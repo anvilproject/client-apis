@@ -107,6 +107,7 @@ Pre-requisites:
     python3 -m pytest --user_email <GMAIL ACCOUNT>  --log-level DEBUG  --gen3_endpoint <GEN3_ENDPOINT>  tests/integration/test_gen3_auth.py
     ```
 
+<<<<<<< HEAD
 ## Distribution
 
 * PyPi
@@ -122,3 +123,6 @@ twine upload dist/*
 ```
 https://readthedocs.org/projects/pyanvil/
 ```
+=======
+
+>>>>>>> 04a6393... Terra/Gen3 SSO
