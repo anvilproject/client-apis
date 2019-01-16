@@ -1,0 +1,5 @@
+pytest
+pre-commit
+sphinx
+sphinx_rtd_theme
+twine

@@ -1,0 +1,20 @@
+swagger: '2.0'
+info:
+  title: Combined API
+  version: 0.0.0
+apis:
+  - url: 'input/indexd.yml'
+    paths:
+      base: '/api/indexd'
+  - url: 'input/peregrine.yml'
+    paths:
+      base: '/api/peregrine'
+  - url: 'input/sheepdog.yml'
+    paths:
+      base: '/api/sheepdog'
+  - url: 'input/leo.yml'
+    paths:
+      base: '/api/leo'
+  - url: 'input/dockstore.yml'
+    paths:
+      base: '/api/dockstore'
