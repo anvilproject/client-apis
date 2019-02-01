@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+
+process.title = 'combine';
+
+const SwaggerCombine = require('swagger-combine').SwaggerCombine;
+const minimist = require('minimist');
+const fs = require('fs');
+
+pkg = {version: '0.0.0'}
+
+function CLI(argv) {
+  const args = minimist(argv);
+  const config = args._[0];
+  const output = args.output || args.o;
+  const format = args.format || args.f || 'yaml';
+  const circular = args.circular || args.c || 'ignore';
+  const opts = {};
+  opts.dereference = {circular: circular};
+
+  if (args.v) {
+    console.info(`v${pkg.version}`);
+    return;
+  }
+
+  if (args.h) {
+    console.info(
+      'Usage: combine <config> [-o|--output file] [-c|--circular <ignore|true|false>] [-f|--format <yaml|json>] [--continueOnError] [--continueOnConflictingPaths] [--includeDefinitions]'
+    );
+    return;
+  }
+
+  if (!config) {
+    console.info('No config file in arguments');
+    return;
+  }
+
+  if ((output && /\.ya?ml$/i.test(output)) || (format && /ya?ml/i.test(format))) {
+    opts.format = 'yaml';
+  }
+
+  opts.continueOnError = !!args.continueOnError;
+  opts.continueOnConflictingPaths = !!args.continueOnConflictingPaths;
+  opts.includeDefinitions = !!args.includeDefinitions;
+
+  return new SwaggerCombine(config, opts)
+    .combine()
+    .then(combinedSchema => {
+      if (output) {
+        fs.writeFileSync(output, combinedSchema.toString());
+        return;
+      }
+
+      console.info(combinedSchema.toString());
+    })
+    .catch(console.error);
+}
+
+
+/*
+ docker  run  -it -v $(pwd):/app  swagger-combine  bash \
+     bin/get_all ; \
+     bin/combine config/swagger-combine.yml  --includeDefinitions -o output/combined-apis.yml ;  \
+     python -m pytest tests
+ */
+// swagger-combine config/swagger-combine.yml  \
+//  --includeDefinitions  \
+//   -o output/combined-apis.yml
+
+CLI(process.argv.slice(2))
