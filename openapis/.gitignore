@@ -1,0 +1,8 @@
+# do not commit input files
+input/indexd.yml
+input/leo.yml
+input/peregrine.yml
+input/sheepdog.yml
+# ignore data version control
+provenance/*.dvc
+bin/provenance*
