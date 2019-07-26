@@ -3,6 +3,7 @@
 import os.path
 import pytest
 import yaml
+from collections import defaultdict
 
 @pytest.fixture
 def configuration_path():
@@ -70,3 +71,27 @@ def test_endpoint_counts(combined_apis, expected_base_paths):
         '/api/sheepdog': 41
     }
     assert actual == expected
+
+
+def test_unique_operation_ids(combined_apis):
+    """Expects unqiue operationIds.  Documents offending endpoint methods."""
+    operationIds = defaultdict(lambda: [])
+    for endpoint, operation in combined_apis['paths'].iteritems():
+        for method_name, method in operation.iteritems():
+            if 'operationId' not in method:
+                continue
+            operationId = method['operationId']
+            method['endpoint'] = endpoint
+            method['method_name'] = method_name
+            operationIds[operationId].append(method)
+    duplicate_messages = []
+    for operationId,occurances in operationIds.iteritems():
+        if len(occurances) > 1:
+            # each occ
+            where = []
+            for o in occurances:
+                where.append(','.join(['{}:{}'.format(o['endpoint'], o['method_name'])]))
+            duplicate_messages.append('{} occured {} times: {}'.format(operationId, len(occurances), where))
+    if len(duplicate_messages) > 0:
+        print('\n'.join(duplicate_messages))
+        assert len(duplicate_messages) == 0, 'Expected no duplicated endpoints'
