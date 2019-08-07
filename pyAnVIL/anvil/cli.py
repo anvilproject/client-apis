@@ -2,16 +2,6 @@ import click
 import anvil
 import sys
 
-@click.command()
-@click.option('--count', default=1, help='Number of greetings.')
-@click.option('--name', prompt='Your name',
-              help='The person to greet.')
-
-
-def hello(count, name):
-    """Simple program that greets NAME for a total of COUNT times."""
-    for x in range(count):
-        click.echo('Hello %s!' % name)
 
 @click.command()
 @click.option('--namespace', default='anvil-datastorage', help='Terra namespace to query')
@@ -27,7 +17,6 @@ def CMG_projects(namespace, project_pattern):
     projects = [p for p in projects if len(p.schema.keys()) > 0]
     for p in projects:
         print(p.project)
-
 
 
 if __name__ == '__main__':
