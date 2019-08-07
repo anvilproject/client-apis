@@ -24,7 +24,9 @@ python  pyAnVIL/anvil/cli.py
 ```
 
 
-From there, the python notebook in this directory explores the schemas, e.g.
+From there, the python notebook in this directory explores the schemas, [gist](https://gist.github.com/bwalsh/57e6225ef6018e221fd0a566c2d1d753) 
+
+e.g.
 
 ```
 from anvil import anvil
