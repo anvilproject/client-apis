@@ -1,9 +1,9 @@
 import os
-import sys
 from attrdict import AttrDict
 from anvil import terra
 import firecloud.api as FAPI
 import networkx as nx
+import logging
 
 
 class BaseApp():
@@ -18,6 +18,7 @@ class BaseApp():
         self.fapi = fapi
         self.projects = None
         self.G = None
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_terra_projects(self):
         """Returns project with associated schema."""
@@ -30,7 +31,7 @@ class BaseApp():
         self.projects = []
         for p in projects:
             if len(p.schema.keys()) == 0:
-                print(f'{p.project} missing schema', file=sys.stderr)
+                self.logger.warning(f'{p.project} missing schema, project will not be included.')
             else:
                 self.projects.append(p)
         return self.projects

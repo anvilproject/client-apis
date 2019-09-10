@@ -1,21 +1,18 @@
 # local package
 -e .
 
-# integration
+## core integration
 gen3==1.0.1
 firecloud==0.16.24
 
 # external requirements
 
-# CLI utilities
-Click==7.0
-
-# dot notation dicts
+## dot notation dicts
 attrdict
 
-# requests cache
+## requests cache
 requests-cache==0.4.13
 
-# tests
+## tests
 pytest==3.6.3
 pytest-cov==2.5.1

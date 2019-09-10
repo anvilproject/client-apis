@@ -13,6 +13,6 @@ class ThousandGenomes(BaseApp):
         graph = super().to_graph()
         for subject in self.get_terra_participants():
             graph.add_node(subject.POPULATION, label='Population', submitter_id=subject.POPULATION, project_id=subject.project_id)
-            graph.add_edge(subject.submitter_id, subject.project_id, label='member_of')
+            graph.add_edge(subject.submitter_id, subject.POPULATION, label='belongs_to', project_id=subject.project_id)
         self.G = graph
         return self.G

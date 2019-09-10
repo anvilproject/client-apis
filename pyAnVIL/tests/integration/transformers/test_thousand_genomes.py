@@ -1,4 +1,4 @@
-from anvil.apps.thousand_genomes import ThousandGenomes
+from anvil.transformers.thousand_genomes import ThousandGenomes
 from datetime import datetime
 EXPECTED_SAMPLES = EXPECTED_COHORT = 2504
 EXPECTED_NODE_COUNTS = {'anvil-datastorage/1000G-high-coverage-2019': {'Project': 1, 'Subject': 2504, 'Sample': 2504, 'CramFile': 2504, 'Population': 26}}

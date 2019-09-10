@@ -62,6 +62,8 @@ class CMG(BaseApp):
             if subject.demographic:
                 G.add_node(subject.demographic.submitter_id, label='Demographic', project_id=subject.project_id)
                 G.add_edge(subject.submitter_id, subject.demographic.submitter_id, label='described_by')
+            if subject.gene:
+                G.add_edge(subject.submitter_id, subject.gene, label='expressed')
 
         self.G = G
         return self.G

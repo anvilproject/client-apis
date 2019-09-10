@@ -1,5 +1,5 @@
-from . import BaseApp
-from attrdict import AttrDict, strip_all
+from . import BaseApp, strip_all
+from attrdict import AttrDict
 
 
 class CCDG(BaseApp):

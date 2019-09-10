@@ -1,4 +1,4 @@
-from anvil.apps.gtex import GTEx
+from anvil.transformers.gtex import GTEx
 from datetime import datetime
 
 EXPECTED_COHORT = 979

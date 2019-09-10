@@ -1,4 +1,4 @@
-from anvil.apps.ccdg import CCDG
+from anvil.transformers.ccdg import CCDG
 from datetime import datetime
 
 EXPECTED_PROJECTS = 51

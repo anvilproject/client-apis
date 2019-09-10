@@ -1,4 +1,4 @@
-from anvil.apps.cmg import CMG
+from anvil.transformers.cmg import CMG
 from datetime import datetime
 
 EXPECTED_PROJECTS = 28
