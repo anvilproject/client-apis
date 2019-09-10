@@ -9,8 +9,12 @@ firecloud==0.16.24
 
 # CLI utilities
 Click==7.0
+
 # dot notation dicts
 attrdict
+
+# requests cache
+requests-cache==0.4.13
 
 # tests
 pytest==3.6.3

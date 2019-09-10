@@ -1,12 +1,6 @@
-# import gen3 as GEN3
-import firecloud.api as FAPI
-
 import re
 from attrdict import AttrDict
-
-
-def dump(fapi=FAPI):
-    print(fapi.list_workspaces().json())
+import firecloud.api as FAPI
 
 
 def get_programs(fapi=FAPI):
@@ -28,7 +22,7 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI):
     workspaces = fapi.list_workspaces().json()
     if namespaces:
         workspaces = [
-            AttrDict({'project': w['workspace']['name'], 'program': w['workspace']['namespace']}) for w in workspaces if w['workspace']['namespace'] in namespaces
+            AttrDict({'project_id': f"{w['workspace']['namespace']}/{w['workspace']['name']}", 'project': w['workspace']['name'], 'program': w['workspace']['namespace']}) for w in workspaces if w['workspace']['namespace'] in namespaces
         ]
     if project_pattern:
         workspaces = [w for w in workspaces if re.match(project_pattern, w.project)]
@@ -48,6 +42,7 @@ def get_project_schema(project, fapi=FAPI):
 
 
 def get_project_schemas(namespaces=None, fapi=FAPI):
+    """Returns schema for all namespaces."""
     projects = get_projects(namespaces, fapi)
     project_schemas = []
     for project in projects:
@@ -58,7 +53,7 @@ def get_project_schemas(namespaces=None, fapi=FAPI):
     return project_schemas
 
 
-def get_entities(namespace=None, workspace=None, fapi=FAPI):
-    """Maps terra workspaces to gen3.projects"""
-    entities = fapi.get_entities(namespace, workspace).json()
+def get_entities(namespace='anvil-datastorage', workspace=None, entity_name=None, fapi=FAPI):
+    """Returns all entities in a workspace."""
+    entities = [AttrDict(e) for e in fapi.get_entities(namespace, workspace, entity_name).json()]
     return entities

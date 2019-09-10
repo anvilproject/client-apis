@@ -110,3 +110,8 @@ caches/
 
 # harvested swagger docs
 openapis/input
+
+# testing cache
+pyAnVIL/anvil_cache.sqlite
+
+**/.DS_Store
