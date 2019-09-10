@@ -46,13 +46,13 @@ def summarize_graph(graph):
     return g
 
 
-def draw_summary(g, label='<untitled>', prog='dot', name=None, save_dot_file=False):
+def draw_summary(g, label='<untitled>', prog='dot', name=None, save_dot_file=False, size='40,40', scale=3):
     """Creates network graph figure using pygraphviz."""
     # ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp']
     g.layout(prog)
-    g.graph_attr.update(label=label, size='40,40', pad=1)
+    g.graph_attr.update(label=label, size=size, pad=1)
     g.edge_attr.update(arrowsize='0.6', style='dotted')
-    g.graph_attr.update(scale=3)  # , nodesep=1, ratio='auto')
+    g.graph_attr.update(scale=scale)  # , nodesep=1, ratio='auto')
     # if not set, default to first word in label
     if not name:
         name = label.split()[0]

@@ -1,0 +1,29 @@
+# AnVIL Summary
+
+## Combined Graph
+
+`Draft:` For discussion purposes, we combined [ccdg, cmg, 1000g, GTEx] and partially harmonized entities into the following graph.
+
+![anvil_summary dot](AnVIL.png)
+
+### Node counts by project
+
+{table}
+
+# Sources
+
+## CCDG
+
+![anvil_ccdg](CCDG.png)
+
+## CMG
+
+![anvil_cmg](CMG.png)
+
+## 1000G
+
+![anvil_1000G](ThousandGenomes.png)
+
+## GTEx
+
+![anvil_gtex](GTEx.png)

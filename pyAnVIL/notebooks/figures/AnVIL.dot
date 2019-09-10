@@ -2,7 +2,7 @@ digraph "" {
 	graph [bb="0,0,1964.3,309",
 		label="AnVIL participants, samples, and files",
 		pad=1,
-		scale=3,
+		scale=6,
 		size="40,40"
 	];
 	node [label="\N"];

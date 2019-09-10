@@ -10,13 +10,23 @@ from anvil.transformers.cmg import CMG
 from anvil.transformers.gtex import GTEx
 from anvil.transformers.thousand_genomes import ThousandGenomes
 from apps.graph_summarizer import summarize_graph, draw_summary
+from apps.node_counts import create_table
 
 
 def generate_graphs():
-    """Returns array of tuples (transformer_name, graph)."""
+    """Returns array of tuples (transformer_name, graph, counts)."""
     transformers = [CCDG(), CMG(), GTEx(), ThousandGenomes()]
     for t in transformers:
-        yield (t.__class__.__name__, t.to_graph(), t.graph_node_counts())
+        name = t.__class__.__name__
+        graph = t.to_graph()
+        counts = t.graph_node_counts()
+        flattened = []
+        for project_id, count in counts.items():
+            # strip off program prefix
+            count['project_id'] = project_id.split('/')[-1]
+            count['source'] = name
+            flattened.append(count)
+        yield (name, graph, flattened)
 
 
 @click.command()
@@ -25,16 +35,23 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info(f'Node counts:')
     graphs = []
-    node_counts = {}
+    node_counts = []
     for name, graph, counts in generate_graphs():
         logger.info(f'{name}: {len(graph.nodes())}')
         draw_summary(summarize_graph(graph), f'{name} participants, samples, and files', prog='dot')
         graphs.append(graph)
-        node_counts.update(counts)
+        node_counts.extend(counts)
     # compose into uber graph
     anvil = nx.compose_all(graphs)
     logger.info(f'AnVIL: {len(anvil.nodes())}')
-    draw_summary(summarize_graph(anvil), f'AnVIL participants, samples, and files', save_dot_file=True)
+    draw_summary(summarize_graph(anvil), f'AnVIL participants, samples, and files', save_dot_file=True, scale=6)
+    table = create_table(node_counts)
+    with open('apps/report.md.template') as input:
+        report = input.read()
+
+    report = report.format(table=table)
+    with open('notebooks/figures/report.md', 'w') as output:
+        output.write(report)
 
 
 if __name__ == '__main__':
