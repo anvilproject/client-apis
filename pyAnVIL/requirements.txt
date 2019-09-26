@@ -16,3 +16,8 @@ requests-cache==0.4.13
 ## tests
 pytest==3.6.3
 pytest-cov==2.5.1
+
+
+## google storage
+google-cloud-storage==1.19.1
+humanfriendly==4.18

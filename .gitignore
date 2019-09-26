@@ -112,6 +112,6 @@ caches/
 openapis/input
 
 # testing cache
-pyAnVIL/anvil_cache.sqlite
+pyAnVIL/*.sqlite
 
 **/.DS_Store

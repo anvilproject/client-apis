@@ -13,9 +13,12 @@ from apps.graph_summarizer import summarize_graph, draw_summary
 from apps.node_counts import create_table
 
 
-def generate_graphs():
+def generate_graphs(program, user_project):
     """Returns array of tuples (transformer_name, graph, counts)."""
-    transformers = [CCDG(), CMG(), GTEx(), ThousandGenomes()]
+    transformers = [CCDG(program=program, user_project=user_project),
+                    CMG(program=program, user_project=user_project),
+                    GTEx(program=program, user_project=user_project),
+                    ThousandGenomes(program=program, user_project=user_project)]
     for t in transformers:
         name = t.__class__.__name__
         graph = t.to_graph()
@@ -30,13 +33,15 @@ def generate_graphs():
 
 
 @click.command()
-def main():
+@click.option('--namespace', default='anvil-datastorage', help='Terra namespace to query')
+@click.option('--user_project', envvar='USER_PROJECT', help='Google billing project for requestor pays')
+def main(namespace, user_project):
     """Harvests and transforms terra data to graph."""
     logger = logging.getLogger(__name__)
     logger.info(f'Node counts:')
     graphs = []
     node_counts = []
-    for name, graph, counts in generate_graphs():
+    for name, graph, counts in generate_graphs(namespace, user_project):
         logger.info(f'{name}: {len(graph.nodes())}')
         draw_summary(summarize_graph(graph), f'{name} participants, samples, and files', prog='dot')
         graphs.append(graph)

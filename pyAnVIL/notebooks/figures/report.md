@@ -758,7 +758,7 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
+      <td>112</td>
       <td>112</td>
       <td></td>
       <td></td>
@@ -1012,15 +1012,15 @@
       <td></td>
       <td>1246</td>
       <td>1246</td>
-      <td>1242</td>
+      <td>1243</td>
       <td>222</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
-      <td>1242</td>
-      <td>1242</td>
+      <td>1243</td>
+      <td>1243</td>
       <td></td>
       <td></td>
     </tr>
@@ -1118,8 +1118,8 @@
       <th>AnVIL_CMG_Broad_Muscle_Topf_WES</th>
       <td></td>
       <td></td>
-      <td>669</td>
-      <td>669</td>
+      <td>169</td>
+      <td>169</td>
       <td>665</td>
       <td>169</td>
       <td></td>
@@ -1226,8 +1226,8 @@
       <th>AnVIL_CMG_Broad_Brain_Gleeson_WES</th>
       <td></td>
       <td></td>
-      <td>1181</td>
-      <td>1181</td>
+      <td></td>
+      <td></td>
       <td>1181</td>
       <td>1181</td>
       <td></td>
@@ -1300,15 +1300,15 @@
       <td></td>
       <td>35</td>
       <td>35</td>
-      <td>35</td>
+      <td>44</td>
       <td>35</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
-      <td>35</td>
-      <td>35</td>
+      <td>44</td>
+      <td>44</td>
       <td></td>
       <td></td>
     </tr>
@@ -1334,8 +1334,8 @@
       <th>AnVIL_CMG_Broad_Muscle_Bonnemann_WGS</th>
       <td></td>
       <td></td>
-      <td>32</td>
-      <td>32</td>
+      <td></td>
+      <td></td>
       <td>32</td>
       <td>32</td>
       <td></td>
@@ -1424,8 +1424,8 @@
       <th>AnVIL_CMG_Broad_Muscle_Myoseq_WGS</th>
       <td></td>
       <td></td>
-      <td>3</td>
-      <td>3</td>
+      <td></td>
+      <td></td>
       <td>3</td>
       <td>3</td>
       <td></td>
@@ -1495,8 +1495,8 @@
     <tr>
       <th>GTEx</th>
       <th>AnVIL_GTEx_V8_hg38</th>
-      <td>18361</td>
-      <td>18361</td>
+      <td>979</td>
+      <td>979</td>
       <td>879</td>
       <td>879</td>
       <td>979</td>

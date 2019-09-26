@@ -1,16 +1,26 @@
 from IPython.display import Image
 import pygraphviz
 from collections import defaultdict
+import humanfriendly
 
 
 def summarize_graph(graph):
     """Introspects the data in the graph, creates a summary graph.  Relies on label attribute on each node"""
     # calc labels and edge lables
     labels = defaultdict(int)
+    sizes = defaultdict(int)
     for k, v in graph.nodes.data():
         labels[v['label']] += 1
+        if 'size' in v:
+            sizes[v['label']] += v['size']
+        # if 'File' in v['label']:
+        #     import pdb; pdb.set_trace()
     for k, v in labels.items():
         labels[k] = '{}({})'.format(k, v)
+
+    for k, v in labels.items():
+        if k in sizes:
+            labels[k] = '{}({})'.format(v, humanfriendly.format_size(sizes[k]))
 
     edge_labels = defaultdict(int)
     for n in graph.nodes():
