@@ -1,16 +1,17 @@
 import re
+import logging
 from attrdict import AttrDict
 import firecloud.api as FAPI
 from google.cloud import storage
-
 import sqlite3
 import json
 
 USER_PROJECT = None
 BLOB_CACHE = sqlite3.connect('blob_cache.sqlite')
+logger = logging.getLogger('terra')
 
 
-def create_table():
+def CREATE_GOOGLE_STORAGE_CACHE_TABLE():
     cur = BLOB_CACHE.cursor()
     cur.execute("""
     CREATE TABLE IF NOT EXISTS blobs (
@@ -21,7 +22,7 @@ def create_table():
 
 
 # static
-create_table()
+CREATE_GOOGLE_STORAGE_CACHE_TABLE()
 
 
 def get_programs(fapi=FAPI):
@@ -42,7 +43,7 @@ def blob_cache_get(bucketName):
     cur = BLOB_CACHE.cursor()
     cur.execute(f"SELECT json FROM blobs where bucketName='{bucketName}'")
     rows = cur.fetchall()
-    print(f'cache get {bucketName}, {len(rows)} rows')
+    logger.debug(f'cache get {bucketName}, {len(rows)} rows')
     if len(rows) == 0:
         return None
     return json.loads(rows[0][0])
@@ -50,7 +51,7 @@ def blob_cache_get(bucketName):
 
 def blob_cache_put(bucketName, blobs):
     cur = BLOB_CACHE.cursor()
-    print(f'cache put {bucketName}, {len(blobs)} blobs')
+    logger.debug(f'cache put {bucketName}, {len(blobs)} blobs')
     cur.execute(f"insert into blobs values ('{bucketName}', '{json.dumps(blobs)}') ON CONFLICT(bucketName) DO UPDATE SET json=excluded.json;")
     BLOB_CACHE.commit()
 
@@ -63,7 +64,7 @@ def get_blobs(workspace, user_project):
         return blobs
     # Instantiates a google client
     # get all blobs in bucket
-    print(f"fetching blobs from google {workspace['bucketName']}")
+    # print(f"fetching blobs from google {workspace['bucketName']}")
     storage_client = storage.Client(project=user_project)
     bucket = storage_client.bucket(workspace['bucketName'], user_project)
     # return only name and size
@@ -76,7 +77,7 @@ def get_blobs(workspace, user_project):
 
 def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=USER_PROJECT):
     """Maps terra workspaces to gen3.projects"""
-    print(f"get_projects {project_pattern} ...")
+    logger.debug(f"get_projects {project_pattern} ...")
     workspaces = fapi.list_workspaces().json()
     if namespaces:
         workspaces = [
@@ -89,7 +90,7 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
         workspaces = [w for w in workspaces if re.match(project_pattern, w.project)]
     for w in workspaces:
         w.blobs = get_blobs(w, user_project=user_project)
-    print(f"get_projects {project_pattern} DONE")
+    logger.debug(f"get_projects {project_pattern} DONE")
     return workspaces
 
 

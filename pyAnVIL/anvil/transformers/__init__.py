@@ -64,11 +64,9 @@ class BaseApp():
     def get_terra_samples(self):
         """Returns generator with samples associated with projects."""
         for p in self.get_terra_projects():
-            print(f"start get_entities ")
             samples = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sample', fapi=self.fapi)
             assert len(samples) == p.schema.sample.count, f"Retrieved samples entities count {len(samples)} did not match anticipated count in schema {p.schema.sample.count}"
-            print(f"end get_entities")
-            print(f'{p.program} {p.project} {len(p.blobs)} {len(samples)}')
+            self.logger.info(f'{p.program} {p.project} number of objects in bucket:{len(p.blobs)} number of samples:{len(samples)}')
             for sample in samples:
                 if 'attributes' not in sample:
                     continue
@@ -84,7 +82,8 @@ class BaseApp():
         for k, v in sample.items():
             if k not in ['cram', 'md5_path', 'crai_path', 'cram_path', 'bam', 'bam_path', 'ase_wasp_counts',
                          'ase_counts', 'cram_file', 'cram_index', 'wgs_cram_index', 'wgs_cram_file',
-                         'wes_bam_index', 'wes_bam_file', 'ase_wasp_chrX_raw_counts', 'ase_chrX_raw_counts']:
+                         'wes_bam_index', 'wes_bam_file', 'ase_wasp_chrX_raw_counts', 'ase_chrX_raw_counts',
+                         'crai_or_bai_path', 'cram_or_bam_path']:
                 continue
 
             filename, file_type = self.file_type(v)
@@ -92,7 +91,7 @@ class BaseApp():
                 blob = blobs.get(v, None)
                 size = blob['size'] if blob else 0
                 if size == 0:
-                    print(f"{v} has no blob!")
+                    self.logger.warning(f"{sample['project_id']} {v} has no blob!")
                 files[k] = AttrDict({'path': v, 'type': file_type, 'size': size})
             else:
                 for k, f in files.items():
@@ -125,10 +124,8 @@ class BaseApp():
         if self.G:
             return self.G
         G = nx.MultiDiGraph()
-        print('to_graph: get_terra_projects')
         for project in self.get_terra_projects():
             G.add_node(project.project_id, label='Project', project_id=project.project_id)
-        print('to_graph: get_terra_participants')
         # start = datetime.datetime.now()
         for subject in self.get_terra_participants():
             # end = datetime.datetime.now()
@@ -138,7 +135,6 @@ class BaseApp():
             assert subject.project_id, 'should have project_id'
             G.add_node(subject.submitter_id, label='Subject', **subject)
             G.add_edge(subject.submitter_id, subject.project_id, label='member_of')
-        print('to_graph: get_terra_samples')
         # start = datetime.datetime.now()
         for sample in self.get_terra_samples():
             # end = datetime.datetime.now()
@@ -172,9 +168,12 @@ class BaseApp():
             label = graph.node[n]['label']
             assert 'project_id' in graph.node[n], f'{label}({n}) has no project_id?'
             project_id = graph.node[n]['project_id']
+            node_size = graph.node[n].get('size', 0)
             project_counts = counts.get(project_id, {})
             label_counts = project_counts.get(label, 0) + 1
+            project_size = project_counts.get('size', 0) + node_size
             project_counts[label] = label_counts
+            project_counts['size'] = project_size
             counts[project_id] = project_counts
         return counts
 

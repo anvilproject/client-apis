@@ -28,10 +28,12 @@
       <th>Subject</th>
       <th>TsvFile</th>
       <th>TxtFile</th>
+      <th>size</th>
     </tr>
     <tr>
       <th>source</th>
       <th>project_id</th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -68,6 +70,7 @@
       <td>647</td>
       <td></td>
       <td></td>
+      <td>9.86 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_EOCAD_TaiChi_WGS</th>
@@ -86,6 +89,7 @@
       <td>773</td>
       <td></td>
       <td></td>
+      <td>14.48 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Brant_DS-IBD_WGS</th>
@@ -104,6 +108,7 @@
       <td>177</td>
       <td></td>
       <td></td>
+      <td>2.28 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_AI_T1D_T1DGC_WGS</th>
@@ -122,6 +127,7 @@
       <td>3166</td>
       <td></td>
       <td></td>
+      <td>53.46 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_Penn_WGS</th>
@@ -140,6 +146,7 @@
       <td>418</td>
       <td></td>
       <td></td>
+      <td>8.56 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Harvard-Costa-Rica_WGS</th>
@@ -158,6 +165,7 @@
       <td>2790</td>
       <td></td>
       <td></td>
+      <td>39.81 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_WashU-CAD_GRU-IRB_WGS</th>
@@ -176,6 +184,7 @@
       <td>146</td>
       <td></td>
       <td></td>
+      <td>2.84 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_EOCAD_VIRGO_WGS</th>
@@ -194,6 +203,7 @@
       <td>2158</td>
       <td></td>
       <td></td>
+      <td>37.67 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_AFLMU_WGS</th>
@@ -212,6 +222,7 @@
       <td>248</td>
       <td></td>
       <td></td>
+      <td>4.93 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_GENAF_WGS</th>
@@ -230,6 +241,7 @@
       <td>90</td>
       <td></td>
       <td></td>
+      <td>1.87 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_METSIM_WGS</th>
@@ -248,6 +260,7 @@
       <td>3121</td>
       <td></td>
       <td></td>
+      <td>64.7 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_JHU_WGS</th>
@@ -266,6 +279,7 @@
       <td>290</td>
       <td></td>
       <td></td>
+      <td>5.45 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_MPP_WGS</th>
@@ -284,6 +298,7 @@
       <td>118</td>
       <td></td>
       <td></td>
+      <td>2.55 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Finland-CHD_WGS</th>
@@ -302,6 +317,7 @@
       <td>155</td>
       <td></td>
       <td></td>
+      <td>3.09 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Alz_LOAD_WGS</th>
@@ -320,6 +336,7 @@
       <td>1049</td>
       <td></td>
       <td></td>
+      <td>24.49 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_SSC_WGS</th>
@@ -338,6 +355,7 @@
       <td>9205</td>
       <td></td>
       <td></td>
+      <td>0 bytes</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Penn_WGS</th>
@@ -356,6 +374,7 @@
       <td>1356</td>
       <td></td>
       <td></td>
+      <td>27 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_ACE2_DS-MDS_WGS</th>
@@ -374,6 +393,7 @@
       <td>66</td>
       <td></td>
       <td></td>
+      <td>1.56 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_MGH_WGS</th>
@@ -392,6 +412,7 @@
       <td>105</td>
       <td></td>
       <td></td>
+      <td>2.32 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_AI_Asthma_Gala2_WGS</th>
@@ -410,6 +431,7 @@
       <td>1171</td>
       <td></td>
       <td></td>
+      <td>28.15 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_McGovern_WGS</th>
@@ -428,6 +450,7 @@
       <td>1565</td>
       <td></td>
       <td></td>
+      <td>21.61 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Cho_WGS</th>
@@ -446,6 +469,7 @@
       <td>253</td>
       <td></td>
       <td></td>
+      <td>4.08 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_SAGE_WGS</th>
@@ -464,6 +488,7 @@
       <td>580</td>
       <td></td>
       <td></td>
+      <td>13.91 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Newberry_WGS</th>
@@ -482,6 +507,7 @@
       <td>25</td>
       <td></td>
       <td></td>
+      <td>294.12 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_HemStroke_ERICH_WGS</th>
@@ -500,6 +526,7 @@
       <td>1358</td>
       <td></td>
       <td></td>
+      <td>27.44 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Alz_EFIGA_WGS</th>
@@ -518,6 +545,7 @@
       <td>1177</td>
       <td></td>
       <td></td>
+      <td>27.93 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_EOCAD_SoL_WGS</th>
@@ -536,6 +564,7 @@
       <td>3944</td>
       <td></td>
       <td></td>
+      <td>102.66 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_AFib_BioVU_WGS</th>
@@ -554,6 +583,7 @@
       <td>1122</td>
       <td></td>
       <td></td>
+      <td>26.79 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_NP_Autism_State-Sanders_WGS</th>
@@ -572,6 +602,7 @@
       <td>534</td>
       <td></td>
       <td></td>
+      <td>8.5 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_BioVu_WGS</th>
@@ -590,6 +621,7 @@
       <td>624</td>
       <td></td>
       <td></td>
+      <td>11.95 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_Intermountain_WGS</th>
@@ -608,6 +640,7 @@
       <td>464</td>
       <td></td>
       <td></td>
+      <td>9.07 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_TASC_WGS</th>
@@ -626,6 +659,7 @@
       <td>905</td>
       <td></td>
       <td></td>
+      <td>22.82 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Emory_WGS</th>
@@ -644,6 +678,7 @@
       <td>429</td>
       <td></td>
       <td></td>
+      <td>8.77 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_UCSF_WGS</th>
@@ -662,6 +697,7 @@
       <td>112</td>
       <td></td>
       <td></td>
+      <td>2.41 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_McCauley_WGS</th>
@@ -680,6 +716,7 @@
       <td>856</td>
       <td></td>
       <td></td>
+      <td>9.93 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Kugathasan_WGS</th>
@@ -698,6 +735,7 @@
       <td>914</td>
       <td></td>
       <td></td>
+      <td>11.76 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_ACE2_GRU-MDS_WGS</th>
@@ -716,6 +754,7 @@
       <td>429</td>
       <td></td>
       <td></td>
+      <td>10.41 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_EOCAD_BioMe_WGS</th>
@@ -734,6 +773,7 @@
       <td>1201</td>
       <td></td>
       <td></td>
+      <td>26.23 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Alz_WHICAP_WGS</th>
@@ -752,6 +792,7 @@
       <td>148</td>
       <td></td>
       <td></td>
+      <td>3.65 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD-NP-AI_Controls_VCControls_WGS</th>
@@ -770,6 +811,7 @@
       <td>112</td>
       <td></td>
       <td></td>
+      <td>0 bytes</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_HMCA_WGS</th>
@@ -788,6 +830,7 @@
       <td>724</td>
       <td></td>
       <td></td>
+      <td>17.22 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_EOCAD_PROMIS_WGS</th>
@@ -806,6 +849,7 @@
       <td>1136</td>
       <td></td>
       <td></td>
+      <td>15.58 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_Vanderbilt-Ablation_WGS</th>
@@ -824,6 +868,7 @@
       <td>2</td>
       <td></td>
       <td></td>
+      <td>39.81 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Brant_HMB_WGS</th>
@@ -842,6 +887,7 @@
       <td>904</td>
       <td></td>
       <td></td>
+      <td>11.94 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_Stroke_BRAVE_WGS</th>
@@ -860,6 +906,7 @@
       <td>496</td>
       <td></td>
       <td></td>
+      <td>6.17 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Emerge_WGS</th>
@@ -878,6 +925,7 @@
       <td>277</td>
       <td></td>
       <td></td>
+      <td>5.52 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Duke_WGS</th>
@@ -896,6 +944,7 @@
       <td>1051</td>
       <td></td>
       <td></td>
+      <td>21.83 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Cleveland_WGS</th>
@@ -914,6 +963,7 @@
       <td>348</td>
       <td></td>
       <td></td>
+      <td>6.89 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_Duke_WGS</th>
@@ -932,6 +982,7 @@
       <td>123</td>
       <td></td>
       <td></td>
+      <td>2.56 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_AGRE_WGS</th>
@@ -950,6 +1001,7 @@
       <td>4601</td>
       <td></td>
       <td></td>
+      <td>106.07 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_AFib_Groningen_WGS</th>
@@ -968,6 +1020,7 @@
       <td>639</td>
       <td></td>
       <td></td>
+      <td>13.92 TB</td>
     </tr>
     <tr>
       <th rowspan="29" valign="top">CMG</th>
@@ -987,6 +1040,7 @@
       <td>6</td>
       <td></td>
       <td></td>
+      <td>118.56 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Orphan_VCGS-White_WES</th>
@@ -1005,13 +1059,14 @@
       <td>283</td>
       <td></td>
       <td></td>
+      <td>522.37 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Myoseq_WES</th>
       <td></td>
       <td></td>
-      <td>1246</td>
-      <td>1246</td>
+      <td>1247</td>
+      <td>1247</td>
       <td>1243</td>
       <td>222</td>
       <td></td>
@@ -1023,6 +1078,7 @@
       <td>1243</td>
       <td></td>
       <td></td>
+      <td>2.25 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Heart_Ware_WES</th>
@@ -1041,6 +1097,7 @@
       <td>10</td>
       <td></td>
       <td></td>
+      <td>18.17 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Beggs_WES</th>
@@ -1059,6 +1116,7 @@
       <td>109</td>
       <td></td>
       <td></td>
+      <td>193.92 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WES</th>
@@ -1077,6 +1135,7 @@
       <td>25</td>
       <td></td>
       <td></td>
+      <td>65.84 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Eye_Pierce_WES</th>
@@ -1095,6 +1154,7 @@
       <td>517</td>
       <td></td>
       <td></td>
+      <td>1.37 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WGS</th>
@@ -1113,13 +1173,14 @@
       <td>104</td>
       <td></td>
       <td></td>
+      <td>1.84 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Topf_WES</th>
       <td></td>
       <td></td>
-      <td>169</td>
-      <td>169</td>
+      <td>669</td>
+      <td>669</td>
       <td>665</td>
       <td>169</td>
       <td></td>
@@ -1131,6 +1192,7 @@
       <td>665</td>
       <td></td>
       <td></td>
+      <td>1.11 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Blood_Sankaran_WES</th>
@@ -1149,6 +1211,7 @@
       <td>277</td>
       <td></td>
       <td></td>
+      <td>520.59 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Brain_Walsh_WES</th>
@@ -1167,6 +1230,7 @@
       <td>663</td>
       <td></td>
       <td></td>
+      <td>1.44 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Kang_WES</th>
@@ -1185,6 +1249,7 @@
       <td>22</td>
       <td></td>
       <td></td>
+      <td>42.26 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Kidney_Hildebrandt_WES</th>
@@ -1203,6 +1268,7 @@
       <td>407</td>
       <td></td>
       <td></td>
+      <td>1 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_OGrady_WES</th>
@@ -1221,13 +1287,14 @@
       <td>43</td>
       <td></td>
       <td></td>
+      <td>70.01 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Brain_Gleeson_WES</th>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>1181</td>
+      <td>1181</td>
       <td>1181</td>
       <td>1181</td>
       <td></td>
@@ -1239,6 +1306,7 @@
       <td>1181</td>
       <td></td>
       <td></td>
+      <td>3.06 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Kidney_Hildebrandt_WGS</th>
@@ -1257,6 +1325,7 @@
       <td>25</td>
       <td></td>
       <td></td>
+      <td>489.2 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Orphan_Manton_WES</th>
@@ -1275,6 +1344,7 @@
       <td>268</td>
       <td></td>
       <td></td>
+      <td>751.5 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Heart_PCGC-Tristani_WGS</th>
@@ -1293,13 +1363,14 @@
       <td>45</td>
       <td></td>
       <td></td>
+      <td>678.23 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_KNC_WES</th>
       <td></td>
       <td></td>
-      <td>35</td>
-      <td>35</td>
+      <td>44</td>
+      <td>44</td>
       <td>44</td>
       <td>35</td>
       <td></td>
@@ -1311,6 +1382,7 @@
       <td>44</td>
       <td></td>
       <td></td>
+      <td>122.52 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Heart_Seidman_WES</th>
@@ -1329,13 +1401,14 @@
       <td>129</td>
       <td></td>
       <td></td>
+      <td>221.46 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Bonnemann_WGS</th>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>32</td>
+      <td>32</td>
       <td>32</td>
       <td>32</td>
       <td></td>
@@ -1347,6 +1420,7 @@
       <td>32</td>
       <td></td>
       <td></td>
+      <td>561.53 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Bonnemann_WES</th>
@@ -1365,6 +1439,7 @@
       <td>24</td>
       <td></td>
       <td></td>
+      <td>42.31 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Orphan_Manton_WGS</th>
@@ -1383,6 +1458,7 @@
       <td>7</td>
       <td></td>
       <td></td>
+      <td>136.57 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Ravenscroft_WES</th>
@@ -1401,6 +1477,7 @@
       <td>35</td>
       <td></td>
       <td></td>
+      <td>49.84 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Orphan_VCGS-White_WGS</th>
@@ -1419,13 +1496,14 @@
       <td>30</td>
       <td></td>
       <td></td>
+      <td>500.48 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Myoseq_WGS</th>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>3</td>
+      <td>3</td>
       <td>3</td>
       <td>3</td>
       <td></td>
@@ -1437,6 +1515,7 @@
       <td>3</td>
       <td></td>
       <td></td>
+      <td>72.47 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_Kang_WGS</th>
@@ -1455,6 +1534,7 @@
       <td>2</td>
       <td></td>
       <td></td>
+      <td>37.5 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Eye_Pierce_WGS</th>
@@ -1473,6 +1553,7 @@
       <td>35</td>
       <td></td>
       <td></td>
+      <td>637.4 GB</td>
     </tr>
     <tr>
       <th>cmg*</th>
@@ -1491,6 +1572,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>0 bytes</td>
     </tr>
     <tr>
       <th>GTEx</th>
@@ -1510,6 +1592,7 @@
       <td>979</td>
       <td>1676</td>
       <td>1676</td>
+      <td>56.84 TB</td>
     </tr>
     <tr>
       <th>ThousandGenomes</th>
@@ -1529,6 +1612,7 @@
       <td>2504</td>
       <td></td>
       <td></td>
+      <td>41.29 TB</td>
     </tr>
   </tbody>
 </table>
