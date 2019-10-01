@@ -1577,8 +1577,8 @@
     <tr>
       <th>GTEx</th>
       <th>AnVIL_GTEx_V8_hg38</th>
-      <td>979</td>
-      <td>979</td>
+      <td>18361</td>
+      <td>18361</td>
       <td>879</td>
       <td>879</td>
       <td>979</td>
@@ -1592,7 +1592,7 @@
       <td>979</td>
       <td>1676</td>
       <td>1676</td>
-      <td>56.84 TB</td>
+      <td>157.63 TB</td>
     </tr>
     <tr>
       <th>ThousandGenomes</th>

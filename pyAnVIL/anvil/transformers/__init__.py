@@ -83,7 +83,7 @@ class BaseApp():
             if k not in ['cram', 'md5_path', 'crai_path', 'cram_path', 'bam', 'bam_path', 'ase_wasp_counts',
                          'ase_counts', 'cram_file', 'cram_index', 'wgs_cram_index', 'wgs_cram_file',
                          'wes_bam_index', 'wes_bam_file', 'ase_wasp_chrX_raw_counts', 'ase_chrX_raw_counts',
-                         'crai_or_bai_path', 'cram_or_bam_path']:
+                         'crai_or_bai_path', 'cram_or_bam_path', 'bam_file', 'bam_index']:
                 continue
 
             filename, file_type = self.file_type(v)
