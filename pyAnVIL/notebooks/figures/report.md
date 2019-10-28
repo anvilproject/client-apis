@@ -19,20 +19,32 @@
       <th>CramFile</th>
       <th>Demographic</th>
       <th>Diagnosis</th>
+      <th>DictFile</th>
+      <th>FaiFile</th>
       <th>Family</th>
+      <th>FastaFile</th>
       <th>Gene</th>
+      <th>GtfFile</th>
       <th>Phenotype</th>
       <th>Population</th>
       <th>Project</th>
       <th>Sample</th>
       <th>Subject</th>
+      <th>TbiFile</th>
       <th>TsvFile</th>
       <th>TxtFile</th>
+      <th>VcfFile</th>
       <th>size</th>
     </tr>
     <tr>
       <th>source</th>
       <th>project_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -61,13 +73,19 @@
       <td>647</td>
       <td>647</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>647</td>
       <td>647</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>9.86 TB</td>
@@ -84,9 +102,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>773</td>
       <td>773</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>14.48 TB</td>
@@ -103,9 +127,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>177</td>
       <td>177</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>2.28 TB</td>
@@ -122,9 +152,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>3166</td>
       <td>3166</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>53.46 TB</td>
@@ -141,9 +177,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>418</td>
       <td>418</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>8.56 TB</td>
@@ -160,9 +202,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>2790</td>
       <td>2790</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>39.81 TB</td>
@@ -179,9 +227,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>146</td>
       <td>146</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>2.84 TB</td>
@@ -198,9 +252,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>2158</td>
       <td>2158</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>37.67 TB</td>
@@ -217,9 +277,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>248</td>
       <td>248</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>4.93 TB</td>
@@ -236,9 +302,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>90</td>
       <td>90</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>1.87 TB</td>
@@ -255,9 +327,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>3121</td>
       <td>3121</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>64.7 TB</td>
@@ -274,9 +352,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>290</td>
       <td>290</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>5.45 TB</td>
@@ -293,9 +377,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>118</td>
       <td>118</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>2.55 TB</td>
@@ -312,9 +402,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>155</td>
       <td>155</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>3.09 TB</td>
@@ -327,13 +423,19 @@
       <td>1049</td>
       <td>1049</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>325</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>1049</td>
       <td>1049</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>24.49 TB</td>
@@ -346,13 +448,19 @@
       <td>9205</td>
       <td>9205</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>2423</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>9205</td>
       <td>9205</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>0 bytes</td>
@@ -369,9 +477,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1356</td>
       <td>1356</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>27 TB</td>
@@ -384,13 +498,19 @@
       <td>66</td>
       <td>66</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>17</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>66</td>
       <td>66</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>1.56 TB</td>
@@ -407,9 +527,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>105</td>
       <td>105</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>2.32 TB</td>
@@ -426,9 +552,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1171</td>
       <td>1171</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>28.15 TB</td>
@@ -445,9 +577,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1565</td>
       <td>1565</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>21.61 TB</td>
@@ -464,9 +602,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>253</td>
       <td>253</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>4.08 TB</td>
@@ -479,13 +623,19 @@
       <td>580</td>
       <td>580</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>181</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>580</td>
       <td>580</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>13.91 TB</td>
@@ -502,9 +652,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>25</td>
       <td>25</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>294.12 GB</td>
@@ -521,9 +677,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1358</td>
       <td>1358</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>27.44 TB</td>
@@ -536,13 +698,19 @@
       <td>1177</td>
       <td>1177</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>306</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>1177</td>
       <td>1177</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>27.93 TB</td>
@@ -559,9 +727,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>3944</td>
       <td>3944</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>102.66 TB</td>
@@ -578,9 +752,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1122</td>
       <td>1122</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>26.79 TB</td>
@@ -597,9 +777,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>534</td>
       <td>534</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>8.5 TB</td>
@@ -616,9 +802,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>624</td>
       <td>624</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>11.95 TB</td>
@@ -635,9 +827,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>464</td>
       <td>464</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>9.07 TB</td>
@@ -650,13 +848,19 @@
       <td>905</td>
       <td>905</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>305</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>905</td>
       <td>905</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>22.82 TB</td>
@@ -673,9 +877,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>429</td>
       <td>429</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>8.77 TB</td>
@@ -692,9 +902,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>112</td>
       <td>112</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>2.41 TB</td>
@@ -711,9 +927,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>856</td>
       <td>856</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>9.93 TB</td>
@@ -730,9 +952,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>914</td>
       <td>914</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>11.76 TB</td>
@@ -745,13 +973,19 @@
       <td>429</td>
       <td>429</td>
       <td>4</td>
+      <td></td>
+      <td></td>
       <td>121</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>429</td>
       <td>429</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>10.41 TB</td>
@@ -768,9 +1002,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1201</td>
       <td>1201</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>26.23 TB</td>
@@ -783,13 +1023,19 @@
       <td>148</td>
       <td>148</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>148</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>148</td>
       <td>148</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>3.65 TB</td>
@@ -806,9 +1052,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>112</td>
       <td>112</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>0 bytes</td>
@@ -821,13 +1073,19 @@
       <td>724</td>
       <td>724</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>176</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>724</td>
       <td>724</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>17.22 TB</td>
@@ -844,9 +1102,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1136</td>
       <td>1136</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>15.58 TB</td>
@@ -863,9 +1127,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>2</td>
       <td>2</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>39.81 GB</td>
@@ -882,9 +1152,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>904</td>
       <td>904</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>11.94 TB</td>
@@ -901,9 +1177,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>496</td>
       <td>496</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>6.17 TB</td>
@@ -920,9 +1202,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>277</td>
       <td>277</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>5.52 TB</td>
@@ -939,9 +1227,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1051</td>
       <td>1051</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>21.83 TB</td>
@@ -958,9 +1252,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>348</td>
       <td>348</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>6.89 TB</td>
@@ -977,9 +1277,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>123</td>
       <td>123</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>2.56 TB</td>
@@ -992,13 +1298,19 @@
       <td>4601</td>
       <td>4601</td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>995</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>4601</td>
       <td>4601</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>106.07 TB</td>
@@ -1015,9 +1327,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>639</td>
       <td>639</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>13.92 TB</td>
@@ -1035,9 +1353,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>6</td>
       <td>6</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>118.56 GB</td>
@@ -1054,9 +1378,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>283</td>
       <td>283</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>522.37 GB</td>
@@ -1065,20 +1395,26 @@
       <th>AnVIL_CMG_Broad_Muscle_Myoseq_WES</th>
       <td></td>
       <td></td>
-      <td>1247</td>
-      <td>1247</td>
-      <td>1243</td>
+      <td>1280</td>
+      <td>1280</td>
+      <td>1276</td>
       <td>222</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
-      <td>1243</td>
-      <td>1243</td>
+      <td>1276</td>
+      <td>1276</td>
       <td></td>
       <td></td>
-      <td>2.25 TB</td>
+      <td></td>
+      <td></td>
+      <td>2.3 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Heart_Ware_WES</th>
@@ -1092,9 +1428,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>10</td>
       <td>10</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>18.17 GB</td>
@@ -1111,9 +1453,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>109</td>
       <td>109</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>193.92 GB</td>
@@ -1130,9 +1478,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>25</td>
       <td>25</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>65.84 GB</td>
@@ -1149,9 +1503,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>517</td>
       <td>517</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>1.37 TB</td>
@@ -1168,9 +1528,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>104</td>
       <td>104</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>1.84 TB</td>
@@ -1187,9 +1553,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>665</td>
       <td>665</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>1.11 TB</td>
@@ -1206,9 +1578,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>277</td>
       <td>277</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>520.59 GB</td>
@@ -1225,9 +1603,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>663</td>
       <td>663</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>1.44 TB</td>
@@ -1244,9 +1628,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>22</td>
       <td>22</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>42.26 GB</td>
@@ -1255,20 +1645,26 @@
       <th>AnVIL_CMG_Broad_Kidney_Hildebrandt_WES</th>
       <td></td>
       <td></td>
+      <td>769</td>
+      <td>769</td>
+      <td>769</td>
       <td>407</td>
-      <td>407</td>
-      <td>407</td>
-      <td>407</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
-      <td>407</td>
-      <td>407</td>
+      <td>769</td>
+      <td>769</td>
       <td></td>
       <td></td>
-      <td>1 TB</td>
+      <td></td>
+      <td></td>
+      <td>1.6 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Muscle_OGrady_WES</th>
@@ -1282,9 +1678,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>43</td>
       <td>43</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>70.01 GB</td>
@@ -1301,9 +1703,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>1181</td>
       <td>1181</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>3.06 TB</td>
@@ -1320,9 +1728,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>25</td>
       <td>25</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>489.2 GB</td>
@@ -1339,9 +1753,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>267</td>
       <td>268</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>751.5 GB</td>
@@ -1358,9 +1778,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>45</td>
       <td>45</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>678.23 GB</td>
@@ -1377,9 +1803,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>44</td>
       <td>44</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>122.52 GB</td>
@@ -1396,9 +1828,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>129</td>
       <td>129</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>221.46 GB</td>
@@ -1415,9 +1853,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>32</td>
       <td>32</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>561.53 GB</td>
@@ -1434,9 +1878,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>24</td>
       <td>24</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>42.31 GB</td>
@@ -1453,9 +1903,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>7</td>
       <td>7</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>136.57 GB</td>
@@ -1472,9 +1928,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>35</td>
       <td>35</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>49.84 GB</td>
@@ -1491,9 +1953,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>30</td>
       <td>30</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>500.48 GB</td>
@@ -1510,9 +1978,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>3</td>
       <td>3</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>72.47 GB</td>
@@ -1529,9 +2003,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>2</td>
       <td>2</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>37.5 GB</td>
@@ -1548,9 +2028,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>1</td>
       <td>35</td>
       <td>35</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>637.4 GB</td>
@@ -1563,9 +2049,15 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
       <td>3540</td>
+      <td></td>
       <td>341</td>
+      <td></td>
       <td>2405</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -1583,16 +2075,22 @@
       <td>879</td>
       <td>979</td>
       <td></td>
+      <td>2</td>
+      <td>2</td>
       <td></td>
+      <td>2</td>
       <td></td>
+      <td>2</td>
       <td></td>
       <td></td>
       <td>1</td>
       <td>17382</td>
       <td>979</td>
+      <td>1</td>
       <td>1676</td>
-      <td>1676</td>
-      <td>157.63 TB</td>
+      <td>1678</td>
+      <td>1</td>
+      <td>157.64 TB</td>
     </tr>
     <tr>
       <th>ThousandGenomes</th>
@@ -1606,10 +2104,16 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>26</td>
       <td>1</td>
       <td>2504</td>
       <td>2504</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td>41.29 TB</td>
@@ -1634,3 +2138,11 @@
 ## GTEx
 
 ![anvil_gtex](GTEx.png)
+
+## Sample attributes
+
+![sample_attributes](sample_attributes.png)
+
+## Sample projects
+
+![sample_projects](sample_projects.png)

@@ -30,8 +30,10 @@ class BaseApp():
         projects = terra.get_projects([self.program], project_pattern=self.project_pattern, fapi=self.fapi, user_project=self.user_project)
         assert len(projects) > 0, f"Should have at least 1 project in {self.program} matching {self.project_pattern}"
         blob_sum = sum([len(p.blobs) for p in projects])
-        assert blob_sum > 0, f"Should have at least more than 0 blobs {self.program}"
-        self.logger.info(f'number of blobs in {self.project_pattern}: {blob_sum}')
+        if blob_sum > 0:
+            self.logger.info(f'number of blobs in {self.project_pattern}: {blob_sum}')
+        else:
+            self.logger.warning(f'number of blobs in {self.project_pattern}: {blob_sum}')
 
         # add the project schema
         projects = [terra.get_project_schema(p, fapi=self.fapi) for p in projects]
@@ -40,7 +42,21 @@ class BaseApp():
             if len(p.schema.keys()) == 0:
                 self.logger.warning(f'{p.project} missing schema, project will not be included.')
             else:
+                # normalize the project_files
+                if len(p.project_files.keys()) == 0:
+                    self.logger.warning(f'{p.project} has no project_files.')
+                else:
+                    _project_files = {}
+                    for key, path in p.project_files.items():
+                        filename, file_type = self.file_type(path)
+                        blob = p.blobs.get(path, None)
+                        size = blob['size'] if blob else 0
+                        if size == 0:
+                            self.logger.warning(f"{p['project_id']} {path} has no blob!")
+                        _project_files[key] = AttrDict({'path': path, 'type': file_type, 'size': size})
+                    p.project_files = _project_files
                 self.projects.append(p)
+
         return self.projects
 
     def get_terra_participants(self):
@@ -126,6 +142,11 @@ class BaseApp():
         G = nx.MultiDiGraph()
         for project in self.get_terra_projects():
             G.add_node(project.project_id, label='Project', project_id=project.project_id)
+            for k, file in project.project_files.items():
+                type = file.type.replace('.', '').capitalize()
+                G.add_node(file.path, label=f'{type}File', project_id=project.project_id, size=file.size)
+                G.add_edge(project.project_id, file.path, label=type)
+
         # start = datetime.datetime.now()
         for subject in self.get_terra_participants():
             # end = datetime.datetime.now()

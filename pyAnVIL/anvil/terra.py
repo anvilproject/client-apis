@@ -5,6 +5,7 @@ import firecloud.api as FAPI
 from google.cloud import storage
 import sqlite3
 import json
+from urllib.parse import urlparse
 
 USER_PROJECT = None
 BLOB_CACHE = sqlite3.connect('blob_cache.sqlite')
@@ -60,19 +61,42 @@ def get_blobs(workspace, user_project):
     """Retrieves all blobs in terra bucket associtated with workspace."""
     # in cache?
     blobs = blob_cache_get(workspace['bucketName'])
-    if blobs:
-        return blobs
-    # Instantiates a google client
-    # get all blobs in bucket
-    # print(f"fetching blobs from google {workspace['bucketName']}")
-    storage_client = storage.Client(project=user_project)
-    bucket = storage_client.bucket(workspace['bucketName'], user_project)
-    # return only name and size
-    blobs = {}
-    for b in list(bucket.list_blobs()):
-        blobs[f"gs://{workspace['bucketName']}/{b.name}"] = {'size': b.size}
-    blob_cache_put(workspace['bucketName'], blobs)
+    storage_client = None
+    if not blobs:
+        # Instantiates a google client
+        # get all blobs in bucket
+        # print(f"fetching blobs from google {workspace['bucketName']}")
+        storage_client = storage.Client(project=user_project)
+        bucket = storage_client.bucket(workspace['bucketName'], user_project)
+        # return only name and size
+        blobs = {}
+        for b in list(bucket.list_blobs()):
+            blobs[f"gs://{workspace['bucketName']}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
+        blob_cache_put(workspace['bucketName'], blobs)
+
+    project_buckets = [urlparse(f).netloc for f in workspace.project_files.values()]
+    for project_bucket in project_buckets:
+        project_blobs = blob_cache_get(project_bucket)
+        if not project_blobs:
+            logger.info(f"{project_bucket} not in cache")
+            project_blobs = {}
+            if not storage_client:
+                storage_client = storage.Client(project=user_project)
+            project_bucket = storage_client.bucket(project_bucket, user_project)
+            for b in list(project_bucket.list_blobs()):
+                project_blobs[f"gs://{project_bucket.name}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
+            blob_cache_put(project_bucket.name, project_blobs)
+        blobs.update(project_blobs)
     return blobs
+
+
+def project_files(w):
+    """Returns attributes that are files."""
+    _files = {}
+    for k, v in w['workspace']['attributes'].items():
+        if isinstance(v, str) and v.startswith('gs://'):
+            _files[k] = v
+    return _files
 
 
 def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=USER_PROJECT):
@@ -84,12 +108,15 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
             AttrDict({'project_id': f"{w['workspace']['namespace']}/{w['workspace']['name']}",
                       'project': w['workspace']['name'],
                       'program': w['workspace']['namespace'],
-                      'bucketName': w['workspace']['bucketName']}) for w in workspaces if w['workspace']['namespace'] in namespaces
+                      'bucketName': w['workspace']['bucketName'],
+                      'project_files': project_files(w),
+                      }) for w in workspaces if w['workspace']['namespace'] in namespaces
         ]
     if project_pattern:
         workspaces = [w for w in workspaces if re.match(project_pattern, w.project)]
     for w in workspaces:
         w.blobs = get_blobs(w, user_project=user_project)
+
     logger.debug(f"get_projects {project_pattern} DONE")
     return workspaces
 

@@ -3,6 +3,10 @@ import pygraphviz
 from collections import defaultdict
 import humanfriendly
 
+import matplotlib.pyplot
+import pandas
+import upsetplot
+
 
 def summarize_graph(graph):
     """Introspects the data in the graph, creates a summary graph.  Relies on label attribute on each node"""
@@ -13,8 +17,6 @@ def summarize_graph(graph):
         labels[v['label']] += 1
         if 'size' in v:
             sizes[v['label']] += v['size']
-        # if 'File' in v['label']:
-        #     import pdb; pdb.set_trace()
     for k, v in labels.items():
         labels[k] = '{}({})'.format(k, v)
 
@@ -70,3 +72,32 @@ def draw_summary(g, label='<untitled>', prog='dot', name=None, save_dot_file=Fal
         g.write(f'notebooks/figures/{name}.dot')
     g.draw(f'notebooks/figures/{name}.png')
     return Image(f'notebooks/figures/{name}.png')
+
+
+def draw_samples_attributes(transformers):
+    """Upset plots for sample attributes."""
+
+    samples = []
+    for t in transformers:
+        for s in t.get_terra_samples():
+            samples.append(s)
+
+    sample_df = pandas.DataFrame(upsetplot.from_contents({s.project_id: s.keys() for s in samples}))
+
+    upsetplot.plot(sample_df, sort_by="cardinality", sum_over=False, show_counts='%d')
+    current_figure = matplotlib.pyplot.gcf()
+    current_figure.suptitle('Count of shared sample properties')
+    current_figure.savefig("notebooks/figures/sample_projects.png")
+
+    entity_by_project = defaultdict(set)
+
+    for s in samples:
+        for k in s.keys():
+            entity_by_project[k].add(s.project_id)
+
+    entity_df = pandas.DataFrame(upsetplot.from_contents(entity_by_project))
+    upsetplot.plot(entity_df, sort_by="cardinality", sum_over=False, show_counts='%d')
+    current_figure = matplotlib.pyplot.gcf()
+    current_figure.set_size_inches(10.5, 40.5)
+    current_figure.suptitle('"Sample" Count of shared attribute names')
+    current_figure.savefig("notebooks/figures/sample_attributes.png")
