@@ -11,7 +11,7 @@ from anvil.transformers.gtex import GTEx
 from anvil.transformers.thousand_genomes import ThousandGenomes
 # from anvil.transformers.eMERGE import eMERGE
 
-from apps.graph_summarizer import summarize_graph, draw_summary, draw_samples_attributes
+from apps.graph_summarizer import summarize_graph, draw_summary, draw_samples_attributes, draw_workspace_attributes
 from apps.node_counts import create_table
 
 
@@ -51,6 +51,7 @@ def main(namespace, user_project):
     logger.info(f'Node counts:')
     graphs = []
     node_counts = []
+
     transformers = make_transformers(namespace, user_project)
     for name, graph, counts in generate_graphs(transformers):
         logger.info(f'{name}: {len(graph.nodes())}')
@@ -63,10 +64,9 @@ def main(namespace, user_project):
     draw_summary(summarize_graph(anvil), f'AnVIL participants, samples, and files', save_dot_file=True, scale=6)
     table = create_table(node_counts)
     draw_samples_attributes(transformers)
-
+    draw_workspace_attributes(transformers)
     with open('apps/report.md.template') as input:
         report = input.read()
-
     report = report.format(table=table)
     with open('notebooks/figures/report.md', 'w') as output:
         output.write(report)

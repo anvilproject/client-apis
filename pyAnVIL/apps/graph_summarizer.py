@@ -7,6 +7,9 @@ import matplotlib.pyplot
 import pandas
 import upsetplot
 
+import firecloud.api as FAPI
+from attrdict import AttrDict
+
 
 def summarize_graph(graph):
     """Introspects the data in the graph, creates a summary graph.  Relies on label attribute on each node"""
@@ -101,3 +104,32 @@ def draw_samples_attributes(transformers):
     current_figure.set_size_inches(10.5, 40.5)
     current_figure.suptitle('"Sample" Count of shared attribute names')
     current_figure.savefig("notebooks/figures/sample_attributes.png")
+
+
+def draw_workspace_attributes(transformers):
+    """Upset plots for workspace attributes."""
+    workspaces = FAPI.list_workspaces().json()
+
+    workspace_attributes = []
+    for w in workspaces:
+        workspace_attributes.append(AttrDict({'name': w['workspace']['name'], 'attribute_keys': sorted(list(w['workspace']['attributes'].keys()))}))
+
+    workspace_df = pandas.DataFrame(upsetplot.from_contents({w.name: w.attribute_keys for w in workspace_attributes}))
+
+    upsetplot.plot(workspace_df, sort_by="cardinality", sum_over=False, show_counts='%d')
+    current_figure = matplotlib.pyplot.gcf()
+    current_figure.suptitle('Count of shared workspace properties')
+    current_figure.savefig("notebooks/figures/workspace_projects.png")
+
+    entity_by_project = defaultdict(set)
+
+    for w in workspace_attributes:
+        for k in w.attribute_keys:
+            entity_by_project[k].add(w.name)
+
+    entity_df = pandas.DataFrame(upsetplot.from_contents(entity_by_project))
+    upsetplot.plot(entity_df, sort_by="cardinality", sum_over=False, show_counts='%d')
+    current_figure = matplotlib.pyplot.gcf()
+    current_figure.set_size_inches(10.5, 40.5)
+    current_figure.suptitle('"Workspace" Count of shared attribute names')
+    current_figure.savefig("notebooks/figures/workspace_attributes.png")

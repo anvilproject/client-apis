@@ -7,6 +7,6 @@ repos:
     - id: flake8
       additional_dependencies: [flake8-docstrings]
     - id: check-added-large-files
-      args: ['--maxkb=2048']
+      args: ['--maxkb=5096']
     - id: detect-aws-credentials
     - id: detect-private-key
