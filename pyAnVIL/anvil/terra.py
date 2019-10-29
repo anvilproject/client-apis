@@ -53,7 +53,7 @@ def blob_cache_get(bucketName):
 def blob_cache_put(bucketName, blobs):
     cur = BLOB_CACHE.cursor()
     logger.debug(f'cache put {bucketName}, {len(blobs)} blobs')
-    cur.execute(f"insert into blobs values ('{bucketName}', '{json.dumps(blobs)}') ON CONFLICT(bucketName) DO UPDATE SET json=excluded.json;")
+    cur.execute(f"REPLACE into blobs values ('{bucketName}', '{json.dumps(blobs)}');")
     BLOB_CACHE.commit()
 
 

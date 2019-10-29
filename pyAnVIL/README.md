@@ -19,3 +19,21 @@ from terra
 > As an AnVIL informaticist, having created a cross project cohort, in order to derive novel results, I would like to run a workflow using files from that cross project cohort
 
 > As an AnVIL data analyst, I need those projects mapped to the AnVIL schema (Note, the schema is a future deliverable)
+
+## Setup
+
+After cloning this repository
+
+```
+$ python3 -m anvil.show_projects
+WARNING:root:Unable to determine/refresh application credentials
+Go to the following link in your browser:
+
+    https://accounts.google.com/o/oauth2/auth?....
+
+
+Enter verification code:
+
+Credentials saved to file: [/home/xxxx/.config/gcloud/application_default_credentials.json]
+
+```
