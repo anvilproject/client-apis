@@ -116,8 +116,9 @@ def draw_workspace_attributes(transformers):
 
     workspace_df = pandas.DataFrame(upsetplot.from_contents({w.name: w.attribute_keys for w in workspace_attributes}))
 
-    upsetplot.plot(workspace_df, sort_by="cardinality", sum_over=False, show_counts='%d')
     current_figure = matplotlib.pyplot.gcf()
+    current_figure.set_size_inches(10.5, 80.5)
+    upsetplot.plot(workspace_df, sort_by="cardinality", sum_over=False, show_counts='%d')
     current_figure.suptitle('Count of shared workspace properties')
     current_figure.savefig("notebooks/figures/workspace_projects.png")
 
@@ -128,8 +129,8 @@ def draw_workspace_attributes(transformers):
             entity_by_project[k].add(w.name)
 
     entity_df = pandas.DataFrame(upsetplot.from_contents(entity_by_project))
-    upsetplot.plot(entity_df, sort_by="cardinality", sum_over=False, show_counts='%d')
     current_figure = matplotlib.pyplot.gcf()
-    current_figure.set_size_inches(10.5, 40.5)
+    current_figure.set_size_inches(10.5, 80.5)
+    upsetplot.plot(entity_df, sort_by="cardinality", sum_over=False, show_counts='%d')
     current_figure.suptitle('"Workspace" Count of shared attribute names')
     current_figure.savefig("notebooks/figures/workspace_attributes.png")

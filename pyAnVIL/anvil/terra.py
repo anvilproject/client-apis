@@ -63,16 +63,17 @@ def get_blobs(workspace, user_project):
     blobs = blob_cache_get(workspace['bucketName'])
     storage_client = None
     if not blobs:
-        # Instantiates a google client
-        # get all blobs in bucket
-        # print(f"fetching blobs from google {workspace['bucketName']}")
-        storage_client = storage.Client(project=user_project)
-        bucket = storage_client.bucket(workspace['bucketName'], user_project)
-        # return only name and size
-        blobs = {}
-        for b in list(bucket.list_blobs()):
-            blobs[f"gs://{workspace['bucketName']}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
-        blob_cache_put(workspace['bucketName'], blobs)
+        # Instantiates a google client, # get all blobs in bucket
+        try:
+            storage_client = storage.Client(project=user_project)
+            bucket = storage_client.bucket(workspace['bucketName'], user_project)
+            # return only name and size
+            blobs = {}
+            for b in list(bucket.list_blobs()):
+                blobs[f"gs://{workspace['bucketName']}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
+            blob_cache_put(workspace['bucketName'], blobs)
+        except Exception as e:
+            print(f"ERROR fetching blobs from google. workspace: {workspace['project']} bucket: {workspace['bucketName']} {str(e)}")
 
     project_buckets = [urlparse(f).netloc for f in workspace.project_files.values()]
     for project_bucket in project_buckets:

@@ -1,4 +1,4 @@
-# AnVIL Summary
+# AnVIL Summary  2019-11-19
 
 ## Combined Graph
 
@@ -2141,16 +2141,10 @@
 
 ## Sample attributes
 
-![sample_attributes](sample_attributes.png)
-
-## Sample projects
-
-![sample_projects](sample_projects.png)
+* [sample attributes](sample_attributes.png)
+* [sample projects](sample_projects.png)
 
 ## Workspace attributes
 
-![workspace_attributes](workspace_attributes.png)
-
-## Workspace projects
-
-![workspace_projects](workspace_projects.png)
+* [workspace attributes](workspace_attributes.png)
+* [workspace projects](workspace_projects.png)

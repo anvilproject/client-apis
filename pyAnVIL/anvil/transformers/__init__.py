@@ -41,6 +41,8 @@ class BaseApp():
         for p in projects:
             if len(p.schema.keys()) == 0:
                 self.logger.warning(f'{p.project} missing schema, project will not be included.')
+            elif 'participant' not in p.schema:
+                self.logger.warning(f'{p.project} missing "participant", project will not be included. {p.schema}')
             else:
                 # normalize the project_files
                 if len(p.project_files.keys()) == 0:
@@ -63,6 +65,9 @@ class BaseApp():
         """Returns generator with participants associated with projects."""
         for p in self.get_terra_projects():
             participants = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='participant', fapi=self.fapi)
+            if 'participant' not in p.schema:
+                print(f"? workspace: {p.project} schema: {p.schema}")
+                continue
             assert len(participants) == p.schema.participant.count, f"Retrieved participants entities count {len(participants)} did not match anticipated count in schema {p.schema.participant.count}"
             for participant in participants:
                 attributes = participant.attributes

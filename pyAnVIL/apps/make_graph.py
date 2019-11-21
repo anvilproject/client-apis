@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 
 import click
 from pathlib import Path
@@ -67,7 +68,7 @@ def main(namespace, user_project):
     draw_workspace_attributes(transformers)
     with open('apps/report.md.template') as input:
         report = input.read()
-    report = report.format(table=table)
+    report = report.format(table=table, date_generated=date.today())
     with open('notebooks/figures/report.md', 'w') as output:
         output.write(report)
 
