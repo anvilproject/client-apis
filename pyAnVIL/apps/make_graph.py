@@ -74,9 +74,8 @@ def main(namespace, user_project):
     with open('notebooks/figures/report.md', 'w') as output:
         output.write(report)
     with open('notebooks/figures/report-data.json', 'w') as output:
-        for node_count in node_counts:
-            json.dump(node_count, output)
-            output.write("\n")
+        projects = {'projects': node_counts}
+        json.dump(projects, output, separators=(',', ': '))
 
 
 if __name__ == '__main__':
