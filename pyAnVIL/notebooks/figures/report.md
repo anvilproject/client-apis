@@ -1,4 +1,4 @@
-# AnVIL Summary  2019-11-25
+# AnVIL Summary  2019-12-02
 
 ## Combined Graph
 
@@ -67,7 +67,7 @@
   </thead>
   <tbody>
     <tr>
-      <th rowspan="51" valign="top">CCDG</th>
+      <th rowspan="63" valign="top">CCDG</th>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_BioMe_WGS</th>
       <td></td>
       <td></td>
@@ -196,6 +196,32 @@
       <td></td>
       <td>False</td>
       <td>8.56 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_BELULB_DS-EP-NPU_WES</th>
+      <td></td>
+      <td></td>
+      <td>380</td>
+      <td>380</td>
+      <td>380</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>380</td>
+      <td>380</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>626.84 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Harvard-Costa-Rica_WGS</th>
@@ -328,6 +354,32 @@
       <td>1.87 TB</td>
     </tr>
     <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_DEUUPM_HMB_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>112</td>
+      <td>112</td>
+      <td>112</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>112</td>
+      <td>112</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>193.25 GB</td>
+    </tr>
+    <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_METSIM_WGS</th>
       <td></td>
       <td></td>
@@ -458,6 +510,32 @@
       <td>24.49 TB</td>
     </tr>
     <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_GBRSWU_CARDI_NEURO_WES</th>
+      <td></td>
+      <td></td>
+      <td>105</td>
+      <td>105</td>
+      <td>105</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>105</td>
+      <td>105</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>170.55 GB</td>
+    </tr>
+    <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_SSC_WGS</th>
       <td></td>
       <td></td>
@@ -482,6 +560,32 @@
       <td></td>
       <td>False</td>
       <td>0 bytes</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_CHEUBB_HMB_IRB_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>7</td>
+      <td>7</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>7</td>
+      <td>7</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>10.03 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_Penn_WGS</th>
@@ -612,6 +716,32 @@
       <td></td>
       <td>False</td>
       <td>21.61 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_AUSRMB_DS-EAED-MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>266</td>
+      <td>266</td>
+      <td>266</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>266</td>
+      <td>266</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>439.35 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Cho_WGS</th>
@@ -796,6 +926,84 @@
       <td>26.79 TB</td>
     </tr>
     <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_FINUVH_HMB_NPU_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>92</td>
+      <td>92</td>
+      <td>92</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>92</td>
+      <td>92</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>160.03 GB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_CZEMTH_GRU_WES</th>
+      <td></td>
+      <td></td>
+      <td>16</td>
+      <td>16</td>
+      <td>16</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>16</td>
+      <td>16</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>27.2 GB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_CANUTN_DS-EP_WES</th>
+      <td></td>
+      <td></td>
+      <td>94</td>
+      <td>94</td>
+      <td>94</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>94</td>
+      <td>94</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>187.71 GB</td>
+    </tr>
+    <tr>
       <th>AnVIL_CCDG_Broad_NP_Autism_State-Sanders_WGS</th>
       <td></td>
       <td></td>
@@ -822,6 +1030,32 @@
       <td>8.5 TB</td>
     </tr>
     <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_DEUUKL_HMB_WES</th>
+      <td></td>
+      <td></td>
+      <td>146</td>
+      <td>146</td>
+      <td>146</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>146</td>
+      <td>146</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>293.97 GB</td>
+    </tr>
+    <tr>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_BioVu_WGS</th>
       <td></td>
       <td></td>
@@ -846,6 +1080,58 @@
       <td></td>
       <td>False</td>
       <td>11.95 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_DEUUKB_HMB_NPU_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>958</td>
+      <td>958</td>
+      <td>958</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>958</td>
+      <td>958</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>1.61 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_CYPCYP_HMB_NPU_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>116</td>
+      <td>116</td>
+      <td>116</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>116</td>
+      <td>116</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>210.2 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_Intermountain_WGS</th>
@@ -1054,6 +1340,32 @@
       <td></td>
       <td>False</td>
       <td>26.23 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_HRVUZG_HMB_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>14</td>
+      <td>14</td>
+      <td>14</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>14</td>
+      <td>14</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>23.41 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Alz_WHICAP_WGS</th>
