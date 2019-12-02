@@ -1,4 +1,4 @@
-# AnVIL Summary  2019-11-19
+# AnVIL Summary  2019-11-25
 
 ## Combined Graph
 
@@ -34,11 +34,13 @@
       <th>TsvFile</th>
       <th>TxtFile</th>
       <th>VcfFile</th>
+      <th>public</th>
       <th>size</th>
     </tr>
     <tr>
       <th>source</th>
       <th>project_id</th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -88,6 +90,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>9.86 TB</td>
     </tr>
     <tr>
@@ -113,6 +116,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>14.48 TB</td>
     </tr>
     <tr>
@@ -138,6 +142,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.28 TB</td>
     </tr>
     <tr>
@@ -163,6 +168,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>53.46 TB</td>
     </tr>
     <tr>
@@ -188,6 +194,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>8.56 TB</td>
     </tr>
     <tr>
@@ -213,6 +220,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>39.81 TB</td>
     </tr>
     <tr>
@@ -238,6 +246,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.84 TB</td>
     </tr>
     <tr>
@@ -263,6 +272,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>37.67 TB</td>
     </tr>
     <tr>
@@ -288,6 +298,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>4.93 TB</td>
     </tr>
     <tr>
@@ -313,6 +324,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.87 TB</td>
     </tr>
     <tr>
@@ -338,6 +350,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>64.7 TB</td>
     </tr>
     <tr>
@@ -363,6 +376,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>5.45 TB</td>
     </tr>
     <tr>
@@ -388,6 +402,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.55 TB</td>
     </tr>
     <tr>
@@ -413,6 +428,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>3.09 TB</td>
     </tr>
     <tr>
@@ -438,6 +454,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>24.49 TB</td>
     </tr>
     <tr>
@@ -463,6 +480,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>0 bytes</td>
     </tr>
     <tr>
@@ -488,6 +506,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>27 TB</td>
     </tr>
     <tr>
@@ -513,6 +532,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.56 TB</td>
     </tr>
     <tr>
@@ -538,6 +558,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.32 TB</td>
     </tr>
     <tr>
@@ -563,6 +584,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>28.15 TB</td>
     </tr>
     <tr>
@@ -588,6 +610,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>21.61 TB</td>
     </tr>
     <tr>
@@ -613,6 +636,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>4.08 TB</td>
     </tr>
     <tr>
@@ -638,6 +662,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>13.91 TB</td>
     </tr>
     <tr>
@@ -663,6 +688,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>294.12 GB</td>
     </tr>
     <tr>
@@ -688,6 +714,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>27.44 TB</td>
     </tr>
     <tr>
@@ -713,6 +740,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>27.93 TB</td>
     </tr>
     <tr>
@@ -738,6 +766,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>102.66 TB</td>
     </tr>
     <tr>
@@ -763,6 +792,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>26.79 TB</td>
     </tr>
     <tr>
@@ -788,6 +818,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>8.5 TB</td>
     </tr>
     <tr>
@@ -813,6 +844,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>11.95 TB</td>
     </tr>
     <tr>
@@ -838,6 +870,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>9.07 TB</td>
     </tr>
     <tr>
@@ -863,6 +896,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>22.82 TB</td>
     </tr>
     <tr>
@@ -888,6 +922,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>8.77 TB</td>
     </tr>
     <tr>
@@ -913,6 +948,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.41 TB</td>
     </tr>
     <tr>
@@ -938,6 +974,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>9.93 TB</td>
     </tr>
     <tr>
@@ -963,6 +1000,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>11.76 TB</td>
     </tr>
     <tr>
@@ -988,6 +1026,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>10.41 TB</td>
     </tr>
     <tr>
@@ -1013,6 +1052,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>26.23 TB</td>
     </tr>
     <tr>
@@ -1038,6 +1078,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>3.65 TB</td>
     </tr>
     <tr>
@@ -1063,6 +1104,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>0 bytes</td>
     </tr>
     <tr>
@@ -1088,6 +1130,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>17.22 TB</td>
     </tr>
     <tr>
@@ -1113,6 +1156,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>15.58 TB</td>
     </tr>
     <tr>
@@ -1138,6 +1182,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>39.81 GB</td>
     </tr>
     <tr>
@@ -1163,6 +1208,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>11.94 TB</td>
     </tr>
     <tr>
@@ -1188,6 +1234,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>6.17 TB</td>
     </tr>
     <tr>
@@ -1213,6 +1260,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>5.52 TB</td>
     </tr>
     <tr>
@@ -1238,6 +1286,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>21.83 TB</td>
     </tr>
     <tr>
@@ -1263,6 +1312,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>6.89 TB</td>
     </tr>
     <tr>
@@ -1288,6 +1338,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.56 TB</td>
     </tr>
     <tr>
@@ -1313,6 +1364,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>106.07 TB</td>
     </tr>
     <tr>
@@ -1338,6 +1390,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>13.92 TB</td>
     </tr>
     <tr>
@@ -1364,6 +1417,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>118.56 GB</td>
     </tr>
     <tr>
@@ -1389,6 +1443,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>522.37 GB</td>
     </tr>
     <tr>
@@ -1414,6 +1469,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>2.3 TB</td>
     </tr>
     <tr>
@@ -1439,6 +1495,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>18.17 GB</td>
     </tr>
     <tr>
@@ -1464,6 +1521,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>193.92 GB</td>
     </tr>
     <tr>
@@ -1489,6 +1547,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>65.84 GB</td>
     </tr>
     <tr>
@@ -1514,6 +1573,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.37 TB</td>
     </tr>
     <tr>
@@ -1539,6 +1599,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.84 TB</td>
     </tr>
     <tr>
@@ -1564,6 +1625,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.11 TB</td>
     </tr>
     <tr>
@@ -1589,6 +1651,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>520.59 GB</td>
     </tr>
     <tr>
@@ -1614,6 +1677,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.44 TB</td>
     </tr>
     <tr>
@@ -1639,6 +1703,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>42.26 GB</td>
     </tr>
     <tr>
@@ -1664,6 +1729,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>1.6 TB</td>
     </tr>
     <tr>
@@ -1689,6 +1755,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>70.01 GB</td>
     </tr>
     <tr>
@@ -1714,6 +1781,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>3.06 TB</td>
     </tr>
     <tr>
@@ -1739,6 +1807,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>489.2 GB</td>
     </tr>
     <tr>
@@ -1764,6 +1833,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>751.5 GB</td>
     </tr>
     <tr>
@@ -1789,6 +1859,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>678.23 GB</td>
     </tr>
     <tr>
@@ -1814,6 +1885,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>122.52 GB</td>
     </tr>
     <tr>
@@ -1839,6 +1911,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>221.46 GB</td>
     </tr>
     <tr>
@@ -1864,6 +1937,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>561.53 GB</td>
     </tr>
     <tr>
@@ -1889,6 +1963,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>42.31 GB</td>
     </tr>
     <tr>
@@ -1914,6 +1989,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>136.57 GB</td>
     </tr>
     <tr>
@@ -1939,6 +2015,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>49.84 GB</td>
     </tr>
     <tr>
@@ -1964,6 +2041,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>500.48 GB</td>
     </tr>
     <tr>
@@ -1989,6 +2067,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>72.47 GB</td>
     </tr>
     <tr>
@@ -2014,6 +2093,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>37.5 GB</td>
     </tr>
     <tr>
@@ -2039,6 +2119,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>False</td>
       <td>637.4 GB</td>
     </tr>
     <tr>
@@ -2056,6 +2137,7 @@
       <td>341</td>
       <td></td>
       <td>2405</td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -2090,6 +2172,7 @@
       <td>1676</td>
       <td>1678</td>
       <td>1</td>
+      <td>False</td>
       <td>157.64 TB</td>
     </tr>
     <tr>
@@ -2116,6 +2199,7 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>True</td>
       <td>41.29 TB</td>
     </tr>
   </tbody>

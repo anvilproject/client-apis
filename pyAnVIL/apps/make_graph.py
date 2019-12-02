@@ -15,6 +15,8 @@ from anvil.transformers.thousand_genomes import ThousandGenomes
 from apps.graph_summarizer import summarize_graph, draw_summary, draw_samples_attributes, draw_workspace_attributes
 from apps.node_counts import create_table
 
+import json
+
 
 def make_transformers(program, user_project):
     return [
@@ -71,6 +73,10 @@ def main(namespace, user_project):
     report = report.format(table=table, date_generated=date.today())
     with open('notebooks/figures/report.md', 'w') as output:
         output.write(report)
+    with open('notebooks/figures/report-data.json', 'w') as output:
+        for node_count in node_counts:
+            json.dump(node_count, output)
+            output.write("\n")
 
 
 if __name__ == '__main__':

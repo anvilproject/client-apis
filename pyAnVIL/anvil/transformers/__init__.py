@@ -146,7 +146,7 @@ class BaseApp():
             return self.G
         G = nx.MultiDiGraph()
         for project in self.get_terra_projects():
-            G.add_node(project.project_id, label='Project', project_id=project.project_id)
+            G.add_node(project.project_id, label='Project', project_id=project.project_id, public=project.public)
             for k, file in project.project_files.items():
                 type = file.type.replace('.', '').capitalize()
                 G.add_node(file.path, label=f'{type}File', project_id=project.project_id, size=file.size)
@@ -200,6 +200,8 @@ class BaseApp():
             project_size = project_counts.get('size', 0) + node_size
             project_counts[label] = label_counts
             project_counts['size'] = project_size
+            if 'Project' == label:
+                project_counts['public'] = graph.node[n]['public']
             counts[project_id] = project_counts
         return counts
 
