@@ -1,4 +1,4 @@
-# AnVIL Summary  2019-12-02
+# AnVIL Summary  2019-12-06
 
 ## Combined Graph
 
@@ -67,7 +67,7 @@
   </thead>
   <tbody>
     <tr>
-      <th rowspan="63" valign="top">CCDG</th>
+      <th rowspan="67" valign="top">CCDG</th>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_BioMe_WGS</th>
       <td></td>
       <td></td>
@@ -718,6 +718,58 @@
       <td>21.61 TB</td>
     </tr>
     <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_IRLRCI_GRU_IRB_WES</th>
+      <td></td>
+      <td></td>
+      <td>777</td>
+      <td>777</td>
+      <td>777</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>777</td>
+      <td>777</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>1.38 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_DEUULG_GRU_WES</th>
+      <td></td>
+      <td></td>
+      <td>74</td>
+      <td>74</td>
+      <td>74</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>74</td>
+      <td>74</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>121.17 GB</td>
+    </tr>
+    <tr>
       <th>AnVIL_CCDG_Broad_NP_Epilepsy_AUSRMB_DS-EAED-MDS_WES</th>
       <td></td>
       <td></td>
@@ -872,6 +924,32 @@
       <td></td>
       <td>False</td>
       <td>27.93 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_ITAIGI_GRU_WES</th>
+      <td></td>
+      <td></td>
+      <td>606</td>
+      <td>606</td>
+      <td>606</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>606</td>
+      <td>606</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>1.07 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_EOCAD_SoL_WGS</th>
@@ -1704,6 +1782,32 @@
       <td></td>
       <td>False</td>
       <td>13.92 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_ITAICB_HMB_NPU_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>244</td>
+      <td>244</td>
+      <td>244</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>244</td>
+      <td>244</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>403.85 GB</td>
     </tr>
     <tr>
       <th rowspan="29" valign="top">CMG</th>

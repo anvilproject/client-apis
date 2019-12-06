@@ -111,7 +111,8 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
                       'program': w['workspace']['namespace'],
                       'bucketName': w['workspace']['bucketName'],
                       'project_files': project_files(w),
-                      'public': w['public']
+                      'public': w['public'],
+                      'authorizationDomains': [ad['membersGroupName'] for ad in w['workspace']['authorizationDomain']]
                       }) for w in workspaces if w['workspace']['namespace'] in namespaces
         ]
     if project_pattern:
