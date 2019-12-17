@@ -1,15 +1,17 @@
 import requests_cache
 
+_CACHE_NAME = 'anvil_cache'
 
-def enable_cache():
+
+def install_cache():
     """Turns on cache."""
-    requests_cache.install_cache('anvil_cache')
+    requests_cache.install_cache(_CACHE_NAME)
 
 
-def disable_cache():
+def uninstall_cache():
     """Turns off cache."""
     requests_cache.core.uninstall_cache()
 
 
 # turns on cache for all requests by default
-enable_cache()
+# install_cache()
