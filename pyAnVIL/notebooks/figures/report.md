@@ -1,4 +1,4 @@
-# AnVIL Summary  2019-12-06
+# AnVIL Summary  2020-01-14
 
 ## Combined Graph
 
@@ -67,7 +67,7 @@
   </thead>
   <tbody>
     <tr>
-      <th rowspan="67" valign="top">CCDG</th>
+      <th rowspan="68" valign="top">CCDG</th>
       <th>AnVIL_CCDG_WashU_CVD_EOCAD_BioMe_WGS</th>
       <td></td>
       <td></td>
@@ -170,6 +170,32 @@
       <td></td>
       <td>False</td>
       <td>53.46 TB</td>
+    </tr>
+    <tr>
+      <th>AnVIL_CCDG_Broad_NP_Epilepsy_FINKPH_EPIL_CO_MORBIDI_MDS_WES</th>
+      <td></td>
+      <td></td>
+      <td>703</td>
+      <td>703</td>
+      <td>703</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>703</td>
+      <td>703</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>False</td>
+      <td>1.19 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_CVD_AFib_Penn_WGS</th>
@@ -1944,10 +1970,10 @@
       <th>AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WES</th>
       <td></td>
       <td></td>
-      <td>25</td>
-      <td>25</td>
-      <td>25</td>
-      <td>25</td>
+      <td>31</td>
+      <td>31</td>
+      <td>31</td>
+      <td>31</td>
       <td></td>
       <td></td>
       <td></td>
@@ -1957,14 +1983,14 @@
       <td></td>
       <td></td>
       <td>1</td>
-      <td>25</td>
-      <td>25</td>
+      <td>31</td>
+      <td>31</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>False</td>
-      <td>65.84 GB</td>
+      <td>76.15 GB</td>
     </tr>
     <tr>
       <th>AnVIL_CMG_Broad_Eye_Pierce_WES</th>
@@ -2548,11 +2574,11 @@
       <td></td>
       <td></td>
       <td></td>
-      <td>3540</td>
+      <td>3542</td>
       <td></td>
-      <td>341</td>
+      <td>340</td>
       <td></td>
-      <td>2405</td>
+      <td>2410</td>
       <td></td>
       <td></td>
       <td></td>

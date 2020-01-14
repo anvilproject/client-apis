@@ -18,7 +18,11 @@ class CMG(BaseApp):
     def get_terra_samples(self):
         """Cleans up terra samples."""
         for s in super().get_terra_samples():
-            yield AttrDict(harmonize_sample(s))
+            harmonized_sample = self.harmonize_sample(s)
+            if harmonized_sample.participant is None:
+                self.logger.warn(f"sample missing participant value, ignoring. {s.project_id} {s.get('root_sample_id', 'no sample id')}")
+                continue
+            yield AttrDict(self.harmonize_sample(s))
 
     def to_graph(self):
         """Adds Family, Demographic to graph"""
@@ -68,22 +72,24 @@ class CMG(BaseApp):
         self.G = G
         return self.G
 
+    def harmonize_sample(self, s):
+        """Ensures links."""
+        s.participant = self.participant_id(s)
+        s.submitter_id = f'{self.participant_id(s)}-sample'
+        return s
 
-def harmonize_sample(s):
-    """Ensures links."""
-    s.participant = participant_id(s)
-    s.submitter_id = f'{participant_id(s)}-sample'
-    return s
-
-
-def participant_id(s):
-    """Corrects mispelling."""
-    if 'participant' in s:
-        if isinstance(s.participant, str):
-            return s.participant
-        return s.participant.entityName
-    if 'participent' in s:
-        return s.participent
+    def participant_id(self, s):
+        """Corrects mispelling."""
+        if 'participant_id' in s:
+            return s.participant_id
+        if 'participant' in s:
+            if s.participant is None:
+                return None
+            if isinstance(s.participant, str):
+                return s.participant
+            return s.participant.entityName
+        if 'participent' in s:
+            return s.participent
 
 
 def harmonize_participant(p):

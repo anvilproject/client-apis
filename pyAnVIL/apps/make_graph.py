@@ -10,6 +10,7 @@ from anvil.transformers.ccdg import CCDG
 from anvil.transformers.cmg import CMG
 from anvil.transformers.gtex import GTEx
 from anvil.transformers.thousand_genomes import ThousandGenomes
+from anvil import install_cache
 # from anvil.transformers.eMERGE import eMERGE
 
 from apps.graph_summarizer import summarize_graph, draw_summary, draw_samples_attributes, draw_workspace_attributes
@@ -88,5 +89,5 @@ if __name__ == '__main__':
     # find .env automagically by walking up directories until it's found, then
     # load up the .env entries as environment variables
     load_dotenv(find_dotenv())
-
+    install_cache()
     main()

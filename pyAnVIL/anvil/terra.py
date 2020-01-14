@@ -103,7 +103,8 @@ def project_files(w):
 def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=USER_PROJECT):
     """Maps terra workspaces to gen3.projects"""
     logger.debug(f"get_projects {project_pattern} ...")
-    workspaces = fapi.list_workspaces().json()
+    workspaces = fapi.list_workspaces()
+    workspaces = workspaces.json()
     if namespaces:
         workspaces = [
             AttrDict({'project_id': f"{w['workspace']['namespace']}/{w['workspace']['name']}",

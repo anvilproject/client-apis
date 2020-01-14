@@ -1,6 +1,7 @@
 import click
 import anvil.terra as terra
 import sys
+import logging
 
 
 @click.command()
@@ -21,4 +22,8 @@ def all_projects(namespace, project_pattern, user_project):
 
 
 if __name__ == '__main__':
+
+    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+
     all_projects()
