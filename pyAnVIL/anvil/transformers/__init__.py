@@ -205,6 +205,35 @@ class BaseApp():
             counts[project_id] = project_counts
         return counts
 
+    def graph_project_summary(self):
+        """Returns a dict project details."""
+        projects = {}
+        graph = self.to_graph()
+        for n in graph.nodes():
+            assert 'label' in graph.node[n], f'{n} has no label?'
+            label = graph.node[n]['label']
+            assert 'project_id' in graph.node[n], f'{label}({n}) has no project_id?'
+            project_id = graph.node[n]['project_id']
+            node_size = graph.node[n].get('size', 0)
+            project_counts = projects.get(project_id, {'files': {}, 'nodes': {}, 'size': 0, 'public': False, 'project_id': None})
+            if label.endswith('File'):
+                file_counts = project_counts['files'].get(label, {})
+                file_counts['type'] = label.replace('File', '')
+                file_counts['size'] = file_counts.get('size', 0) + node_size
+                file_counts['count'] = file_counts.get('count', 0) + 1
+                project_counts['files'][label] = file_counts
+            else:
+                node_counts = project_counts['nodes'].get(label, {})
+                node_counts['type'] = label
+                node_counts['count'] = node_counts.get('count', 0) + 1
+                project_counts['nodes'][label] = node_counts
+            project_size = project_counts.get('size', 0) + node_size
+            project_counts['size'] = project_size
+            if 'Project' == label:
+                project_counts['public'] = graph.node[n]['public']
+            projects[project_id] = project_counts
+        return projects
+
 
 def strip_NA(v):
     """Cleans up."""

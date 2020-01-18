@@ -14,4 +14,4 @@ def uninstall_cache():
 
 
 # turns on cache for all requests by default
-# install_cache()
+install_cache()

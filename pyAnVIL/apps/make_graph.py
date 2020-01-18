@@ -46,6 +46,19 @@ def generate_graphs(transformers):
     return transformers
 
 
+def generate_project_summary(transformers):
+    """Returns array of tuples (transformer_name, graph, counts)."""
+    for t in transformers:
+        name = t.__class__.__name__
+        # graph = t.to_graph()
+        project_summary = t.graph_project_summary()
+        for project_id, summary in project_summary.items():
+            # strip off program prefix
+            summary['project_id'] = project_id.split('/')[-1]
+            summary['source'] = name
+        yield project_summary
+
+
 @click.command()
 @click.option('--namespace', default='anvil-datastorage', help='Terra namespace to query')
 @click.option('--user_project', envvar='USER_PROJECT', help='Google billing project for requestor pays')
@@ -75,7 +88,15 @@ def main(namespace, user_project):
     with open('notebooks/figures/report.md', 'w') as output:
         output.write(report)
     with open('notebooks/figures/report-data.json', 'w') as output:
-        projects = {'projects': node_counts}
+        # https://app.zenhub.com/workspaces/anvil-portal-5cccd4e3d9d2da0571fb3427/issues/anvilproject/anvil-portal/155#issuecomment-564664519
+        project_summaries = []
+        for project_summary in generate_project_summary(transformers):
+            for p in project_summary.values():
+                # turn dicts into arrays
+                p["files"] = [v for n, v in p["files"].items()]
+                p["nodes"] = [v for n, v in p["nodes"].items()]
+            project_summaries.extend(project_summary.values())
+        projects = {'projects': project_summaries}
         json.dump(projects, output, separators=(',', ': '))
 
 
