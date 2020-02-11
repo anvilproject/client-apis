@@ -44,9 +44,9 @@ def blob_cache_get(bucketName):
     cur = BLOB_CACHE.cursor()
     cur.execute(f"SELECT json FROM blobs where bucketName='{bucketName}'")
     rows = cur.fetchall()
-    logger.debug(f'cache get {bucketName}, {len(rows)} rows')
     if len(rows) == 0:
         return None
+    logger.debug(f'cache get {bucketName}, {rows[0][0]}')
     return json.loads(rows[0][0])
 
 
@@ -63,6 +63,7 @@ def get_blobs(workspace, user_project):
     blobs = blob_cache_get(workspace['bucketName'])
     storage_client = None
     if not blobs:
+        logger.debug('get_blobs', workspace['project'], workspace['bucketName'])
         # Instantiates a google client, # get all blobs in bucket
         try:
             storage_client = storage.Client(project=user_project)
@@ -84,9 +85,12 @@ def get_blobs(workspace, user_project):
             if not storage_client:
                 storage_client = storage.Client(project=user_project)
             project_bucket = storage_client.bucket(project_bucket, user_project)
-            for b in list(project_bucket.list_blobs()):
-                project_blobs[f"gs://{project_bucket.name}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
-            blob_cache_put(project_bucket.name, project_blobs)
+            try:
+                for b in list(project_bucket.list_blobs()):
+                    project_blobs[f"gs://{project_bucket.name}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
+                blob_cache_put(project_bucket.name, project_blobs)
+            except Exception as e:
+                print(f"ERROR fetching blobs from google. workspace: {workspace['project']} bucket: {workspace['bucketName']} {str(e)}")
         blobs.update(project_blobs)
     return blobs
 

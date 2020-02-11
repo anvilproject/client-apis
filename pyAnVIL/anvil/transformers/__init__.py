@@ -36,6 +36,7 @@ class BaseApp():
             self.logger.warning(f'number of blobs in {self.project_pattern}: {blob_sum}')
 
         # add the project schema
+        print('get_terra_projects')
         projects = [terra.get_project_schema(p, fapi=self.fapi) for p in projects]
         self.projects = []
         for p in projects:
@@ -63,10 +64,11 @@ class BaseApp():
 
     def get_terra_participants(self):
         """Returns generator with participants associated with projects."""
+        print('get_terra_participants')
         for p in self.get_terra_projects():
             participants = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='participant', fapi=self.fapi)
             if 'participant' not in p.schema:
-                print(f"? workspace: {p.project} schema: {p.schema}")
+                self.logger.warning(f"? workspace: {p.project} schema: {p.schema}")
                 continue
             assert len(participants) == p.schema.participant.count, f"Retrieved participants entities count {len(participants)} did not match anticipated count in schema {p.schema.participant.count}"
             for participant in participants:
@@ -145,7 +147,9 @@ class BaseApp():
         if self.G:
             return self.G
         G = nx.MultiDiGraph()
+        print('to_graph')
         for project in self.get_terra_projects():
+            print(f'to_graph {project.project_id}')
             G.add_node(project.project_id, label='Project', project_id=project.project_id, public=project.public)
             for k, file in project.project_files.items():
                 type = file.type.replace('.', '').capitalize()

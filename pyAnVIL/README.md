@@ -25,7 +25,7 @@ from terra
 After cloning this repository
 
 ```
-$ python3 -m anvil.show_projects
+$python3 -m anvil.show_projects --user_project <your test project here>
 WARNING:root:Unable to determine/refresh application credentials
 Go to the following link in your browser:
 

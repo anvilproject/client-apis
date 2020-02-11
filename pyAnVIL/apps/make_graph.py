@@ -75,6 +75,8 @@ def main(namespace, user_project):
         draw_summary(summarize_graph(graph), f'{name} participants, samples, and files', prog='dot')
         graphs.append(graph)
         node_counts.extend(counts)
+
+    exit(1)
     # compose into uber graph
     anvil = nx.compose_all(graphs)
     logger.info(f'AnVIL: {len(anvil.nodes())}')
@@ -102,7 +104,7 @@ def main(namespace, user_project):
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.WARNING, format=log_fmt)
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files
     project_dir = Path(__file__).resolve().parents[2]

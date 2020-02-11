@@ -1,4 +1,4 @@
-# AnVIL Summary  2020-01-17
+# AnVIL Summary  2020-02-11
 
 ## Combined Graph
 
@@ -1371,9 +1371,9 @@
       <th>AnVIL_CCDG_Broad_AI_IBD_Kugathasan_WGS</th>
       <td></td>
       <td></td>
-      <td>914</td>
-      <td>914</td>
-      <td>914</td>
+      <td>1348</td>
+      <td>1348</td>
+      <td>1348</td>
       <td></td>
       <td></td>
       <td></td>
@@ -1384,14 +1384,14 @@
       <td></td>
       <td></td>
       <td>1</td>
-      <td>914</td>
-      <td>914</td>
+      <td>1348</td>
+      <td>1348</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>False</td>
-      <td>11.76 TB</td>
+      <td>16.54 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_NYGC_NP_Autism_ACE2_GRU-MDS_WGS</th>
