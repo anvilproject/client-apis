@@ -84,9 +84,12 @@ def draw_samples_attributes(transformers):
     for t in transformers:
         for s in t.get_terra_samples():
             samples.append(s)
+    distinct_project_ids = set([s.project_id for s in samples])
+    if len(distinct_project_ids) == 1:
+        print(f'Only one project_id not drawing sample attributes {distinct_project_ids}')
+        return
 
     sample_df = pandas.DataFrame(upsetplot.from_contents({s.project_id: s.keys() for s in samples}))
-
     upsetplot.plot(sample_df, sort_by="cardinality", sum_over=False, show_counts='%d')
     current_figure = matplotlib.pyplot.gcf()
     current_figure.suptitle('Count of shared sample properties')

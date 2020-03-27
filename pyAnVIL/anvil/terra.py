@@ -6,6 +6,8 @@ from google.cloud import storage
 import sqlite3
 import json
 from urllib.parse import urlparse
+from datetime import date, datetime
+
 
 USER_PROJECT = None
 BLOB_CACHE = sqlite3.connect('blob_cache.sqlite')
@@ -24,6 +26,13 @@ def CREATE_GOOGLE_STORAGE_CACHE_TABLE():
 
 # static
 CREATE_GOOGLE_STORAGE_CACHE_TABLE()
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
 
 
 def get_programs(fapi=FAPI):
@@ -53,7 +62,7 @@ def blob_cache_get(bucketName):
 def blob_cache_put(bucketName, blobs):
     cur = BLOB_CACHE.cursor()
     logger.debug(f'cache put {bucketName}, {len(blobs)} blobs')
-    cur.execute(f"REPLACE into blobs values ('{bucketName}', '{json.dumps(blobs)}');")
+    cur.execute(f"REPLACE into blobs values ('{bucketName}', '{json.dumps(blobs, default=json_serial)}');")
     BLOB_CACHE.commit()
 
 
@@ -71,7 +80,7 @@ def get_blobs(workspace, user_project):
             # return only name and size
             blobs = {}
             for b in list(bucket.list_blobs()):
-                blobs[f"gs://{workspace['bucketName']}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
+                blobs[f"gs://{workspace['bucketName']}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created}
             blob_cache_put(workspace['bucketName'], blobs)
         except Exception as e:
             print(f"ERROR fetching blobs from google. workspace: {workspace['project']} bucket: {workspace['bucketName']} {str(e)}")
@@ -87,7 +96,7 @@ def get_blobs(workspace, user_project):
             project_bucket = storage_client.bucket(project_bucket, user_project)
             try:
                 for b in list(project_bucket.list_blobs()):
-                    project_blobs[f"gs://{project_bucket.name}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c}
+                    project_blobs[f"gs://{project_bucket.name}/{b.name}"] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created}
                 blob_cache_put(project_bucket.name, project_blobs)
             except Exception as e:
                 print(f"ERROR fetching blobs from google. workspace: {workspace['project']} bucket: {workspace['bucketName']} {str(e)}")
@@ -115,6 +124,8 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
                       'project': w['workspace']['name'],
                       'program': w['workspace']['namespace'],
                       'bucketName': w['workspace']['bucketName'],
+                      'createdDate': w['workspace']['createdDate'],
+                      'lastModified': w['workspace']['lastModified'],
                       'project_files': project_files(w),
                       'public': w['public'],
                       'authorizationDomains': [ad['membersGroupName'] for ad in w['workspace']['authorizationDomain']]

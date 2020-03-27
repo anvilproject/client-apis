@@ -11,7 +11,7 @@ from anvil.transformers.cmg import CMG
 from anvil.transformers.gtex import GTEx
 from anvil.transformers.thousand_genomes import ThousandGenomes
 from anvil import install_cache
-# from anvil.transformers.eMERGE import eMERGE
+from anvil.transformers.eMERGE import eMERGE
 
 from apps.graph_summarizer import summarize_graph, draw_summary, draw_samples_attributes, draw_workspace_attributes
 from apps.node_counts import create_table
@@ -25,7 +25,7 @@ def make_transformers(program, user_project):
         CMG(program=program, user_project=user_project),
         GTEx(program=program, user_project=user_project),
         ThousandGenomes(program=program, user_project=user_project),
-        # eMERGE(program=program, user_project=user_project)
+        eMERGE(program=program, user_project=user_project)
     ]
 
 
@@ -50,19 +50,22 @@ def generate_project_summary(transformers):
     """Returns array of tuples (transformer_name, graph, counts)."""
     for t in transformers:
         name = t.__class__.__name__
-        # graph = t.to_graph()
         project_summary = t.graph_project_summary()
         for project_id, summary in project_summary.items():
             # strip off program prefix
             summary['project_id'] = project_id.split('/')[-1]
             summary['source'] = name
+            summary['gen3_project_id'] = None
+            summary['gen3_file_histogram'] = None
+            summary['dbGAP_project_id'] = None
         yield project_summary
 
 
 @click.command()
 @click.option('--namespace', default='anvil-datastorage', help='Terra namespace to query')
 @click.option('--user_project', envvar='USER_PROJECT', help='Google billing project for requestor pays')
-def main(namespace, user_project):
+@click.option('--report', default=False, help='Generate local "uber graph" report.')
+def main(namespace, user_project, report):
     """Harvests and transforms terra data to graph."""
     logger = logging.getLogger(__name__)
     logger.info(f'Node counts:')
@@ -76,19 +79,22 @@ def main(namespace, user_project):
         graphs.append(graph)
         node_counts.extend(counts)
 
-    exit(1)
+    with open(f"node_counts.json", 'w') as fd:
+        json.dump(node_counts, fd)
+
     # compose into uber graph
-    anvil = nx.compose_all(graphs)
-    logger.info(f'AnVIL: {len(anvil.nodes())}')
-    draw_summary(summarize_graph(anvil), f'AnVIL participants, samples, and files', save_dot_file=True, scale=6)
-    table = create_table(node_counts)
-    draw_samples_attributes(transformers)
-    draw_workspace_attributes(transformers)
-    with open('apps/report.md.template') as input:
-        report = input.read()
-    report = report.format(table=table, date_generated=date.today())
-    with open('notebooks/figures/report.md', 'w') as output:
-        output.write(report)
+    if report:
+        anvil = nx.compose_all(graphs)
+        logger.info(f'AnVIL: {len(anvil.nodes())}')
+        draw_summary(summarize_graph(anvil), f'AnVIL participants, samples, and files', save_dot_file=True, scale=6)
+        table = create_table(node_counts)
+        draw_samples_attributes(transformers)
+        draw_workspace_attributes(transformers)
+        with open('apps/report.md.template') as input:
+            report = input.read()
+        report = report.format(table=table, date_generated=date.today())
+        with open('notebooks/figures/report.md', 'w') as output:
+            output.write(report)
     with open('notebooks/figures/report-data.json', 'w') as output:
         # https://app.zenhub.com/workspaces/anvil-portal-5cccd4e3d9d2da0571fb3427/issues/anvilproject/anvil-portal/155#issuecomment-564664519
         project_summaries = []

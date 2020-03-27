@@ -4,7 +4,33 @@ from anvil import terra
 import firecloud.api as FAPI
 import networkx as nx
 import logging
-# import datetime
+from datetime import date, datetime
+import sqlite3
+import json
+
+PROJECT_CACHE = sqlite3.connect('project_cache.sqlite')
+
+
+def CREATE_PROJECT_CACHE_TABLE():
+    cur = PROJECT_CACHE.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS projects (
+        project_id text PRIMARY KEY,
+        transformer_name text NOT NULL,
+        json text NOT NULL
+    );""")
+    PROJECT_CACHE.commit()
+
+
+# static
+CREATE_PROJECT_CACHE_TABLE()
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
 
 
 class BaseApp():
@@ -22,11 +48,44 @@ class BaseApp():
         self.user_project = user_project
         self.G = None
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.samples = None
+
+    def project_cache_get_projects(self):
+        cur = PROJECT_CACHE.cursor()
+        sql = f"SELECT project_id, json FROM projects where transformer_name='{self.__class__.__name__}'"
+        cur.execute(sql)
+        while True:
+            row = cur.fetchone()
+            if not row:
+                break
+            project = AttrDict(json.loads(row[1]))
+            # recast children
+            project.project_files = {k: AttrDict(file) for k, file in project.project_files.items()}
+            project.participants = [AttrDict(p) for p in project.participants]
+            project.samples = [AttrDict(s) for s in project.samples]
+            yield project
+
+    def project_cache_put(self, project_id, project):
+        project_json = None
+        try:
+            cur = PROJECT_CACHE.cursor()
+            project_json = json.dumps(project, default=json_serial)
+            cur.execute(f"REPLACE into projects(project_id, transformer_name, json) values (?, ?, ?);", (project_id, self.__class__.__name__, project_json, ))
+            PROJECT_CACHE.commit()
+        except Exception:
+            raise
 
     def get_terra_projects(self):
-        """Returns project with associated schema."""
-        if self.projects:
-            return self.projects
+        """Yield project with associated schema."""
+        db_count = 0
+        for p in self.project_cache_get_projects():
+            db_count += 1
+            yield p
+
+        if db_count > 0:
+            return
+
+        self.logger.info('get_terra_projects')
         projects = terra.get_projects([self.program], project_pattern=self.project_pattern, fapi=self.fapi, user_project=self.user_project)
         assert len(projects) > 0, f"Should have at least 1 project in {self.program} matching {self.project_pattern}"
         blob_sum = sum([len(p.blobs) for p in projects])
@@ -36,9 +95,7 @@ class BaseApp():
             self.logger.warning(f'number of blobs in {self.project_pattern}: {blob_sum}')
 
         # add the project schema
-        print('get_terra_projects')
         projects = [terra.get_project_schema(p, fapi=self.fapi) for p in projects]
-        self.projects = []
         for p in projects:
             if len(p.schema.keys()) == 0:
                 self.logger.warning(f'{p.project} missing schema, project will not be included.')
@@ -58,24 +115,50 @@ class BaseApp():
                             self.logger.warning(f"{p['project_id']} {path} has no blob!")
                         _project_files[key] = AttrDict({'path': path, 'type': file_type, 'size': size})
                     p.project_files = _project_files
-                self.projects.append(p)
 
-        return self.projects
+                if 'participant' in p.schema:
+                    participants = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='participant', fapi=self.fapi)
+                    _participants = []
+                    for participant in participants:
+                        attributes = participant.attributes
+                        attributes.submitter_id = participant.name
+                        attributes.project_id = p.project_id
+                        attributes.submitter_id = participant.name
+                        attributes.project_id = p.project_id
+                        _participants.append(attributes)
+                    p.participants = _participants
+                    assert len(p.participants) == p.schema.participant.count, f"Retrieved participants entities count {len(participants)} did not match anticipated count in schema {p.schema.participant.count}"
+                samples = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sample', fapi=self.fapi)
+                _samples = []
+                for sample in samples:
+                    attributes = sample.attributes
+                    attributes.project_id = p.project_id
+                    attributes.submitter_id = self.sample_submitter_id(attributes)
+                    attributes.files = self.identify_files(attributes, p.blobs)
+                    _samples.append(attributes)
+                p.samples = _samples
+                assert len(p.samples) == p.schema.sample.count, f"Retrieved samples entities count {len(samples)} did not match anticipated count in schema {p.schema.sample.count}"
+
+                self.project_cache_put(p['project_id'], p)
+                yield p
+        return
 
     def get_terra_participants(self):
         """Returns generator with participants associated with projects."""
         print('get_terra_participants')
         for p in self.get_terra_projects():
-            participants = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='participant', fapi=self.fapi)
-            if 'participant' not in p.schema:
-                self.logger.warning(f"? workspace: {p.project} schema: {p.schema}")
-                continue
-            assert len(participants) == p.schema.participant.count, f"Retrieved participants entities count {len(participants)} did not match anticipated count in schema {p.schema.participant.count}"
-            for participant in participants:
-                attributes = participant.attributes
-                attributes.submitter_id = participant.name
-                attributes.project_id = p.project_id
-                yield attributes
+            for participant in p.participants:
+                yield participant
+            # participants = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='participant', fapi=self.fapi)
+            # if 'participant' not in p.schema:
+            #     self.logger.warning(f"? workspace: {p.project} schema: {p.schema}")
+            #     continue
+            # assert len(participants) == p.schema.participant.count, f"Retrieved participants entities count {len(participants)} did not match anticipated count in schema {p.schema.participant.count}"
+            # for participant in participants:
+            #     attributes = participant.attributes
+            #     attributes.submitter_id = participant.name
+            #     attributes.project_id = p.project_id
+            #     yield attributes
 
     def sample_submitter_id(self, sample):
         """Creates a sample submitter_id."""
@@ -86,18 +169,22 @@ class BaseApp():
 
     def get_terra_samples(self):
         """Returns generator with samples associated with projects."""
+        self.logger.info('get_terra_samples')
         for p in self.get_terra_projects():
-            samples = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sample', fapi=self.fapi)
-            assert len(samples) == p.schema.sample.count, f"Retrieved samples entities count {len(samples)} did not match anticipated count in schema {p.schema.sample.count}"
-            self.logger.info(f'{p.program} {p.project} number of objects in bucket:{len(p.blobs)} number of samples:{len(samples)}')
-            for sample in samples:
-                if 'attributes' not in sample:
-                    continue
-                attributes = sample.attributes
-                attributes.project_id = p.project_id
-                attributes.submitter_id = self.sample_submitter_id(attributes)
-                attributes.files = self.identify_files(attributes, p.blobs)
-                yield attributes
+            for s in p.samples:
+                yield s
+            # samples = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sample', fapi=self.fapi)
+            # assert len(samples) == p.schema.sample.count, f"Retrieved samples entities count {len(samples)} did not match anticipated count in schema {p.schema.sample.count}"
+            # self.logger.info(f'{p.program} {p.project} number of objects in bucket:{len(p.blobs)} number of samples:{len(samples)}')
+            # for sample in samples:
+            #     if 'attributes' not in sample:
+            #         continue
+            #     attributes = sample.attributes
+            #     attributes.project_id = p.project_id
+            #     attributes.submitter_id = self.sample_submitter_id(attributes)
+            #     attributes.files = self.identify_files(attributes, p.blobs)
+            #     yield attributes
+            #     self.samples.append(attributes)
 
     def identify_files(self, sample, blobs):
         """Returns a dictionary of files associated with this sample."""
@@ -113,9 +200,10 @@ class BaseApp():
             if 'md5' not in file_type:
                 blob = blobs.get(v, None)
                 size = blob['size'] if blob else 0
+                time_created = blob['time_created'] if blob else 0
                 if size == 0:
-                    self.logger.warning(f"{sample['project_id']} {v} has no blob!")
-                files[k] = AttrDict({'path': v, 'type': file_type, 'size': size})
+                    self.logger.warning(f"identify_files {sample['project_id']} {v} has no blob!")
+                files[k] = AttrDict({'path': v, 'type': file_type, 'size': size, 'time_created': time_created})
             else:
                 for k, f in files.items():
                     if f.path == filename:
@@ -150,7 +238,7 @@ class BaseApp():
         print('to_graph')
         for project in self.get_terra_projects():
             print(f'to_graph {project.project_id}')
-            G.add_node(project.project_id, label='Project', project_id=project.project_id, public=project.public)
+            G.add_node(project.project_id, label='Project', project_id=project.project_id, public=project.public, createdDate=project.createdDate, lastModified=project.lastModified)
             for k, file in project.project_files.items():
                 type = file.type.replace('.', '').capitalize()
                 G.add_node(file.path, label=f'{type}File', project_id=project.project_id, size=file.size)
@@ -179,8 +267,9 @@ class BaseApp():
             G.add_node(sample.submitter_id, label='Sample', project_id=sample.project_id)
             G.add_edge(participant, sample.submitter_id, label='drawn_from')
             for k, file in sample.files.items():
+                file = AttrDict(file)
                 type = file.type.replace('.', '').capitalize()
-                G.add_node(file.path, label=f'{type}File', project_id=sample.project_id, size=file.size)
+                G.add_node(file.path, label=f'{type}File', project_id=sample.project_id, size=file.size, time_created=file.time_created)
                 G.add_edge(sample.submitter_id, file.path, label=type)
             # end = datetime.datetime.now()
             # print('added nodes', end-start)
@@ -206,11 +295,14 @@ class BaseApp():
             project_counts['size'] = project_size
             if 'Project' == label:
                 project_counts['public'] = graph.node[n]['public']
+                project_counts['createdDate'] = graph.node[n]['createdDate']
+                project_counts['lastModified'] = graph.node[n]['lastModified']
             counts[project_id] = project_counts
         return counts
 
     def graph_project_summary(self):
         """Returns a dict project details."""
+
         projects = {}
         graph = self.to_graph()
         for n in graph.nodes():
@@ -219,13 +311,21 @@ class BaseApp():
             assert 'project_id' in graph.node[n], f'{label}({n}) has no project_id?'
             project_id = graph.node[n]['project_id']
             node_size = graph.node[n].get('size', 0)
-            project_counts = projects.get(project_id, {'files': {}, 'nodes': {}, 'size': 0, 'public': False, 'project_id': None})
+            time_created = graph.node[n].get('time_created', 0)
+            project_counts = projects.get(project_id, {'file_histogram': {}, 'files': {}, 'nodes': {}, 'size': 0, 'public': False, 'project_id': None})
             if label.endswith('File'):
                 file_counts = project_counts['files'].get(label, {})
                 file_counts['type'] = label.replace('File', '')
                 file_counts['size'] = file_counts.get('size', 0) + node_size
                 file_counts['count'] = file_counts.get('count', 0) + 1
                 project_counts['files'][label] = file_counts
+                if not time_created == 0:
+                    date_created = datetime.fromisoformat(time_created).date()
+                    date_created = date_created.isoformat()
+                    if date_created not in project_counts['file_histogram']:
+                        project_counts['file_histogram'][date_created] = {'count': 0, 'size': 0}
+                    project_counts['file_histogram'][date_created]['count'] += 1
+                    project_counts['file_histogram'][date_created]['size'] += node_size
             else:
                 node_counts = project_counts['nodes'].get(label, {})
                 node_counts['type'] = label
@@ -235,7 +335,19 @@ class BaseApp():
             project_counts['size'] = project_size
             if 'Project' == label:
                 project_counts['public'] = graph.node[n]['public']
+                project_counts['createdDate'] = graph.node[n]['createdDate']
+                project_counts['lastModified'] = graph.node[n]['lastModified']
+
             projects[project_id] = project_counts
+
+        # adjust file_histogram from {} to []
+        for project_id, project_counts in projects.items():
+            _file_histogram = []
+            for k, v in project_counts['file_histogram'].items():
+                v['date'] = k
+                _file_histogram.append(v)
+            project_counts['file_histogram'] = _file_histogram
+
         return projects
 
 

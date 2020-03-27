@@ -1,4 +1,4 @@
-# AnVIL Summary  2020-02-11
+# AnVIL Summary  2020-03-26
 
 ## Combined Graph
 
@@ -23,7 +23,6 @@
       <th>FaiFile</th>
       <th>Family</th>
       <th>FastaFile</th>
-      <th>Gene</th>
       <th>GtfFile</th>
       <th>Phenotype</th>
       <th>Population</th>
@@ -34,12 +33,15 @@
       <th>TsvFile</th>
       <th>TxtFile</th>
       <th>VcfFile</th>
+      <th>createdDate</th>
+      <th>lastModified</th>
       <th>public</th>
       <th>size</th>
     </tr>
     <tr>
       <th>source</th>
       <th>project_id</th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -82,7 +84,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>647</td>
       <td>647</td>
@@ -90,6 +91,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:34.602Z</td>
+      <td>2020-01-07T19:01:39.926Z</td>
       <td>False</td>
       <td>9.86 TB</td>
     </tr>
@@ -108,7 +111,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>773</td>
       <td>773</td>
@@ -116,6 +118,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:18.715Z</td>
+      <td>2020-01-07T18:36:54.738Z</td>
       <td>False</td>
       <td>14.48 TB</td>
     </tr>
@@ -134,7 +138,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>177</td>
       <td>177</td>
@@ -142,6 +145,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:30.105Z</td>
+      <td>2020-01-07T18:25:48.639Z</td>
       <td>False</td>
       <td>2.28 TB</td>
     </tr>
@@ -160,7 +165,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>3166</td>
       <td>3166</td>
@@ -168,6 +172,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:15.592Z</td>
+      <td>2020-01-07T19:00:52.410Z</td>
       <td>False</td>
       <td>53.46 TB</td>
     </tr>
@@ -186,7 +192,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>703</td>
       <td>703</td>
@@ -194,6 +199,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-12-05T14:38:47.788Z</td>
+      <td>2020-01-07T18:43:57.913Z</td>
       <td>False</td>
       <td>1.19 TB</td>
     </tr>
@@ -212,7 +219,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>418</td>
       <td>418</td>
@@ -220,6 +226,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:13.689Z</td>
+      <td>2020-01-07T18:35:29.972Z</td>
       <td>False</td>
       <td>8.56 TB</td>
     </tr>
@@ -238,7 +246,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>380</td>
       <td>380</td>
@@ -246,6 +253,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-21T15:33:42.324Z</td>
+      <td>2020-01-07T18:40:42.557Z</td>
       <td>False</td>
       <td>626.84 GB</td>
     </tr>
@@ -264,7 +273,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>2790</td>
       <td>2790</td>
@@ -272,6 +280,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:44.347Z</td>
+      <td>2020-01-07T19:03:58.424Z</td>
       <td>False</td>
       <td>39.81 TB</td>
     </tr>
@@ -290,7 +300,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>146</td>
       <td>146</td>
@@ -298,6 +307,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:35:14.495Z</td>
+      <td>2020-01-07T19:07:10.893Z</td>
       <td>False</td>
       <td>2.84 TB</td>
     </tr>
@@ -316,7 +327,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>2158</td>
       <td>2158</td>
@@ -324,6 +334,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:44.539Z</td>
+      <td>2020-01-07T18:38:22.481Z</td>
       <td>False</td>
       <td>37.67 TB</td>
     </tr>
@@ -342,7 +354,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>248</td>
       <td>248</td>
@@ -350,6 +361,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:10.164Z</td>
+      <td>2020-01-07T18:32:43.983Z</td>
       <td>False</td>
       <td>4.93 TB</td>
     </tr>
@@ -368,7 +381,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>90</td>
       <td>90</td>
@@ -376,6 +388,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:14.387Z</td>
+      <td>2020-01-07T18:33:19.723Z</td>
       <td>False</td>
       <td>1.87 TB</td>
     </tr>
@@ -394,7 +408,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>112</td>
       <td>112</td>
@@ -402,6 +415,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T16:23:03.085Z</td>
+      <td>2020-01-07T18:43:27.946Z</td>
       <td>False</td>
       <td>193.25 GB</td>
     </tr>
@@ -420,7 +435,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>3121</td>
       <td>3121</td>
@@ -428,6 +442,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:53.551Z</td>
+      <td>2020-01-07T19:04:13.852Z</td>
       <td>False</td>
       <td>64.7 TB</td>
     </tr>
@@ -446,7 +462,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>290</td>
       <td>290</td>
@@ -454,6 +469,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:26.450Z</td>
+      <td>2020-01-07T18:33:56.687Z</td>
       <td>False</td>
       <td>5.45 TB</td>
     </tr>
@@ -472,7 +489,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>118</td>
       <td>118</td>
@@ -480,6 +496,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:33.450Z</td>
+      <td>2020-01-07T18:34:30.630Z</td>
       <td>False</td>
       <td>2.55 TB</td>
     </tr>
@@ -498,7 +516,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>155</td>
       <td>155</td>
@@ -506,6 +523,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:01.641Z</td>
+      <td>2020-01-07T19:03:23.320Z</td>
       <td>False</td>
       <td>3.09 TB</td>
     </tr>
@@ -524,7 +543,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1049</td>
       <td>1049</td>
@@ -532,6 +550,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:35:03.847Z</td>
+      <td>2020-01-07T18:57:02.548Z</td>
       <td>False</td>
       <td>24.49 TB</td>
     </tr>
@@ -550,7 +570,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>105</td>
       <td>105</td>
@@ -558,6 +577,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T20:06:46.189Z</td>
+      <td>2020-01-07T18:45:25.446Z</td>
       <td>False</td>
       <td>170.55 GB</td>
     </tr>
@@ -566,24 +587,25 @@
       <td></td>
       <td></td>
       <td></td>
-      <td>9205</td>
-      <td>9205</td>
+      <td>9201</td>
+      <td>9201</td>
       <td></td>
       <td></td>
       <td></td>
-      <td>2423</td>
-      <td></td>
+      <td>2422</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
       <td>1</td>
-      <td>9205</td>
-      <td>9205</td>
+      <td>9201</td>
+      <td>9201</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:35:09.430Z</td>
+      <td>2020-03-12T15:14:20.921Z</td>
       <td>False</td>
       <td>0 bytes</td>
     </tr>
@@ -602,7 +624,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>7</td>
       <td>7</td>
@@ -610,6 +631,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T16:28:02.709Z</td>
+      <td>2020-01-07T18:41:29.337Z</td>
       <td>False</td>
       <td>10.03 GB</td>
     </tr>
@@ -628,7 +651,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1356</td>
       <td>1356</td>
@@ -636,6 +658,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:37.791Z</td>
+      <td>2020-01-07T19:06:39.191Z</td>
       <td>False</td>
       <td>27 TB</td>
     </tr>
@@ -654,7 +678,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>66</td>
       <td>66</td>
@@ -662,6 +685,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:01.490Z</td>
+      <td>2020-01-07T18:57:34.185Z</td>
       <td>False</td>
       <td>1.56 TB</td>
     </tr>
@@ -680,7 +705,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>105</td>
       <td>105</td>
@@ -688,6 +712,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:21.193Z</td>
+      <td>2020-01-07T18:34:12.971Z</td>
       <td>False</td>
       <td>2.32 TB</td>
     </tr>
@@ -706,7 +732,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1171</td>
       <td>1171</td>
@@ -714,6 +739,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:27.515Z</td>
+      <td>2020-02-05T15:32:44.917Z</td>
       <td>False</td>
       <td>28.15 TB</td>
     </tr>
@@ -732,7 +759,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1565</td>
       <td>1565</td>
@@ -740,6 +766,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:14.319Z</td>
+      <td>2020-01-07T18:31:02.023Z</td>
       <td>False</td>
       <td>21.61 TB</td>
     </tr>
@@ -758,7 +786,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>777</td>
       <td>777</td>
@@ -766,6 +793,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-27T19:24:38.907Z</td>
+      <td>2020-01-07T18:46:55.952Z</td>
       <td>False</td>
       <td>1.38 TB</td>
     </tr>
@@ -784,7 +813,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>74</td>
       <td>74</td>
@@ -792,6 +820,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-12-02T22:03:50.122Z</td>
+      <td>2020-01-07T18:43:09.553Z</td>
       <td>False</td>
       <td>121.17 GB</td>
     </tr>
@@ -810,7 +840,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>266</td>
       <td>266</td>
@@ -818,6 +847,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-21T15:57:37.643Z</td>
+      <td>2020-01-07T18:40:13.012Z</td>
       <td>False</td>
       <td>439.35 GB</td>
     </tr>
@@ -836,7 +867,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>253</td>
       <td>253</td>
@@ -844,6 +874,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:48.272Z</td>
+      <td>2020-01-07T18:26:25.787Z</td>
       <td>False</td>
       <td>4.08 TB</td>
     </tr>
@@ -862,7 +894,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>580</td>
       <td>580</td>
@@ -870,6 +901,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:25.221Z</td>
+      <td>2020-01-07T18:58:48.727Z</td>
       <td>False</td>
       <td>13.91 TB</td>
     </tr>
@@ -888,7 +921,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>25</td>
       <td>25</td>
@@ -896,6 +928,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:12.895Z</td>
+      <td>2020-01-07T18:31:17.731Z</td>
       <td>False</td>
       <td>294.12 GB</td>
     </tr>
@@ -914,7 +948,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1358</td>
       <td>1358</td>
@@ -922,6 +955,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:35:15.655Z</td>
+      <td>2020-01-07T18:25:08.160Z</td>
       <td>False</td>
       <td>27.44 TB</td>
     </tr>
@@ -940,7 +975,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1177</td>
       <td>1177</td>
@@ -948,6 +982,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:40.103Z</td>
+      <td>2020-01-07T18:56:46.661Z</td>
       <td>False</td>
       <td>27.93 TB</td>
     </tr>
@@ -966,7 +1002,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>606</td>
       <td>606</td>
@@ -974,6 +1009,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-27T19:43:12.791Z</td>
+      <td>2020-01-07T18:47:48.967Z</td>
       <td>False</td>
       <td>1.07 TB</td>
     </tr>
@@ -992,7 +1029,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>3944</td>
       <td>3944</td>
@@ -1000,6 +1036,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:56.435Z</td>
+      <td>2020-01-07T18:24:06.181Z</td>
       <td>False</td>
       <td>102.66 TB</td>
     </tr>
@@ -1018,7 +1056,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1122</td>
       <td>1122</td>
@@ -1026,6 +1063,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:47.973Z</td>
+      <td>2020-01-07T18:21:46.789Z</td>
       <td>False</td>
       <td>26.79 TB</td>
     </tr>
@@ -1044,7 +1083,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>92</td>
       <td>92</td>
@@ -1052,6 +1090,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T19:38:57.250Z</td>
+      <td>2020-01-07T18:45:09.781Z</td>
       <td>False</td>
       <td>160.03 GB</td>
     </tr>
@@ -1070,7 +1110,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>16</td>
       <td>16</td>
@@ -1078,6 +1117,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T16:04:59.207Z</td>
+      <td>2020-01-07T18:42:02.954Z</td>
       <td>False</td>
       <td>27.2 GB</td>
     </tr>
@@ -1096,7 +1137,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>94</td>
       <td>94</td>
@@ -1104,6 +1144,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-21T15:42:27.275Z</td>
+      <td>2020-01-07T18:40:58.039Z</td>
       <td>False</td>
       <td>187.71 GB</td>
     </tr>
@@ -1122,7 +1164,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>534</td>
       <td>534</td>
@@ -1130,6 +1171,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:32:51.408Z</td>
+      <td>2020-01-07T18:39:14.110Z</td>
       <td>False</td>
       <td>8.5 TB</td>
     </tr>
@@ -1148,7 +1191,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>146</td>
       <td>146</td>
@@ -1156,6 +1198,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T19:51:39.573Z</td>
+      <td>2020-01-07T18:42:53.830Z</td>
       <td>False</td>
       <td>293.97 GB</td>
     </tr>
@@ -1174,7 +1218,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>624</td>
       <td>624</td>
@@ -1182,6 +1225,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:48.412Z</td>
+      <td>2020-01-07T19:01:54.639Z</td>
       <td>False</td>
       <td>11.95 TB</td>
     </tr>
@@ -1200,7 +1245,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>958</td>
       <td>958</td>
@@ -1208,6 +1252,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-12-02T16:32:13.380Z</td>
+      <td>2020-01-07T18:42:20.346Z</td>
       <td>False</td>
       <td>1.61 TB</td>
     </tr>
@@ -1226,7 +1272,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>116</td>
       <td>116</td>
@@ -1234,6 +1279,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T15:58:16.811Z</td>
+      <td>2020-01-07T18:41:44.407Z</td>
       <td>False</td>
       <td>210.2 GB</td>
     </tr>
@@ -1252,7 +1299,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>464</td>
       <td>464</td>
@@ -1260,6 +1306,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:29.951Z</td>
+      <td>2020-01-07T18:33:38.842Z</td>
       <td>False</td>
       <td>9.07 TB</td>
     </tr>
@@ -1278,7 +1326,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>905</td>
       <td>905</td>
@@ -1286,6 +1333,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:46.571Z</td>
+      <td>2020-01-07T18:59:17.421Z</td>
       <td>False</td>
       <td>22.82 TB</td>
     </tr>
@@ -1304,7 +1353,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>429</td>
       <td>429</td>
@@ -1312,6 +1360,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:04.347Z</td>
+      <td>2020-01-07T19:03:10.665Z</td>
       <td>False</td>
       <td>8.77 TB</td>
     </tr>
@@ -1330,7 +1380,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>112</td>
       <td>112</td>
@@ -1338,6 +1387,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:28.055Z</td>
+      <td>2020-01-07T18:35:46.260Z</td>
       <td>False</td>
       <td>2.41 TB</td>
     </tr>
@@ -1345,10 +1396,9 @@
       <th>AnVIL_CCDG_Broad_AI_IBD_McCauley_WGS</th>
       <td></td>
       <td></td>
-      <td>856</td>
-      <td>856</td>
-      <td>856</td>
-      <td></td>
+      <td>1087</td>
+      <td>1087</td>
+      <td>1087</td>
       <td></td>
       <td></td>
       <td></td>
@@ -1358,14 +1408,16 @@
       <td></td>
       <td></td>
       <td>1</td>
-      <td>856</td>
-      <td>856</td>
+      <td>1087</td>
+      <td>1087</td>
       <td></td>
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:44.626Z</td>
+      <td>2020-03-02T16:51:00.438Z</td>
       <td>False</td>
-      <td>9.93 TB</td>
+      <td>12.62 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Broad_AI_IBD_Kugathasan_WGS</th>
@@ -1382,7 +1434,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1348</td>
       <td>1348</td>
@@ -1390,6 +1441,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:55.309Z</td>
+      <td>2020-02-06T15:13:18.014Z</td>
       <td>False</td>
       <td>16.54 TB</td>
     </tr>
@@ -1408,7 +1461,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>429</td>
       <td>429</td>
@@ -1416,8 +1468,10 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:11.020Z</td>
+      <td>2020-01-07T18:58:01.450Z</td>
       <td>False</td>
-      <td>10.41 TB</td>
+      <td>10.33 TB</td>
     </tr>
     <tr>
       <th>AnVIL_CCDG_Baylor_CVD_EOCAD_BioMe_WGS</th>
@@ -1434,7 +1488,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1201</td>
       <td>1201</td>
@@ -1442,6 +1495,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:51.854Z</td>
+      <td>2020-01-07T18:23:49.828Z</td>
       <td>False</td>
       <td>26.23 TB</td>
     </tr>
@@ -1460,7 +1515,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>14</td>
       <td>14</td>
@@ -1468,6 +1522,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-22T20:59:37.180Z</td>
+      <td>2020-01-07T18:46:40.475Z</td>
       <td>False</td>
       <td>23.41 GB</td>
     </tr>
@@ -1486,7 +1542,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>148</td>
       <td>148</td>
@@ -1494,6 +1549,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:25.037Z</td>
+      <td>2020-01-07T18:57:18.584Z</td>
       <td>False</td>
       <td>3.65 TB</td>
     </tr>
@@ -1512,7 +1569,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>112</td>
       <td>112</td>
@@ -1520,6 +1576,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:33.847Z</td>
+      <td>2020-01-07T19:01:07.827Z</td>
       <td>False</td>
       <td>0 bytes</td>
     </tr>
@@ -1538,7 +1596,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>724</td>
       <td>724</td>
@@ -1546,6 +1603,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:25.284Z</td>
+      <td>2020-01-07T18:58:32.951Z</td>
       <td>False</td>
       <td>17.22 TB</td>
     </tr>
@@ -1564,7 +1623,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1136</td>
       <td>1136</td>
@@ -1572,6 +1630,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:17.464Z</td>
+      <td>2020-01-07T18:36:39.279Z</td>
       <td>False</td>
       <td>15.58 TB</td>
     </tr>
@@ -1590,7 +1650,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>2</td>
       <td>2</td>
@@ -1598,6 +1657,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-05-30T17:47:12.234Z</td>
+      <td>2020-01-07T18:36:01.430Z</td>
       <td>False</td>
       <td>39.81 GB</td>
     </tr>
@@ -1616,7 +1677,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>904</td>
       <td>904</td>
@@ -1624,6 +1684,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:46.577Z</td>
+      <td>2020-01-07T18:26:09.434Z</td>
       <td>False</td>
       <td>11.94 TB</td>
     </tr>
@@ -1642,7 +1704,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>496</td>
       <td>496</td>
@@ -1650,6 +1711,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:13.035Z</td>
+      <td>2020-01-07T18:38:37.764Z</td>
       <td>False</td>
       <td>6.17 TB</td>
     </tr>
@@ -1668,7 +1731,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>277</td>
       <td>277</td>
@@ -1676,6 +1738,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:44.293Z</td>
+      <td>2020-01-07T19:02:57.168Z</td>
       <td>False</td>
       <td>5.52 TB</td>
     </tr>
@@ -1694,7 +1758,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>1051</td>
       <td>1051</td>
@@ -1702,6 +1765,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:12.676Z</td>
+      <td>2020-01-07T19:02:41.936Z</td>
       <td>False</td>
       <td>21.83 TB</td>
     </tr>
@@ -1720,7 +1785,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>348</td>
       <td>348</td>
@@ -1728,6 +1792,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:01.306Z</td>
+      <td>2020-01-07T19:02:24.722Z</td>
       <td>False</td>
       <td>6.89 TB</td>
     </tr>
@@ -1746,7 +1812,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>123</td>
       <td>123</td>
@@ -1754,6 +1819,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:39.324Z</td>
+      <td>2020-01-07T18:32:59.549Z</td>
       <td>False</td>
       <td>2.56 TB</td>
     </tr>
@@ -1772,7 +1839,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>4601</td>
       <td>4601</td>
@@ -1780,6 +1846,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:33.147Z</td>
+      <td>2020-01-07T18:58:17.368Z</td>
       <td>False</td>
       <td>106.07 TB</td>
     </tr>
@@ -1798,7 +1866,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>639</td>
       <td>639</td>
@@ -1806,6 +1873,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:34:17.299Z</td>
+      <td>2020-01-07T18:22:57.496Z</td>
       <td>False</td>
       <td>13.92 TB</td>
     </tr>
@@ -1824,7 +1893,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>244</td>
       <td>244</td>
@@ -1832,11 +1900,13 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-11-27T19:34:38.459Z</td>
+      <td>2020-01-07T18:47:11.086Z</td>
       <td>False</td>
       <td>403.85 GB</td>
     </tr>
     <tr>
-      <th rowspan="29" valign="top">CMG</th>
+      <th rowspan="2" valign="top">CMG</th>
       <th>AnVIL_CMG_Broad_Muscle_KNC_WGS</th>
       <td></td>
       <td></td>
@@ -1851,7 +1921,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>1</td>
       <td>6</td>
       <td>6</td>
@@ -1859,710 +1928,10 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-06-06T17:33:03.378Z</td>
+      <td>2020-01-07T19:17:14.835Z</td>
       <td>False</td>
       <td>118.56 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Orphan_VCGS-White_WES</th>
-      <td></td>
-      <td></td>
-      <td>283</td>
-      <td>283</td>
-      <td>283</td>
-      <td>283</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>283</td>
-      <td>283</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>522.37 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Myoseq_WES</th>
-      <td></td>
-      <td></td>
-      <td>1280</td>
-      <td>1280</td>
-      <td>1276</td>
-      <td>222</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>1276</td>
-      <td>1276</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>2.3 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Heart_Ware_WES</th>
-      <td></td>
-      <td></td>
-      <td>10</td>
-      <td>10</td>
-      <td>10</td>
-      <td>10</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>10</td>
-      <td>10</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>18.17 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Beggs_WES</th>
-      <td></td>
-      <td></td>
-      <td>109</td>
-      <td>109</td>
-      <td>109</td>
-      <td>109</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>109</td>
-      <td>109</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>193.92 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WES</th>
-      <td></td>
-      <td></td>
-      <td>31</td>
-      <td>31</td>
-      <td>31</td>
-      <td>31</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>31</td>
-      <td>31</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>76.15 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Eye_Pierce_WES</th>
-      <td></td>
-      <td></td>
-      <td>517</td>
-      <td>517</td>
-      <td>517</td>
-      <td>516</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>517</td>
-      <td>517</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>1.37 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WGS</th>
-      <td></td>
-      <td></td>
-      <td>104</td>
-      <td>104</td>
-      <td>104</td>
-      <td>104</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>104</td>
-      <td>104</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>1.84 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Topf_WES</th>
-      <td></td>
-      <td></td>
-      <td>669</td>
-      <td>669</td>
-      <td>665</td>
-      <td>169</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>665</td>
-      <td>665</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>1.11 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Blood_Sankaran_WES</th>
-      <td></td>
-      <td></td>
-      <td>277</td>
-      <td>277</td>
-      <td>277</td>
-      <td>277</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>277</td>
-      <td>277</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>520.59 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Brain_Walsh_WES</th>
-      <td></td>
-      <td></td>
-      <td>663</td>
-      <td>663</td>
-      <td>663</td>
-      <td>663</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>663</td>
-      <td>663</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>1.44 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Kang_WES</th>
-      <td></td>
-      <td></td>
-      <td>22</td>
-      <td>22</td>
-      <td>22</td>
-      <td>21</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>22</td>
-      <td>22</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>42.26 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Kidney_Hildebrandt_WES</th>
-      <td></td>
-      <td></td>
-      <td>769</td>
-      <td>769</td>
-      <td>769</td>
-      <td>407</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>769</td>
-      <td>769</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>1.6 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_OGrady_WES</th>
-      <td></td>
-      <td></td>
-      <td>43</td>
-      <td>43</td>
-      <td>43</td>
-      <td>43</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>43</td>
-      <td>43</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>70.01 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Brain_Gleeson_WES</th>
-      <td></td>
-      <td></td>
-      <td>1181</td>
-      <td>1181</td>
-      <td>1181</td>
-      <td>1181</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>1181</td>
-      <td>1181</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>3.06 TB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Kidney_Hildebrandt_WGS</th>
-      <td></td>
-      <td></td>
-      <td>25</td>
-      <td>25</td>
-      <td>25</td>
-      <td>25</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>25</td>
-      <td>25</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>489.2 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Orphan_Manton_WES</th>
-      <td></td>
-      <td></td>
-      <td>268</td>
-      <td>268</td>
-      <td>268</td>
-      <td>264</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>267</td>
-      <td>268</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>751.5 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Heart_PCGC-Tristani_WGS</th>
-      <td></td>
-      <td></td>
-      <td>45</td>
-      <td>45</td>
-      <td>45</td>
-      <td>45</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>45</td>
-      <td>45</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>678.23 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_KNC_WES</th>
-      <td></td>
-      <td></td>
-      <td>44</td>
-      <td>44</td>
-      <td>44</td>
-      <td>35</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>44</td>
-      <td>44</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>122.52 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Heart_Seidman_WES</th>
-      <td></td>
-      <td></td>
-      <td>129</td>
-      <td>129</td>
-      <td>129</td>
-      <td>121</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>129</td>
-      <td>129</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>221.46 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Bonnemann_WGS</th>
-      <td></td>
-      <td></td>
-      <td>32</td>
-      <td>32</td>
-      <td>32</td>
-      <td>32</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>32</td>
-      <td>32</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>561.53 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Bonnemann_WES</th>
-      <td></td>
-      <td></td>
-      <td>24</td>
-      <td>24</td>
-      <td>24</td>
-      <td>24</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>24</td>
-      <td>24</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>42.31 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Orphan_Manton_WGS</th>
-      <td></td>
-      <td></td>
-      <td>7</td>
-      <td>7</td>
-      <td>7</td>
-      <td>7</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>7</td>
-      <td>7</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>136.57 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Ravenscroft_WES</th>
-      <td></td>
-      <td></td>
-      <td>35</td>
-      <td>35</td>
-      <td>35</td>
-      <td>35</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>35</td>
-      <td>35</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>49.84 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Orphan_VCGS-White_WGS</th>
-      <td></td>
-      <td></td>
-      <td>30</td>
-      <td>30</td>
-      <td>30</td>
-      <td>30</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>30</td>
-      <td>30</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>500.48 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Myoseq_WGS</th>
-      <td></td>
-      <td></td>
-      <td>3</td>
-      <td>3</td>
-      <td>3</td>
-      <td>3</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>3</td>
-      <td>3</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>72.47 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Muscle_Kang_WGS</th>
-      <td></td>
-      <td></td>
-      <td>2</td>
-      <td>2</td>
-      <td>2</td>
-      <td>2</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>2</td>
-      <td>2</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>37.5 GB</td>
-    </tr>
-    <tr>
-      <th>AnVIL_CMG_Broad_Eye_Pierce_WGS</th>
-      <td></td>
-      <td></td>
-      <td>35</td>
-      <td>35</td>
-      <td>35</td>
-      <td>35</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>1</td>
-      <td>35</td>
-      <td>35</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td>False</td>
-      <td>637.4 GB</td>
     </tr>
     <tr>
       <th>cmg*</th>
@@ -2574,11 +1943,12 @@
       <td></td>
       <td></td>
       <td></td>
-      <td>3542</td>
+      <td>3</td>
       <td></td>
-      <td>340</td>
       <td></td>
-      <td>2410</td>
+      <td>5</td>
+      <td></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -2603,7 +1973,6 @@
       <td>2</td>
       <td></td>
       <td>2</td>
-      <td></td>
       <td>2</td>
       <td></td>
       <td></td>
@@ -2614,6 +1983,8 @@
       <td>1676</td>
       <td>1678</td>
       <td>1</td>
+      <td>2019-05-23T17:17:00.849Z</td>
+      <td>2020-01-07T19:38:56.436Z</td>
       <td>False</td>
       <td>157.64 TB</td>
     </tr>
@@ -2632,7 +2003,6 @@
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
       <td>26</td>
       <td>1</td>
       <td>2504</td>
@@ -2641,8 +2011,38 @@
       <td></td>
       <td></td>
       <td></td>
+      <td>2019-02-22T19:11:11.069Z</td>
+      <td>2020-01-15T18:54:51.510Z</td>
       <td>True</td>
       <td>41.29 TB</td>
+    </tr>
+    <tr>
+      <th>eMERGE</th>
+      <th>AnVIL_CCDG_WashU_CVD_EOCAD_Emerge_WGS</th>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>277</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>1</td>
+      <td>1</td>
+      <td>277</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>2019-06-06T17:33:44.293Z</td>
+      <td>2020-01-07T19:02:57.168Z</td>
+      <td>False</td>
+      <td>5.52 TB</td>
     </tr>
   </tbody>
 </table>
