@@ -238,7 +238,10 @@ class BaseApp():
         print('to_graph')
         for project in self.get_terra_projects():
             print(f'to_graph {project.project_id}')
-            G.add_node(project.project_id, label='Project', project_id=project.project_id, public=project.public, createdDate=project.createdDate, lastModified=project.lastModified)
+            G.add_node(project.project_id, label='Project', 
+                project_id=project.project_id, public=project.public, 
+                createdDate=project.createdDate, lastModified=project.lastModified, 
+                data_type=project.data_type, data_category=project.data_category)
             for k, file in project.project_files.items():
                 type = file.type.replace('.', '').capitalize()
                 G.add_node(file.path, label=f'{type}File', project_id=project.project_id, size=file.size)
@@ -281,22 +284,23 @@ class BaseApp():
     def graph_node_counts(self):
         """Returns a dict of node counts by project/label."""
         counts = {}
+        print('graph_node_counts', self.program, self.project_pattern)        
         graph = self.to_graph()
         for n in graph.nodes():
-            assert 'label' in graph.node[n], f'{n} has no label?'
-            label = graph.node[n]['label']
-            assert 'project_id' in graph.node[n], f'{label}({n}) has no project_id?'
-            project_id = graph.node[n]['project_id']
-            node_size = graph.node[n].get('size', 0)
+            assert 'label' in graph.nodes[n], f'{n} has no label?'
+            label = graph.nodes[n]['label']
+            assert 'project_id' in graph.nodes[n], f'{label}({n}) has no project_id?'
+            project_id = graph.nodes[n]['project_id']
+            node_size = graph.nodes[n].get('size', 0)
             project_counts = counts.get(project_id, {})
             label_counts = project_counts.get(label, 0) + 1
             project_size = project_counts.get('size', 0) + node_size
             project_counts[label] = label_counts
             project_counts['size'] = project_size
             if 'Project' == label:
-                project_counts['public'] = graph.node[n]['public']
-                project_counts['createdDate'] = graph.node[n]['createdDate']
-                project_counts['lastModified'] = graph.node[n]['lastModified']
+                project_counts['public'] = graph.nodes[n]['public']
+                project_counts['createdDate'] = graph.nodes[n]['createdDate']
+                project_counts['lastModified'] = graph.nodes[n]['lastModified']
             counts[project_id] = project_counts
         return counts
 
@@ -304,14 +308,16 @@ class BaseApp():
         """Returns a dict project details."""
 
         projects = {}
+        print('graph_project_summary', self.program, self.project_pattern)
+
         graph = self.to_graph()
         for n in graph.nodes():
-            assert 'label' in graph.node[n], f'{n} has no label?'
-            label = graph.node[n]['label']
-            assert 'project_id' in graph.node[n], f'{label}({n}) has no project_id?'
-            project_id = graph.node[n]['project_id']
-            node_size = graph.node[n].get('size', 0)
-            time_created = graph.node[n].get('time_created', 0)
+            assert 'label' in graph.nodes[n], f'{n} has no label?'
+            label = graph.nodes[n]['label']
+            assert 'project_id' in graph.nodes[n], f'{label}({n}) has no project_id?'
+            project_id = graph.nodes[n]['project_id']
+            node_size = graph.nodes[n].get('size', 0)
+            time_created = graph.nodes[n].get('time_created', 0)
             project_counts = projects.get(project_id, {'file_histogram': {}, 'files': {}, 'nodes': {}, 'size': 0, 'public': False, 'project_id': None})
             if label.endswith('File'):
                 file_counts = project_counts['files'].get(label, {})
@@ -334,9 +340,11 @@ class BaseApp():
             project_size = project_counts.get('size', 0) + node_size
             project_counts['size'] = project_size
             if 'Project' == label:
-                project_counts['public'] = graph.node[n]['public']
-                project_counts['createdDate'] = graph.node[n]['createdDate']
-                project_counts['lastModified'] = graph.node[n]['lastModified']
+                project_counts['public'] = graph.nodes[n]['public']
+                project_counts['createdDate'] = graph.nodes[n]['createdDate']
+                project_counts['lastModified'] = graph.nodes[n]['lastModified']
+                project_counts['data_type'] = graph.nodes[n]['data_type']
+                project_counts['data_category'] = graph.nodes[n]['data_category']
 
             projects[project_id] = project_counts
 

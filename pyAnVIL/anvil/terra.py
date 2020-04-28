@@ -118,6 +118,21 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
     logger.debug(f"get_projects {project_pattern} ...")
     workspaces = fapi.list_workspaces()
     workspaces = workspaces.json()
+
+    def get_data_type(w):
+        try:
+            return w['workspace']['attributes']['library:datatype']['items']
+        except Exception as e:
+            return None
+
+    def get_data_category(w):
+        try:
+            print(w['workspace']['attributes']['library:dataCategory']['items'])
+            return w['workspace']['attributes']['library:dataCategory']['items']
+        except Exception as e:
+            return None
+
+
     if namespaces:
         workspaces = [
             AttrDict({'project_id': f"{w['workspace']['namespace']}/{w['workspace']['name']}",
@@ -128,11 +143,15 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
                       'lastModified': w['workspace']['lastModified'],
                       'project_files': project_files(w),
                       'public': w['public'],
+                      'data_type': get_data_type(w),
+                      'data_category': get_data_category(w),
                       'authorizationDomains': [ad['membersGroupName'] for ad in w['workspace']['authorizationDomain']]
                       }) for w in workspaces if w['workspace']['namespace'] in namespaces
         ]
     if project_pattern:
         workspaces = [w for w in workspaces if re.match(project_pattern, w.project)]
+
+
     for w in workspaces:
         w.blobs = get_blobs(w, user_project=user_project)
 

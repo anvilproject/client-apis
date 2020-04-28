@@ -29,9 +29,9 @@ def summarize_graph(graph):
 
     edge_labels = defaultdict(int)
     for n in graph.nodes():
-        lable = graph.node[n]['label']
+        lable = graph.nodes[n]['label']
         for neighbor in graph.neighbors(n):
-            n_lable = graph.node[neighbor]['label']
+            n_lable = graph.nodes[neighbor]['label']
             edges = graph.get_edge_data(n, neighbor)
             for e in edges.values():
                 edge_labels[(lable, n_lable, e['label'])] += 1
