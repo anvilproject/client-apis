@@ -73,7 +73,7 @@ def main():
             fp.write(f"{project['dbGAP_study_id']}\t")
             fp.write(f"{project['dbGAP_acession']}\t")
             fp.write(f"{list(filter(lambda p : (p['type']=='Sample'), project['nodes']))[0]['count']}\t")
-            fp.write(f"{project['dbGAP_sample_count']}\t")
+            fp.write(f"{project['dbGAP_sample_count']}")
             fp.write('\n')
 
     with open('notebooks/figures/report-data.json', 'w') as fp:
