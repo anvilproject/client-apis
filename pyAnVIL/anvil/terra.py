@@ -127,7 +127,6 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
 
     def get_data_category(w):
         try:
-            print(w['workspace']['attributes']['library:dataCategory']['items'])
             return w['workspace']['attributes']['library:dataCategory']['items']
         except Exception as e:
             return None
@@ -148,6 +147,8 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
                       'authorizationDomains': [ad['membersGroupName'] for ad in w['workspace']['authorizationDomain']]
                       }) for w in workspaces if w['workspace']['namespace'] in namespaces
         ]
+
+
     if project_pattern:
         workspaces = [w for w in workspaces if re.match(project_pattern, w.project)]
 
@@ -155,7 +156,7 @@ def get_projects(namespaces=None, project_pattern=None, fapi=FAPI, user_project=
     for w in workspaces:
         w.blobs = get_blobs(w, user_project=user_project)
 
-    logger.debug(f"get_projects {project_pattern} DONE")
+    logger.debug(f"get_projects {project_pattern} {[w.project_id for w in workspaces if re.match(project_pattern, w.project)]}")
     return workspaces
 
 

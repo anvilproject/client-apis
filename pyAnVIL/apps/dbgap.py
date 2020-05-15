@@ -76,8 +76,6 @@ def main():
             fp.write(f"{project['dbGAP_sample_count']}")
             fp.write('\n')
 
-    with open('notebooks/figures/report-data.json', 'w') as fp:
-        json.dump(report_data, fp)
 
 
 if __name__ == '__main__':

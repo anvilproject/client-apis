@@ -4,10 +4,14 @@ from . import BaseApp, strip_all
 
 class CMG(BaseApp):
     """Transforms CMG to cannonical graph."""
-
     def __init__(self, project_pattern='^AnVIL.*CMG.*$', *args, **kwargs):
         """Initializes class variables."""
         super(CMG, self).__init__(project_pattern=project_pattern, **kwargs)
+
+    def is_blacklist(self, project_id):
+        """Returns true if blacklisted"""
+        return 'AnVIL_CMG_Broad_Muscle_KNC_WGS' in project_id
+
 
     def get_terra_participants(self):
         """Cleans up terra participants, maps family."""
@@ -19,10 +23,19 @@ class CMG(BaseApp):
         """Cleans up terra samples."""
         for s in super().get_terra_samples():
             harmonized_sample = self.harmonize_sample(s)
-            if harmonized_sample.participant is None:
-                self.logger.warn(f"sample missing participant value, ignoring. {s.project_id} {s.get('root_sample_id', 'no sample id')}")
+            if harmonized_sample.participant is None and not self.reported_already:
+                self.reported_already = True
+                self.logger.warn(f"sample missing participant value, ignoring. {s.project_id} {s.get('root_sample_id', 'missing sample id')}")
                 continue
             yield AttrDict(self.harmonize_sample(s))
+
+    def get_terra_sequencing(self):
+        """Returns generator with samples associated with projects."""
+        self.logger.info('get_terra_sequencing')
+        for p in self.get_terra_projects():
+            if 'sequencing' in p:
+                for s in p.sequencing:
+                    yield s
 
     def to_graph(self):
         """Adds Family, Demographic to graph"""
@@ -69,17 +82,35 @@ class CMG(BaseApp):
             if subject.gene:
                 G.add_edge(subject.submitter_id, subject.gene, label='expressed')
 
+        for sequence in self.get_terra_sequencing():
+            G.add_node(sequence.submitter_id, label='Sequencing', project_id=subject.project_id)
+            # assert 'collaborator_sample_id' in sequence, sequence
+            sample_id = sequence.get('collaborator_sample_id', sequence.submitter_id)
+            G.add_edge(sequence.submitter_id, sample_id, label='representation_of')
+            for k, file in sequence.files.items():
+                file = AttrDict(file)
+                type = file.type.replace('.', '').capitalize()
+                G.add_node(file.path, label=f'{type}File', project_id=sequence.project_id, size=file.size, time_created=file.time_created)
+                G.add_edge(sequence.submitter_id, file.path, label=type)
+
+
         self.G = G
         return self.G
 
     def harmonize_sample(self, s):
         """Ensures links."""
         s.participant = self.participant_id(s)
+        if '02-sample_id' in s:
+            s.submitter_id = s['02-sample_id']
         s.submitter_id = f'{self.participant_id(s)}-sample'
         return s
 
     def participant_id(self, s):
-        """Corrects mispelling."""
+        """Corrects misspelling, mismatches, and schema drift."""
+        if '01-subject_id' in s:
+            return s['01-subject_id']
+        if 'collaborator_participant_id' in s:
+            return s.collaborator_participant_id
         if 'participant_id' in s:
             return s.participant_id
         if 'participant' in s:

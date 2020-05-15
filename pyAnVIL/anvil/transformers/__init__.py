@@ -49,6 +49,8 @@ class BaseApp():
         self.G = None
         self.logger = logging.getLogger(self.__class__.__name__)
         self.samples = None
+        self.reported_already = False
+
 
     def project_cache_get_projects(self):
         cur = PROJECT_CACHE.cursor()
@@ -63,6 +65,7 @@ class BaseApp():
             project.project_files = {k: AttrDict(file) for k, file in project.project_files.items()}
             project.participants = [AttrDict(p) for p in project.participants]
             project.samples = [AttrDict(s) for s in project.samples]
+
             yield project
 
     def project_cache_put(self, project_id, project):
@@ -75,6 +78,10 @@ class BaseApp():
         except Exception:
             raise
 
+    def is_blacklist(self, project_id):
+        """Returns true if blacklisted"""
+        return False
+
     def get_terra_projects(self):
         """Yield project with associated schema."""
         db_count = 0
@@ -85,9 +92,11 @@ class BaseApp():
         if db_count > 0:
             return
 
-        self.logger.info('get_terra_projects')
         projects = terra.get_projects([self.program], project_pattern=self.project_pattern, fapi=self.fapi, user_project=self.user_project)
+        projects = [p for p in projects if not self.is_blacklist(p.project_id)]
+
         assert len(projects) > 0, f"Should have at least 1 project in {self.program} matching {self.project_pattern}"
+        self.logger.info(f"projects={[project.project_id for project in projects]}")
         blob_sum = sum([len(p.blobs) for p in projects])
         if blob_sum > 0:
             self.logger.info(f'number of blobs in {self.project_pattern}: {blob_sum}')
@@ -99,12 +108,14 @@ class BaseApp():
         for p in projects:
             if len(p.schema.keys()) == 0:
                 self.logger.warning(f'{p.project} missing schema, project will not be included.')
-            elif 'participant' not in p.schema:
-                self.logger.warning(f'{p.project} missing "participant", project will not be included. {p.schema}')
+            elif 'participant' not in p.schema and 'subject' not in p.schema:
+                self.logger.warning(f'{p.project} does not have "participant" or "subject", project will not be included. {p.schema.keys()}')
+            elif 'participant' in p.schema and 'subject' in p.schema:
+                self.logger.warning(f'{p.project} has "participant" and "subject", project will not be included. {p.schema.keys()}')
             else:
                 # normalize the project_files
                 if len(p.project_files.keys()) == 0:
-                    self.logger.warning(f'{p.project} has no project_files.')
+                    self.logger.debug(f'{p.project} has no project_files.')
                 else:
                     _project_files = {}
                     for key, path in p.project_files.items():
@@ -112,7 +123,7 @@ class BaseApp():
                         blob = p.blobs.get(path, None)
                         size = blob['size'] if blob else 0
                         if size == 0:
-                            self.logger.warning(f"{p['project_id']} {path} has no blob!")
+                            self.logger.debug(f"{p['project_id']} {path} has no blob!")
                         _project_files[key] = AttrDict({'path': path, 'type': file_type, 'size': size})
                     p.project_files = _project_files
 
@@ -128,6 +139,23 @@ class BaseApp():
                         _participants.append(attributes)
                     p.participants = _participants
                     assert len(p.participants) == p.schema.participant.count, f"Retrieved participants entities count {len(participants)} did not match anticipated count in schema {p.schema.participant.count}"
+                
+                # normalize to participant
+                if 'subject' in p.schema:
+                    participants = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='subject', fapi=self.fapi)
+                    _participants = []
+                    for participant in participants:
+                        attributes = participant.attributes
+                        attributes.submitter_id = participant.name
+                        attributes.project_id = p.project_id
+                        attributes.submitter_id = participant.name
+                        attributes.project_id = p.project_id
+                        _participants.append(attributes)
+                    p.participants = _participants
+                    assert len(p.participants) == p.schema.subject.count, f"Retrieved subjects entities count {len(participants)} did not match anticipated count in schema {p.schema.subject.count}"
+
+                
+                
                 samples = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sample', fapi=self.fapi)
                 _samples = []
                 for sample in samples:
@@ -139,13 +167,26 @@ class BaseApp():
                 p.samples = _samples
                 assert len(p.samples) == p.schema.sample.count, f"Retrieved samples entities count {len(samples)} did not match anticipated count in schema {p.schema.sample.count}"
 
+                if 'sequencing' in p.schema:
+                    sequencing = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sequencing', fapi=self.fapi)
+                    _sequencing = []
+                    for sequence in sequencing:
+                        attributes = sequence.attributes
+                        attributes.project_id = p.project_id
+                        attributes.submitter_id = sequence.name  # note labled 'sequencing_id' on terra UI !!
+                        attributes.files = self.identify_files(attributes, p.blobs)
+                        _sequencing.append(attributes)
+                    p.sequencing = _sequencing
+                    assert len(p.sequencing) == p.schema.sequencing.count, f"Retrieved sequencing entities count {len(samples)} did not match anticipated count in schema {p.schema.sequencing.count}"
+
+
+
                 self.project_cache_put(p['project_id'], p)
                 yield p
         return
 
     def get_terra_participants(self):
         """Returns generator with participants associated with projects."""
-        print('get_terra_participants')
         for p in self.get_terra_projects():
             for participant in p.participants:
                 yield participant
@@ -173,18 +214,6 @@ class BaseApp():
         for p in self.get_terra_projects():
             for s in p.samples:
                 yield s
-            # samples = terra.get_entities(namespace=p.program, workspace=p.project, entity_name='sample', fapi=self.fapi)
-            # assert len(samples) == p.schema.sample.count, f"Retrieved samples entities count {len(samples)} did not match anticipated count in schema {p.schema.sample.count}"
-            # self.logger.info(f'{p.program} {p.project} number of objects in bucket:{len(p.blobs)} number of samples:{len(samples)}')
-            # for sample in samples:
-            #     if 'attributes' not in sample:
-            #         continue
-            #     attributes = sample.attributes
-            #     attributes.project_id = p.project_id
-            #     attributes.submitter_id = self.sample_submitter_id(attributes)
-            #     attributes.files = self.identify_files(attributes, p.blobs)
-            #     yield attributes
-            #     self.samples.append(attributes)
 
     def identify_files(self, sample, blobs):
         """Returns a dictionary of files associated with this sample."""
@@ -235,9 +264,7 @@ class BaseApp():
         if self.G:
             return self.G
         G = nx.MultiDiGraph()
-        print('to_graph')
         for project in self.get_terra_projects():
-            print(f'to_graph {project.project_id}')
             G.add_node(project.project_id, label='Project', 
                 project_id=project.project_id, public=project.public, 
                 createdDate=project.createdDate, lastModified=project.lastModified, 
@@ -263,7 +290,10 @@ class BaseApp():
             # start = end
             assert sample.submitter_id, 'should have submitter_id'
             assert sample.project_id, 'should have project_id'
-            assert sample.participant, 'should have participant'
+            #assert sample.participant , f'should have participant {sample.keys()} {sample}'
+            if not sample.participant:
+                self.logger.warning(f"{sample.project_id}, {sample.submitter_id} missing participant")
+                continue
             participant = sample.participant
             if not isinstance(participant, str):
                 participant = participant['entityName']
@@ -287,7 +317,13 @@ class BaseApp():
         print('graph_node_counts', self.program, self.project_pattern)        
         graph = self.to_graph()
         for n in graph.nodes():
-            assert 'label' in graph.nodes[n], f'{n} has no label?'
+            if 'label' not in graph.nodes[n]:
+                if len(graph.out_edges(n)) > 0:
+                    for e in graph.out_edges(n):
+                        for o in e:
+                            print(graph[o])
+
+            assert 'label' in graph.nodes[n], f'{n} has no label? {graph.nodes[n]} {graph.in_edges(n)} {graph.out_edges(n)}'
             label = graph.nodes[n]['label']
             assert 'project_id' in graph.nodes[n], f'{label}({n}) has no project_id?'
             project_id = graph.nodes[n]['project_id']
