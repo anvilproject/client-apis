@@ -68,11 +68,15 @@ def main():
     with open('notebooks/figures/report-dbGAP.tsv', 'w') as fp:
         fp.write('\t'.join(keys))
         fp.write('\n')
-        for project in report_data['projects']:            
+        for project in report_data['projects']:
+            dbGap_sample_count = 0
+            sample_nodes = list(filter(lambda p: (p['type'] == 'Sample'), project['nodes']))
+            if len(sample_nodes) > 0:
+                dbGap_sample_count = sample_nodes[0]['count']
             fp.write(f"{project['project_id']}\t")
             fp.write(f"{project['dbGAP_study_id']}\t")
             fp.write(f"{project['dbGAP_acession']}\t")
-            fp.write(f"{list(filter(lambda p : (p['type']=='Sample'), project['nodes']))[0]['count']}\t")
+            fp.write(f"{dbGap_sample_count}\t")
             fp.write(f"{project['dbGAP_sample_count']}")
             fp.write('\n')
 
