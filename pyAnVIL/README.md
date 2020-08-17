@@ -107,4 +107,18 @@ Pre-requisites:
     python3 -m pytest --user_email <GMAIL ACCOUNT>  --log-level DEBUG  --gen3_endpoint <GEN3_ENDPOINT>  tests/integration/test_gen3_auth.py
     ```
 
+## Distribution
 
+* PyPi
+
+```
+rm -r dist/
+python3  setup.py sdist bdist_wheel
+twine upload dist/*
+```
+
+* Read The Docs
+
+```
+https://readthedocs.org/projects/pyanvil/
+```
