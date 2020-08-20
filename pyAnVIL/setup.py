@@ -5,9 +5,27 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/anvil
 """
 
+
+import setuptools.command.build_py
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 from os import path
+import subprocess
+
+
+class DownloadDataIngestionSpreadsheetCommand(setuptools.command.build_py.build_py):
+    """Custom build command."""
+
+    description = 'download data from AnVIL data ingestion spreadsheet'
+
+    def run(self):
+        """Run the command."""
+        self.announce('running data_ingestion_tracker')
+        process = subprocess.run(['bin/data_ingestion_tracker'],
+                                 stdout=subprocess.PIPE,
+                                 universal_newlines=True)
+        assert process.returncode == 0, "data_ingestion_tracker must execute successfully"
+
 
 here = path.abspath(path.dirname(__file__))
 
@@ -23,9 +41,9 @@ setup(
     # package, this name will be registered for you. It will determine how
     # users can install this project, e.g.:
     #
-    # $ pip install anvil
+    # $ pip install pyAnVIL
     #
-    # And where it will live on PyPI: https://pypi.org/project/anvil/
+    # And where it will live on PyPI: https://pypi.org/project/pyAnVIL/
     #
     # There are some restrictions on what makes a valid project name
     # specification here:
@@ -39,7 +57,7 @@ setup(
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='Combined gen3 and terra client APIs',  # Optional
+    description='AnVIL client library. Combines gen3, terra client APIs with single signon and data harmonization use cases.',  # Optional
 
     # This field corresponds to the "Description" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#description-optional
@@ -58,6 +76,11 @@ setup(
     # This should be a valid email address corresponding to the author listed
     # above.
     author_email='walsbr@ohsu.edu',  # Optional
+
+    cmdclass={
+        'data_ingestion_tracker': DownloadDataIngestionSpreadsheetCommand,
+    },
+
 
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[  # Optional
@@ -80,7 +103,7 @@ setup(
     # project page. What does your project relate to?
     #
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords='terra gen3 bioinformatics',  # Optional
+    keywords='AnVIL terra gen3 bioinformatics',  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -106,7 +129,14 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['gen3==2.4.0', 'firecloud==0.16.29'],  # Optional
+    install_requires=[
+        'gen3==2.4.0',
+        'firecloud==0.16.29',
+        'xmltodict==0.12.0',
+        'Click==7.0',
+        'attrdict==2.0.1',
+        'google-cloud-storage==1.19.1'
+    ],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -149,6 +179,16 @@ setup(
     #         'sample=sample:main',
     #     ],
     # },
+
+    # TODO - not working
+    # entry_points={
+    #     'console_scripts': [
+    #         'data_ingestion_tracker=anvil.bin.data_ingestion_tracker:data_ingestion_tracker',
+    #         'reconciler=anvil.bin.reconciler:reconciler',
+    #     ],
+    # },
+    scripts=['bin/data_ingestion_tracker', 'bin/reconciler'],
+    include_package_data=True,
 
     # List additional URLs that are relevant to your project as a dict.
     #

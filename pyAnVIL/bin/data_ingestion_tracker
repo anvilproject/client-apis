@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+"""Extract AnVIL Data Ingestion Tracker spreadsheet."""
+
+import json
+import click
+
+from anvil.util.data_ingestion_tracker import DEFAULT_OUTPUT_PATH, download_projects
+
+
+@click.command()
+@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help='Where to write output.')
+@click.option('--spreadsheet_key', default='1UvQimGHggygeJeTIPjIi6Ze3ryxsUdVjjn8BoIFkyho', help='Spreadsheet GUID')
+@click.option('--json_keyfile_path', default='client_secret.json', help='Credential file.  See https://gspread.readthedocs.io/en/latest/oauth2.html#for-bots-using-service-account')
+def data_ingestion_tracker(output_path, spreadsheet_key, json_keyfile_path):
+    """Read spreadsheet, write to package data."""
+    abbreviated_projects = [
+        {'workspace_name': p['workspace_name'],
+         'gen3_program': p['gen3_program'],
+         'gen3_project': p['gen3_project'],
+         'dbGaP_accession': p['dbGaP_accession'],
+         'simple_accession': p['simple_accession']} for p in list(download_projects(spreadsheet_key=spreadsheet_key, json_keyfile_path=json_keyfile_path))]
+
+    with open(output_path, 'w') as fp:
+        json.dump(abbreviated_projects, fp)
+
+    print(f"Wrote {output_path}")
+
+
+if __name__ == '__main__':
+    data_ingestion_tracker()

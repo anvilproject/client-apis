@@ -1,5 +1,11 @@
-pytest
 pre-commit
 sphinx
 sphinx_rtd_theme
 twine
+flake8
+flake8-docstrings
+pytest==3.6.3
+pytest-cov==2.5.1
+gspread
+oauth2client
+wheel

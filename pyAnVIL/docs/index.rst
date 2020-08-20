@@ -15,7 +15,6 @@ Installation
 
 Pre-requisites: 
 
-* gcloud cli tools installed and configured `gcloud <https://cloud.google.com/sdk/install>`_.  
 * Google Id provisioned in both Terra and Gen3: 
    * One time Account Linking:
       * Pre-requisite: google account provisioned in both Gen3 and Terra.
@@ -24,24 +23,29 @@ Pre-requisites:
       * In Terra, navigate to your profile
          * Under "IDENTITY & EXTERNAL SERVERS", log into `NHGRI AnVIL Data Commons Framework Services`, the system should present you with a Gen3 Oauth flow.
          * Note the google project used for billing
+
       .. image:: _static/terra-profile.png
-* Per instance, terra API setup:
-   * Use the google account and billing project to setup credentials for the `terra api <https://github.com/broadinstitute/fiss>`_. ::
 
-      gcloud auth login <google-account>
-      gcloud auth application-default set-quota-project <billing-project-id>   
+* For standalone instances, outside of terra environment:
+   gcloud cli tools installed and configured `gcloud <https://cloud.google.com/sdk/install>`_.  
 
-* Validation ::
+   * Per instance, terra API setup:
+      * Use the google account and billing project to setup credentials for the `terra api <https://github.com/broadinstitute/fiss>`_. ::
 
-   gcloud auth print-access-token
-   >>> ya29.a0AfH6SMBSPFSt252qQNl.......
+         gcloud auth login <google-account>
+         gcloud auth application-default set-quota-project <billing-project-id>   
 
-   fissfc config
-   >>> ....
-   root_url	https://broad-bond-prod.appspot.com/   
+   * Validation ::
+
+      gcloud auth print-access-token
+      >>> ya29.a0AfH6SMBSPFSt252qQNl.......
+
+      fissfc config
+      >>> ....
+      root_url	https://broad-bond-prod.appspot.com/   
 
 
-Setup: ::
+* Setup: ::
    
    pip install pyAnVIL
 
@@ -49,7 +53,10 @@ Setup: ::
 Use cases
 ---------
 
-SSO: ::
+SSO
+###
+
+Setup: ::
 
    from anvil.gen3_auth import Gen3TerraAuth
    from gen3.submission import Gen3Submission
@@ -58,6 +65,11 @@ SSO: ::
    gen3_endpoint = "https://gen3.theanvil.io"
    submission_client = Gen3Submission(gen3_endpoint, auth)
 
+:doc:`sso sequence diagram <diagram>` 
+
+API wrappers
+############
+
 Gen3: ::
 
    query = '{project(first:0) {code,  subjects {submitter_id}, programs {name}  }}'
@@ -65,13 +77,14 @@ Gen3: ::
    [p['code'] for p in results['data']['project']]
    >>> ['GTEx', '1000Genomes']
 
+
 Terra: ::
 
    from anvil.terra import FAPI
    FAPI.whoami()
    >>> 'anvil.user@gmail.com'
 
-Terra wrapper: ::
+Terra utilities: ::
 
    from anvil.terra import get_projects
    projects = get_projects(namespaces=['anvil-datastorage'], project_pattern='AnVIL_CCDG.*')
@@ -81,11 +94,14 @@ Terra wrapper: ::
         'AnVIL_CCDG_Broad_AI_IBD_Brant_DS-IBD_WGS', ...]
    
 
+Data Dashboard
+##############
 
-Diagram
--------
+Dashboard example:
 
-:doc:`sequence diagram <diagram>` 
+.. image:: _static/notebook.png
+
+`notebook <_static/0.0.2.ipynb>`_
 
 Roadmap
 -------
@@ -93,7 +109,6 @@ Roadmap
 Future use cases include:
 
 * Setup google service account for travis testing
-* Workspace Google bucket objects mapped to project/subject/sample. (Code currently supporting data dashboard)
 * Reconciliation of Gen3 and Terra workspace, keyed by dbGAP identifier
 * FHIR
 
@@ -107,8 +122,10 @@ Contributing
 Package Index
 -------------
 
-:doc:`anvil  <source/anvil>` 
+* :doc:`auth <source/anvil_gen3>` 
+* :doc:`terra <source/anvil_terra>` 
+* :doc:`util <source/anvil_util>` 
 
 .. toctree::
   :maxdepth: 2
-  :hidden: 
+  :hidden:
