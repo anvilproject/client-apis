@@ -4,6 +4,7 @@ from . import BaseApp, strip_all
 
 class CMG(BaseApp):
     """Transforms CMG to cannonical graph."""
+
     def __init__(self, project_pattern='^AnVIL.*CMG.*$', *args, **kwargs):
         """Initializes class variables."""
         super(CMG, self).__init__(project_pattern=project_pattern, **kwargs)
@@ -109,16 +110,16 @@ class CMG(BaseApp):
         """Corrects misspelling, mismatches, and schema drift."""
         if '01-subject_id' in s:
             return s['01-subject_id']
-        if 'collaborator_participant_id' in s:
-            return s.collaborator_participant_id
-        if 'participant_id' in s:
-            return s.participant_id
         if 'participant' in s:
             if s.participant is None:
                 return None
             if isinstance(s.participant, str):
                 return s.participant
             return s.participant.entityName
+        if 'collaborator_participant_id' in s:
+            return s.collaborator_participant_id
+        if 'participant_id' in s:
+            return s.participant_id
         if 'participent' in s:
             return s.participent
 

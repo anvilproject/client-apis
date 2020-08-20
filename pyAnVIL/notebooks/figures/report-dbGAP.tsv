@@ -22,6 +22,7 @@ AnVIL_CCDG_NYGC_NP_Autism_SSC_WGS	phs001676	phs001676.v1.p1	9201	9209
 AnVIL_CCDG_Broad_NP_Epilepsy_CHEUBB_HMB_IRB_MDS_WES	None	None	47	None
 AnVIL_CCDG_WashU_CVD_EOCAD_Penn_WGS	phs001502	phs001502.v1.p1	1356	1373
 AnVIL_CCDG_NYGC_NP_Autism_ACE2_DS-MDS_WGS	None	None	69	None
+AnVIL_CCDG_Broad_NP_Epilepsy_BELATW_GRU_WES	None	None	107	None
 AnVIL_CCDG_Broad_CVD_AFib_MGH_WGS	phs001062	phs001062.v4.p2	105	1163
 AnVIL_CCDG_NYGC_AI_Asthma_Gala2_WGS	phs000920	phs000920.v4.p2	1171	4763
 AnVIL_CCDG_Broad_AI_IBD_McGovern_WGS	phs001642	None	1565	None
@@ -74,7 +75,6 @@ AnVIL_CMG_Broad_Muscle_Beggs_WES	phs001272	phs001272.v1.p1	109	1079
 AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WES	phs001272	phs001272.v1.p1	31	1079
 AnVIL_CMG_Broad_Eye_Pierce_WES	phs001272	phs001272.v1.p1	602	1079
 AnVIL_CMG_Broad_Orphan_Estonia-Ounap_WGS	phs001272	phs001272.v1.p1	115	1079
-AnVIL_CMG_Broad_Muscle_Topf_WES	phs001272	phs001272.v1.p1	722	1079
 AnVIL_CMG_Broad_Blood_Sankaran_WES	phs001272	phs001272.v1.p1	277	1079
 AnVIL_CMG_Broad_Brain_Walsh_WES	phs001272	phs001272.v1.p1	767	1079
 AnVIL_CMG_Broad_Muscle_Kang_WES	phs001272	phs001272.v1.p1	49	1079
@@ -83,6 +83,7 @@ AnVIL_CMG_Broad_Muscle_OGrady_WES	phs001272	phs001272.v1.p1	73	1079
 AnVIL_CMG_Broad_Brain_Gleeson_WES	phs001272	phs001272.v1.p1	1181	1079
 AnVIL_CMG_UWash_GRU	None	None	0	None
 AnVIL_CMG_Broad_Kidney_Hildebrandt_WGS	phs001272	phs001272.v1.p1	27	1079
+AnVIL_CMG_Broad_Blood_Gazda_WES	phs001272	phs001272.v1.p1	51	1079
 AnVIL_CMG_Broad_Orphan_Manton_WES	phs001272	phs001272.v1.p1	419	1079
 AnVIL_CMG_Broad_Heart_PCGC-Tristani_WGS	phs001272	phs001272.v1.p1	79	1079
 AnVIL_CMG_Broad_Muscle_KNC_WES	phs001272	phs001272.v1.p1	44	1079
