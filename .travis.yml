@@ -1,0 +1,25 @@
+language: python
+cache:
+  directories:
+  - "$HOME/google-cloud-sdk/"
+python:
+- '3.8'
+install:
+- gcloud version || true
+- if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export
+  CLOUDSDK_CORE_DISABLE_PROMPTS=1; curl https://sdk.cloud.google.com | bash; fi
+- source /home/travis/google-cloud-sdk/path.bash.inc
+- gcloud version
+- cd pyAnVIL
+- pip install -r requirements.txt
+script:
+- pytest tests/unit
+# before_install:
+# - mkdir -p "$HOME/.config/gcloud/configurations"
+# - echo -n 'default' > "$HOME/.config/gcloud/active_config"
+# - openssl aes-256-cbc -K $encrypted_3403f4ee383c_key -iv $encrypted_3403f4ee383c_iv
+#   -in application_default_credentials.json.enc -out "$HOME/.config/gcloud/application_default_credentials.json"
+#   -d
+# - openssl aes-256-cbc -K $encrypted_14dab145559e_key -iv $encrypted_14dab145559e_iv
+#   -in config_default.enc -out "$HOME/.config/gcloud/configurations/config_default" -d
+# - echo 'Y' | gcloud auth login $GOOGLE_AUTH --brief

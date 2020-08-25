@@ -1,0 +1,25 @@
+# local package
+-e .
+
+## core integration
+gen3==2.4.0
+firecloud==0.16.24
+
+# external requirements
+
+## dot notation dicts
+attrdict
+
+## requests cache
+requests-cache==0.4.13
+
+## tests
+pytest==3.6.3
+pytest-cov==2.5.1
+
+
+## google storage
+google-cloud-storage==1.19.1
+
+## gen3 requires pandas
+pandas==0.25.3

@@ -1,0 +1,6 @@
+# local package
+./pyAnVIL
+
+## core integration
+gen3==2.4.0
+firecloud==0.16.24
