@@ -3,7 +3,7 @@
 
 ## core integration
 gen3==2.4.0
-firecloud==0.16.24
+firecloud==0.16.29
 
 # external requirements
 
