@@ -106,7 +106,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['gen3==2.4.0', 'firecloud==0.16.24'],  # Optional
+    install_requires=['gen3==2.4.0', 'firecloud==0.16.29'],  # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
