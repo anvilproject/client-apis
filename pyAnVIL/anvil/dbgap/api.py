@@ -18,6 +18,7 @@ DEFAULT_OUTPUT_PATH = f"{os.path.dirname(__file__)}/../data/data_ingestion_track
 @memoize
 def get_study(accession):
     """Return tuple (qualified_accession, schema)."""
+    qualified_accession = None
     try:
         r = requests.get(f"{url_base}{accession}", allow_redirects=False)
         assert r.status_code == 302, r.status_code

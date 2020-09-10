@@ -101,7 +101,7 @@ Dashboard example:
 
 .. image:: _static/notebook.png
 
-`notebook <_static/0.0.2.ipynb>`_
+`notebook <https://github.com/anvilproject/client-apis/blob/dashboard/pyAnVIL/docs/_static/0.0.2.ipynb>`_
 
 Roadmap
 -------

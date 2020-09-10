@@ -5,6 +5,9 @@
 from anvil.util.reconciler import aggregate, DEFAULT_NAMESPACE
 import json
 import click
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
 DEFAULT_OUTPUT_PATH = '/tmp/data_dashboard.json'
 
 

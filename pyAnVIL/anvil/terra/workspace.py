@@ -19,6 +19,7 @@ class Workspace():
     def __init__(self, *args, user_project=None):
         """Pass all args to AttrDict, set id for cacheing."""
         self.attributes = AttrDict(*args)
+        assert user_project, "Must have user_project"
         self._user_project = user_project
         self._logger = logging.getLogger(__name__)
         self.id = self.attributes.workspace.name
@@ -29,7 +30,6 @@ class Workspace():
         self._project_files = None
         self._missing_project_files = None
         self.missing_sequence = False
-        assert len(self._user_project) > 1, "Must have user_project"
 
     @property
     def subjects(self):
