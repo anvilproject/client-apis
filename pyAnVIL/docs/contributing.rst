@@ -17,7 +17,7 @@ Pull Request Process
    locations and container parameters.
 3. Increase the version numbers in any examples files and the README.md
    to the new version that this Pull Request would represent. The
-   versioning scheme we use is `SemVer`_.
+   versioning scheme we use is semantic versioning.
 4. You may merge the Pull Request in once you have the sign-off of two
    other developers, or if you do not have permission to do that, you
    may request the second reviewer to merge it for you.

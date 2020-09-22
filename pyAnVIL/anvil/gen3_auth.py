@@ -47,7 +47,7 @@ class Gen3TerraAuth(AuthBase):
         >>> ['GTEx', '1000Genomes']
 
         # access terra api
-        from anvil.terra import whoami
+        from anvil.terra.api import whoami
         whoami()
         >>> 'anvil.user@gmail.com'
 

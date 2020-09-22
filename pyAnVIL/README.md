@@ -53,6 +53,11 @@ Pre-requisites:
    submission_client = Gen3Submission(gen3_endpoint, auth)
 ```
 
+
+[sso sequence diagram](docs/_static/sequence-diagram.png)
+
+#### API Wrappers
+
 ### Gen3
 
 ```
@@ -70,7 +75,7 @@ Pre-requisites:
    >>> 'anvil.user@gmail.com'
 ```
 
-### Terra wrapper
+### Terra utilities
 
 ```
    from anvil.terra import get_projects
@@ -81,12 +86,9 @@ Pre-requisites:
         'AnVIL_CCDG_Broad_AI_IBD_Brant_DS-IBD_WGS', ...]
 ```   
 
+### Data Dashboard
 
-## Sequence Diagram
-
-![](docs/_static/sequence-diagram.png)
-
-
+[notebook example](docs/_static/0.0.2.ipynb)
 
 ## Contributing
 
@@ -107,13 +109,27 @@ Pre-requisites:
     python3 -m pytest --user_email <GMAIL ACCOUNT>  --log-level DEBUG  --gen3_endpoint <GEN3_ENDPOINT>  tests/integration/test_gen3_auth.py
     ```
 
+* continuous integration
+   * see [service account setup](https://cloud.google.com/solutions/continuous-delivery-with-travis-ci#create_a_service_account)
+
+   ```
+      # see https://github.com/broadinstitute/firecloud-tools/tree/master/scripts/register_service_account
+      docker run --rm -it -v "$HOME"/.config:/.config -v /Users/walsbr/client-apis/pyAnVIL/client_secret.json:/svc.json broadinstitute/firecloud-tools python /scripts/register_service_account/register_service_account.py -j /svc.json -e  brian@bwalsh.com
+      The service account pyanvil@api-project-807881269549.bwalsh.com.iam.gserviceaccount.com is now registered with FireCloud. You can share workspaces with this address, or use it to call APIs.   
+   ```
+
 ## Distribution
 
 * PyPi
 
 ```
+# refresh from data ingestion tracker spread sheet, update pypi
+
+export TWINE_USERNAME=  #  the username to use for authentication to the repository.
+export TWINE_PASSWORD=  # the password to use for authentication to the repository.
+
 rm -r dist/
-python3  setup.py sdist bdist_wheel
+python3  setup.py data_ingestion_tracker sdist bdist_wheel
 twine upload dist/*
 ```
 

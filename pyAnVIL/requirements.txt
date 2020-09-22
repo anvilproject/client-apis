@@ -7,16 +7,11 @@ firecloud==0.16.29
 
 # external requirements
 
+## cmd arguments
+click==7.0
+
 ## dot notation dicts
-attrdict
-
-## requests cache
-requests-cache==0.4.13
-
-## tests
-pytest==3.6.3
-pytest-cov==2.5.1
-
+attrdict==2.0.1
 
 ## google storage
 google-cloud-storage==1.19.1

@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+"""Reconcile and aggregate results."""
+
+from anvil.util.reconciler import aggregate, DEFAULT_NAMESPACE
+import json
+import click
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
+DEFAULT_OUTPUT_PATH = '/tmp/data_dashboard.json'
+
+
+@click.command()
+@click.option('--user_project', help='Google billing project.')
+@click.option('--namespace', default=DEFAULT_NAMESPACE, help=f'Terra namespace default={DEFAULT_NAMESPACE}')
+@click.option('--consortium', type=(str, str), multiple=True, help='<Name Regexp> e.g "CCDG AnVIL_CCDG.*"')
+@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'json output path default={DEFAULT_OUTPUT_PATH}')
+def reconcile_all(user_project, namespace, consortium, output_path):
+    """Reconcile and aggregate results.
+
+    e.g. anvil/bin/reconciler --user_project <your-billing-project>  --consortium CMG AnVIL_CMG.* --consortium CCDG AnVIL_CCDG.* --consortium GTEx ^AnVIL_GTEx_V8_hg38$ --consortium ThousandGenomes ^1000G-high-coverage-2019$
+    """
+    with open(output_path, 'w') as outs:
+        json.dump({'projects': [v for v in aggregate(namespace, user_project, consortium)]}, outs)
+
+
+if __name__ == '__main__':
+    reconcile_all()

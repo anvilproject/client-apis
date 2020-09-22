@@ -3,20 +3,36 @@ cache:
   directories:
   - "$HOME/google-cloud-sdk/"
 python:
-- '3.8'
+- '3.7'
 install:
 - gcloud version || true
-- if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export
-  CLOUDSDK_CORE_DISABLE_PROMPTS=1; curl https://sdk.cloud.google.com | bash; fi
-- source /home/travis/google-cloud-sdk/path.bash.inc
+# - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export
+#   CLOUDSDK_CORE_DISABLE_PROMPTS=1; curl https://sdk.cloud.google.com | bash; fi
+# - source /home/travis/google-cloud-sdk/path.bash.inc
 - gcloud version
 - cd pyAnVIL
 - pip install -r requirements.txt
 script:
+- gcloud auth list  
+- fissfc  config
 - pytest tests/unit
-# before_install:
-# - mkdir -p "$HOME/.config/gcloud/configurations"
-# - echo -n 'default' > "$HOME/.config/gcloud/active_config"
+# - pytest tests/integration/test_terra.py
+env:
+# Make sure gcloud command is on our PATH and the App Engine SDK is in the Python path
+- GAE_PYTHONPATH=${HOME}/.cache/google_appengine PATH=$PATH:${HOME}/google-cloud-sdk/bin PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH} CLOUDSDK_CORE_DISABLE_PROMPTS=1
+before_install:
+  # see https://github.com/GoogleCloudPlatform/continuous-deployment-demo/blob/master/.travis.yml
+  # If the SDK is not already cached, download it and unpack it  
+  - if [ ! -d ${HOME}/google-cloud-sdk ]; then
+      curl https://sdk.cloud.google.com | bash;
+    fi  
+  - openssl aes-256-cbc -K $encrypted_0d4d67c9ad25_key -iv $encrypted_0d4d67c9ad25_iv -in pyAnVIL/client_secret.json.enc -out client_secret.json -d
+  # Here we use the decrypted service account credentials to authenticate the command line tool
+  - gcloud auth activate-service-account --key-file client_secret.json
+  - gcloud auth list
+  - gcloud auth print-access-token
+  # - mkdir -p "$HOME/.config/gcloud/configurations"
+  # - echo -n 'default' > "$HOME/.config/gcloud/active_config"
 # - openssl aes-256-cbc -K $encrypted_3403f4ee383c_key -iv $encrypted_3403f4ee383c_iv
 #   -in application_default_credentials.json.enc -out "$HOME/.config/gcloud/application_default_credentials.json"
 #   -d
