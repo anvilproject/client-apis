@@ -29,7 +29,7 @@ class Sample(object):
                 blob['property_name'] = property_name
             my_blobs.append(blob)
         self.missing_blobs = len([b for b in my_blobs if b]) == 0
-        return AttrDict({b['name']: b for b in my_blobs if b})
+        return {b['name']: b for b in my_blobs if b}
 
     def __repr__(self):
         """Return attributes."""
