@@ -1,0 +1,1 @@
+ python3 -m pytest -s --log-cli-level DEBUG  --user_email brian@bwalsh.com --gen3_endpoint https://gen3.theanvil.io tests/integration/test_gen3_auth.py::test_query
