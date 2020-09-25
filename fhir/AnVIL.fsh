@@ -63,3 +63,30 @@ Description: "An example representation of an AnvilSpecimen with reference."
 * id = "any-sample-id"
 * status = #available
 * extension[attachments][0].valueReference = Reference(DRSAttachmentExample)
+
+// Extension:      AnvilDocumentReference
+// Id:             anvil-document-reference
+// Title:          "AnVIL Document Reference"
+// Description:    "An association to a document."
+// * value[x] only Reference(DRSAttachment)
+
+Extension: AnvilEvidenceType
+Id:  anvil-evidence-type
+Title: "Evidence Type"
+Description: "Categorization of the kind of evidence used as input to the clinical judgment."
+* value[x] only DRSAttachment
+
+Instance: AnvilEvidenceTypeExample
+InstanceOf: AnvilEvidenceType
+Description: "An example representation of an AnvilSpecimen with reference."
+* id = "any-evidence-id"
+* status = #available
+* extension[attachments][0].valueReference = Reference(DRSAttachmentExample)
+
+Profile:  CancerDiseaseStatus
+Parent:   DocumentReference
+Id:       mcode-cancer-disease-status
+Title:    "Cancer Disease Status"
+Description: "A clinician's qualitative judgment on the current trend of the cancer, e.g., whether it is stable, worsening (progressing), or improving (responding)."
+* ^status = #draft
+* extension contains AnvilEvidenceTypeExample named evidenceType 0..*
