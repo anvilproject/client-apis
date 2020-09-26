@@ -113,7 +113,7 @@ def load_configurations(config, extensions, profiles, examples):
             url=url,
             json=extension,
         )
-        assert response.ok, response.text
+        assert response.ok, f"body:{extension}\nerror: {response.text}"
         response_body = response.json()
         logger.debug(f"created {url} from {path}")
         config_resource_urls.append(url)
@@ -125,7 +125,7 @@ def load_configurations(config, extensions, profiles, examples):
             url=url,
             json=profile,
         )
-        assert response.ok, response.text
+        assert response.ok, f"body:{profile}\nerror: {response.text}"
         response_body = response.json()
         logger.debug(f"created {url} from {path}")
         config_resource_urls.append(url)
@@ -138,8 +138,9 @@ def load_configurations(config, extensions, profiles, examples):
             url=url,
             json=example,
         )
-        assert response.ok, response.text
+        assert response.ok, f"body:{json.dumps(example)}\nerror: {response.text}"
         response_body = response.json()
         logger.debug(f"created {resourceType}/{response_body['id']} from {path}")
         config_resource_urls.append(url)
+
     return config_resource_urls
