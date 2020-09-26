@@ -67,7 +67,7 @@ class Patient:
         #                 }
         #             )
 
-        # species QUESTION: extension ?
+        # species QUESTION: species ?
         #     if species:
         #         if species_dict.get(species):
         #             entity.setdefault("extension", []).append(species_dict[species])
