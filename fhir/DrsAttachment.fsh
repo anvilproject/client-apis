@@ -26,9 +26,9 @@ Description: "The drs object"
     created_time 1..1 MS and
     updated_time 0..1 and
     version 0..1 and
-    mime_type 0..1 and
-    DRSChecksum named checksums 1..* MS and
-    DRSAccessMethod named access_methods 1..* MS
+    mime_type 0..1 
+    and DRSChecksum named checksums 1..* MS
+    and DRSAccessMethod named access_methods 1..* MS
 
 * extension[id] ^short = "An identifier unique to this `DrsObject`."
 * extension[id].value[x] only string
@@ -85,6 +85,7 @@ InstanceOf: DRSAttachment
 Description: "An example representation of a DRSAttachment"
 Usage: #inline
 * id = "any-attachment-id"
+* contentType = #application/json
 * extension[drs].extension[id].valueString = "any-id"
 * extension[drs].extension[name].valueString = "any-file-name"
 * extension[drs].extension[self_uri].valueString = "drs://url-here"
@@ -100,22 +101,4 @@ Usage: #inline
 * extension[drs].extension[access_methods].extension[region].valueString = "us-west"
 
 
-
-Instance: DRSAttachmentExampleForExport
-InstanceOf: DRSAttachment
-Description: "An example representation of a DRSAttachment"
-* id = "drs-attachment-id"
-* extension[drs].extension[id].valueString = "any-id"
-* extension[drs].extension[name].valueString = "any-file-name"
-* extension[drs].extension[self_uri].valueString = "drs://url-here"
-* extension[drs].extension[created_time].valueDateTime = "1985-04-12T23:20:50.52Z"
-* extension[drs].extension[updated_time].valueDateTime = "1985-04-12T23:20:50.52Z"
-* extension[drs].extension[size].valueInteger = 12345
-* extension[drs].extension[version].valueString = "0.0.0"
-* extension[drs].extension[mime_type].valueString = "application/json"
-* extension[drs].extension[checksums].extension[checksum].valueString = "abcdef0123456789"
-* extension[drs].extension[checksums].extension[type].valueString = "etag"
-* extension[drs].extension[access_methods].extension[type].valueString = "s3"
-* extension[drs].extension[access_methods].extension[access_url].valueString = "s3://some-url-here"
-* extension[drs].extension[access_methods].extension[region].valueString = "us-west"
 
