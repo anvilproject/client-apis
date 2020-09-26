@@ -1,7 +1,7 @@
 """Represent fhir entity."""
 
 
-from anvil.transformers.fhir import join
+from anvil.transformers.fhir import join, make_identifier
 from anvil.transformers.fhir.patient import Patient
 
 
@@ -18,13 +18,14 @@ class ResearchSubject:
     def build_entity(subject):
         """Create fhir entity."""
         study_id = subject.workspace_name
-        participant_id = subject.id
-        # https://www.hl7.org/fhir/valueset-research-subject-status.html
-        research_subject_status = "off-study"
+        study_id_slug = make_identifier(study_id)
+        subject_id = subject.id
+        subject_id_slug = make_identifier(subject_id)
+        research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html
 
         entity = {
             "resourceType": ResearchSubject.resource_type,
-            "id": subject.id,
+            "id": subject_id_slug,
             "meta": {
                 "profile": [
                     "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
@@ -32,20 +33,20 @@ class ResearchSubject:
             },
             "identifier": [
                 {
-                    "system": f"https://kf-api-dataservice.kidsfirstdrc.org/participants?study_id={study_id}&external_id=",
-                    "value": participant_id,
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
+                    "value": subject_id,
                 },
                 {
-                    "system": "urn:kids-first:unique-string",
-                    "value": join(Patient.resource_type, study_id, participant_id),
+                    "system": "urn:anvil:unique-string",
+                    "value": join(Patient.resource_type, study_id, subject_id),
                 },
             ],
             "status": research_subject_status,
             "study": {
-                "reference": f"ResearchStudy/{study_id}"
+                "reference": f"ResearchStudy/{study_id_slug}"
             },
             "individual": {
-                "reference": f"Patient/{participant_id}"
+                "reference": f"Patient/{subject_id_slug}"
             },
         }
 

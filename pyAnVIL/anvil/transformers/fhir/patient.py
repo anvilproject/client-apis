@@ -1,6 +1,6 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import join
+from anvil.transformers.fhir import join, make_identifier
 
 
 class Patient:
@@ -13,7 +13,9 @@ class Patient:
     def build_entity(subject):
         """Create fhir entity."""
         study_id = subject.workspace_name
-        participant_id = subject.id
+        # study_id_slug = make_identifier(study_id)
+        subject_id = subject.id
+        subject_id_slug = make_identifier(subject_id)
         # ethnicity = None
         # race = None
         # species = None
@@ -21,24 +23,25 @@ class Patient:
 
         entity = {
             "resourceType": Patient.resource_type,
-            "id": participant_id,
+            "id": subject_id_slug,
             "meta": {
                 "profile": [
-                    "http://fhir.kids-first.io/StructureDefinition/kfdrc-patient"
+                    "http://hl7.org/fhir/StructureDefinition/Patient"
                 ]
             },
             "identifier": [
                 {
-                    "system": f"https://kf-api-dataservice.kidsfirstdrc.org/participants?study_id={study_id}&external_id=",
-                    "value": participant_id,
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
+                    "value": subject_id,
                 },
                 {
-                    "system": "urn:kids-first:unique-string",
-                    "value": join(Patient.resource_type, study_id, participant_id),
+                    "system": "urn:anvil:unique-string",
+                    "value": join(Patient.resource_type, study_id, subject_id),
                 },
             ],
         }
 
+        # ethnicity QUESTION: http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity
         # if ethnicity:
         #     if omb_ethnicity_category.get(ethnicity):
         #         entity.setdefault("extension", []).append(
@@ -51,6 +54,7 @@ class Patient:
         #             }
         #         )
 
+        # race QUESTION: http://hl7.org/fhir/us/core/StructureDefinition/us-core-race
         #     if race:
         #         if omb_race_category.get(race):
         #             entity.setdefault("extension", []).append(
@@ -63,10 +67,12 @@ class Patient:
         #                 }
         #             )
 
+        # species QUESTION: extension ?
         #     if species:
         #         if species_dict.get(species):
         #             entity.setdefault("extension", []).append(species_dict[species])
 
+        # species QUESTION: gender ?
         #     if gender:
         #         if administrative_gender.get(gender):
         #             entity["gender"] = administrative_gender[gender]

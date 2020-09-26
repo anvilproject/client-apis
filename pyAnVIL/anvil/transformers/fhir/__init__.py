@@ -10,3 +10,7 @@ def make_identifier(*args):
 def join(*args):
     """Create pipe separated string."""
     return "|".join(str(a) for a in args)
+
+
+# note coordinate with StructureDefintions /fhir/config.yaml::canonical
+CANONICAL = "http://anvilproject.org"

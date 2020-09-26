@@ -1,4 +1,5 @@
 """Transform terra workspaces to FHIR."""
+# from anvil.transformers.fhir.attachment import Attachment
 from anvil.transformers.fhir.document_reference import DocumentReference
 from anvil.transformers.fhir.patient import Patient
 from anvil.transformers.fhir.research_study import ResearchStudy

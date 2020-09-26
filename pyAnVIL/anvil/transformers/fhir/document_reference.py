@@ -1,6 +1,6 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import join
+from anvil.transformers.fhir import join, make_identifier
 # from anvil.transformers.fhir.patient import Patient
 
 
@@ -141,9 +141,14 @@ class DocumentReference:
         """Render entity."""
         # assert False, blob.attributes
         study_id = blob.sample.workspace_name
-        genomic_file_id = join(study_id, blob.sample.id, blob.attributes.property_name)
+        study_id_slug = make_identifier(study_id)
+        sample_id = blob.sample.id
+        sample_id_slug = make_identifier(sample_id)
+        subject_id = blob.sample.subject_id
+        subject_id_slug = make_identifier(subject_id)
+
+        genomic_file_id = make_identifier(join(study_id_slug, sample_id_slug, blob.attributes.property_name))
         acl = None
-        participant_id = blob.sample.subject_id
         size = blob.attributes.size
         url_list = [blob.attributes.name]
         file_name = blob.attributes.name.split('/')[-1]
@@ -152,7 +157,7 @@ class DocumentReference:
 
         entity = {
             "resourceType": DocumentReference.resource_type,
-            "id": blob.attributes.name,
+            "id": genomic_file_id,
             "meta": {
                 "profile": [
                     "http://hl7.org/fhir/StructureDefinition/DocumentReference"
@@ -160,11 +165,11 @@ class DocumentReference:
             },
             "identifier": [
                 {
-                    "system": f"https://kf-api-dataservice.kidsfirstdrc.org/genomic-files?study_id={study_id}&external_id=",
-                    "value": genomic_file_id,
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
+                    "value": sample_id,
                 },
                 {
-                    "system": "urn:kids-first:unique-string",
+                    "system": "urn:anvil:unique-string",
                     "value": genomic_file_id,
                 },
             ],
@@ -193,9 +198,9 @@ class DocumentReference:
             else:
                 entity.setdefault('type', {})['text'] = data_type
 
-        if participant_id:
+        if subject_id_slug:
             entity["subject"] = {
-                "reference": f"Patient/{participant_id}"
+                "reference": f"Patient/{subject_id_slug}"
             }
 
         content = {}
