@@ -76,3 +76,180 @@ The profile was modeled using [Sushi](https://github.com/FHIR/sushi) using the  
 ## however
 
 If `extension in an extension` is removed from profile the update works
+
+```
+http://localhost:8000/DocumentReference/example-document-reference-id 200 {
+  "resourceType": "DocumentReference",
+  "id": "example-document-reference-id",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2020-09-26T00:30:47.518+00:00",
+    "source": "#OqQrYiIyBmdnHlEi"
+  },
+  "status": "current",
+  "content": [ {
+    "attachment": {
+      "id": "any-attachment-id",
+      "extension": [ {
+        "url": "http://anvilproject.org/StructureDefinition/drs-object",
+        "extension": [ {
+          "url": "id",
+          "valueString": "any-id"
+        }, {
+          "url": "self_uri",
+          "valueString": "drs://url-here"
+        }, {
+          "url": "size",
+          "valueInteger": 12345
+        }, {
+          "url": "created_time",
+          "valueDateTime": "1985-04-12T23:20:50.52Z"
+        }, {
+          "url": "name",
+          "valueString": "any-file-name"
+        }, {
+          "url": "updated_time",
+          "valueDateTime": "1985-04-12T23:20:50.52Z"
+        }, {
+          "url": "version",
+          "valueString": "0.0.0"
+        }, {
+          "url": "mime_type",
+          "valueString": "application/json"
+        } ]
+      } ],
+      "contentType": "application/json"
+    }
+  } ]
+}
+```
+
+### `extension in an extension` 
+```
+diff --git a/fhir/DrsAttachment.fsh b/fhir/DrsAttachment.fsh
+index b5013c9..426e5e8 100644
+--- a/fhir/DrsAttachment.fsh
++++ b/fhir/DrsAttachment.fsh
+@@ -27,8 +27,8 @@ Description: "The drs object"
+     updated_time 0..1 and
+     version 0..1 and
+     mime_type 0..1 
+-    and DRSChecksum named checksums 1..* MS
+-    and DRSAccessMethod named access_methods 1..* MS
++    // and DRSChecksum named checksums 1..* MS
++    // and DRSAccessMethod named access_methods 1..* MS
+ 
+ * extension[id] ^short = "An identifier unique to this `DrsObject`."
+ * extension[id].value[x] only string
+@@ -94,11 +94,11 @@ Usage: #inline
+ * extension[drs].extension[size].valueInteger = 12345
+ * extension[drs].extension[version].valueString = "0.0.0"
+ * extension[drs].extension[mime_type].valueString = "application/json"
+-* extension[drs].extension[checksums].extension[checksum].valueString = "abcdef0123456789"
+-* extension[drs].extension[checksums].extension[type].valueString = "etag"
+-* extension[drs].extension[access_methods].extension[type].valueString = "s3"
+-* extension[drs].extension[access_methods].extension[access_url].valueString = "s3://some-url-here"
+-* extension[drs].extension[access_methods].extension[region].valueString = "us-west"
++// * extension[drs].extension[checksums].extension[checksum].valueString = "abcdef0123456789"
++// * extension[drs].extension[checksums].extension[type].valueString = "etag"
++// * extension[drs].extension[access_methods].extension[type].valueString = "s3"
++// * extension[drs].extension[access_methods].extension[access_url].valueString = "s3://some-url-here"
++// * extension[drs].extension[access_methods].extension[region].valueString = "us-west"
+ 
+ 
+ 
+diff --git a/fhir/fhir-artifacts/examples/DocumentReference-example-document-reference-id.json b/fhir/fhir-artifacts/examples/DocumentReference-example-document-reference-id.json
+index e774db0..eed9dbc 100644
+--- a/fhir/fhir-artifacts/examples/DocumentReference-example-document-reference-id.json
++++ b/fhir/fhir-artifacts/examples/DocumentReference-example-document-reference-id.json
+@@ -23,36 +23,6 @@
+                 "url": "created_time",
+                 "valueDateTime": "1985-04-12T23:20:50.52Z"
+               },
+-              {
+-                "url": "http://anvilproject.org/StructureDefinition/drs-checksum",
+-                "extension": [
+-                  {
+-                    "url": "checksum",
+-                    "valueString": "abcdef0123456789"
+-                  },
+-                  {
+-                    "url": "type",
+-                    "valueString": "etag"
+-                  }
+-                ]
+-              },
+-              {
+-                "url": "http://anvilproject.org/StructureDefinition/drs-access-method",
+-                "extension": [
+-                  {
+-                    "url": "type",
+-                    "valueString": "s3"
+-                  },
+-                  {
+-                    "url": "access_url",
+-                    "valueString": "s3://some-url-here"
+-                  },
+-                  {
+-                    "url": "region",
+-                    "valueString": "us-west"
+-                  }
+-                ]
+-              },
+               {
+                 "url": "name",
+                 "valueString": "any-file-name"
+diff --git a/fhir/fhir-artifacts/extensions/StructureDefinition-drs-object.json b/fhir/fhir-artifacts/extensions/StructureDefinition-drs-object.json
+index c7bbff6..ebf8eb9 100644
+--- a/fhir/fhir-artifacts/extensions/StructureDefinition-drs-object.json
++++ b/fhir/fhir-artifacts/extensions/StructureDefinition-drs-object.json
+@@ -31,7 +31,7 @@
+       {
+         "id": "Extension.extension",
+         "path": "Extension.extension",
+-        "min": 6
++        "min": 4
+       },
+       {
+         "id": "Extension.extension:id",
+@@ -253,38 +253,6 @@
+           }
+         ]
+       },
+-      {
+-        "id": "Extension.extension:checksums",
+-        "path": "Extension.extension",
+-        "sliceName": "checksums",
+-        "min": 1,
+-        "max": "*",
+-        "type": [
+-          {
+-            "code": "Extension",
+-            "profile": [
+-              "http://anvilproject.org/StructureDefinition/drs-checksum"
+-            ]
+-          }
+-        ],
+-        "mustSupport": true
+-      },
+-      {
+-        "id": "Extension.extension:access_methods",
+-        "path": "Extension.extension",
+-        "sliceName": "access_methods",
+-        "min": 1,
+-        "max": "*",
+-        "type": [
+-          {
+-            "code": "Extension",
+-            "profile": [
+-              "http://anvilproject.org/StructureDefinition/drs-access-method"
+-            ]
+-          }
+-        ],
+-        "mustSupport": true
+-      },
+       {
+         "id": "Extension.url",
+         "path": "Extension.url",
+
+```
