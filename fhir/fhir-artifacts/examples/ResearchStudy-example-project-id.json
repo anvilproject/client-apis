@@ -1,0 +1,19 @@
+{
+  "resourceType": "ResearchStudy",
+  "id": "example-project-id",
+  "meta": {
+    "profile": [
+      "http://anvilproject.org/StructureDefinition/anvil-research-study"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://anvilproject.org/StructureDefinition/anvil-document-reference",
+      "valueReference": {
+        "reference": "DocumentReference/example-document-reference-id"
+      }
+    }
+  ],
+  "title": "my anvil research study example",
+  "status": "active"
+}

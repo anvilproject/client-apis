@@ -1,0 +1,24 @@
+{
+  "resourceType": "ResearchSubject",
+  "id": "example-subject-id",
+  "meta": {
+    "profile": [
+      "http://anvilproject.org/StructureDefinition/anvil-research-subject"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://anvilproject.org/StructureDefinition/anvil-document-reference",
+      "valueReference": {
+        "reference": "DocumentReference/example-document-reference-id"
+      }
+    }
+  ],
+  "status": "on-study",
+  "study": {
+    "reference": "ResearchStudy/example-project-id"
+  },
+  "individual": {
+    "reference": "Patient/example-patient-id"
+  }
+}

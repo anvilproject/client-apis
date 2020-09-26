@@ -1,0 +1,18 @@
+{
+  "resourceType": "Specimen",
+  "id": "example-sample-id",
+  "meta": {
+    "profile": [
+      "http://anvilproject.org/StructureDefinition/anvil-specimen"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://anvilproject.org/StructureDefinition/anvil-document-reference",
+      "valueReference": {
+        "reference": "DocumentReference/example-document-reference-id"
+      }
+    }
+  ],
+  "status": "available"
+}
