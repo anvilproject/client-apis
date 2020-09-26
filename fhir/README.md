@@ -48,19 +48,19 @@ alias fish='docker run -v $(pwd)/:/src --rm -it fish'
 
 # enter shell
 fish bash
-#  once in shell, validate the model and build the site
-sushi . && \
-    cd build/ && \
-    sed -i s/JAVA/java/ _genonce.sh && \
-    jq '{extension, id, resourceType}'   input/examples/Attachment-DRSAttachmentExample.json > /tmp/ttt && \
-    mv /tmp/ttt input/examples/Attachment-DRSAttachmentExample.json && \
-    ./_genonce.sh && \
-    cd ..
-
-
-
+#  once in shell, validate the model
+sushi . 
+# and optionally build the site
+cd build
+./_updatePublisher.sh
+./_genonce.sh 
+ 
 ```
 
+
+## testing
+
+see tests/README.md
 
 TODO
 
