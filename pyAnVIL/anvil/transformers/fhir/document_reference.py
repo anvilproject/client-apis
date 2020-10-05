@@ -145,7 +145,7 @@ class DocumentReference:
         sample_id = blob.sample.id
         sample_id_slug = make_identifier(sample_id)
         subject_id = blob.sample.subject_id
-        subject_id_slug = make_identifier(subject_id)
+        subject_id_slug = make_identifier(study_id, subject_id)
 
         genomic_file_id = make_identifier(join(study_id_slug, sample_id_slug, blob.attributes.property_name))
         acl = None

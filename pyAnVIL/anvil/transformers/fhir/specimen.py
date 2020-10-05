@@ -33,7 +33,7 @@ class Specimen:
         study_id = sample.workspace_name
         # study_id_slug = make_identifier(study_id)
         sample_id = sample.id
-        sample_id_slug = make_identifier(sample_id)
+        sample_id_slug = make_identifier(sample.workspace_name, sample_id)
         event_age_days = None
         concentration_mg_per_ml = None
         composition = None
@@ -58,7 +58,7 @@ class Specimen:
                 },
             ],
             "subject": {
-                "reference": f"Patient/{make_identifier(sample.subject_id)}"
+                "reference": f"Patient/{make_identifier(study_id, sample.subject_id)}"
             },
         }
 

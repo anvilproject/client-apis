@@ -15,7 +15,8 @@ class Patient:
         study_id = subject.workspace_name
         # study_id_slug = make_identifier(study_id)
         subject_id = subject.id
-        subject_id_slug = make_identifier(subject_id)
+        subject_id_slug = make_identifier(study_id, subject_id)
+
         # ethnicity = None
         # race = None
         # species = None

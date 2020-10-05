@@ -15,5 +15,8 @@
     }
   ],
   "title": "my anvil research study example",
-  "status": "active"
+  "status": "active",
+  "principalInvestigator": {
+    "reference": "Practitioner/example-principle-investigator"
+  }
 }

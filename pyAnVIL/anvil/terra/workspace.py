@@ -60,6 +60,15 @@ class Workspace():
         return self._project_files
 
     @property
+    def project_files_attributes(self):
+        """Find attributes that are files."""
+        _files = {}
+        for k, v in self.attributes.workspace.items():
+            if isinstance(v, str) and v.startswith('gs://'):
+                _files[k] = v
+        return _files
+
+    @property
     def missing_project_files(self):
         """Return files associated with project attributes where gs:// blobs are missing."""
         if not self._missing_project_files:
@@ -296,6 +305,27 @@ class Workspace():
             'problems': self.problems
         })
 
+    @property
+    def investigator(self):
+        """Deduce investigator name."""
+        _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
+        if _investigator == 'NA':
+            return None
+        return _investigator
+
+    @property
+    def accession(self):
+        """Deduce accession."""
+        return self.attributes.workspace.attributes.get("library:datasetVersion", None)
+
+    @property
+    def institute(self):
+        """Deduce institute."""
+        _institute = self.attributes.workspace.attributes.get("library:institute", None)
+        if _institute and 'items' in _institute:
+            return _institute['items'][0]
+        return _institute
+
 
 def _project_files(w):
     """Deduce attributes that are files."""
@@ -312,3 +342,52 @@ def _bucket_contents(user_project, bucket_name):
         name = f"gs://{project_bucket.name}/{b.name}"
         project_blobs[name] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name}
     return project_blobs
+
+
+class CMGWorkspace(Workspace):
+    """Extend Workspace class."""
+
+    def __init__(self, *args, **kwargs):
+        """Call super."""
+        super().__init__(*args, **kwargs)
+
+    @property
+    def investigator(self):
+        """Deduce investigator name."""
+        _investigator = self.attributes.workspace.attributes.get('study_pi', None)
+        if not _investigator:
+            _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
+        return _investigator
+
+    @property
+    def accession(self):
+        """Deduce accession."""
+        _accession = super().accession
+        if not _accession:
+            _accession = self.attributes.workspace.attributes.get("study_accession", None)
+        return _accession
+
+
+class CCDGWorkspace(Workspace):
+    """Extend Workspace class."""
+
+    def __init__(self, *args, **kwargs):
+        """Call super."""
+        super().__init__(*args, **kwargs)
+
+
+def workspace_factory(*args, **kwargs):
+    """Return a specialized Workspace class instance."""
+    name = args[0]['workspace']['name']
+    if 'CCDG' in name.upper():
+        return CCDGWorkspace(*args, **kwargs)
+    if 'CMG' in name.upper():
+        return CMGWorkspace(*args, **kwargs)
+    return Workspace(*args, **kwargs)
+    # if 'GTEX' in kwargs['workspace'].name.upper():
+    #     return GTExSubject(*args, **kwargs)
+    # if '1000G-HIGH-COVERAGE' in kwargs['workspace'].name.upper():
+    #     return ThousandGenomesSubject(*args, **kwargs)
+    # if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
+    #     return eMERGESUbject(*args, **kwargs)
+    raise Exception('Not implemented')

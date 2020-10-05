@@ -1,7 +1,7 @@
 """Retrieve google bucket meta data, dbGap information and gen3 meta associated with terra workspace."""
 import logging
 
-from anvil.terra.workspace import Workspace
+from anvil.terra.workspace import workspace_factory
 from anvil.terra.api import get_projects
 # from anvil.cache import memoize
 from collections import defaultdict
@@ -25,7 +25,7 @@ class Reconciler():
     def workspaces(self):
         """Terra workspaces that match namespace & project_pattern."""
         if not self._workspaces:
-            self._workspaces = [Workspace(w, user_project=self._user_project) for w in get_projects(self.namespaces, self.project_pattern)]
+            self._workspaces = [workspace_factory(w, user_project=self._user_project) for w in get_projects(self.namespaces, self.project_pattern)]
         return self._workspaces
 
     # @memoize

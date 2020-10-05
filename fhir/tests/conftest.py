@@ -130,17 +130,20 @@ def load_configurations(config, extensions, profiles, examples):
         logger.debug(f"created {url} from {path}")
         config_resource_urls.append(url)
 
-    for example, path in examples:
-        resourceType = example['resourceType']
-        id = example['id']
-        url = f"{config.base_url}/{resourceType}/{id}"
-        response = config.connection.put(
-            url=url,
-            json=example,
-        )
-        assert response.ok, f"body:{json.dumps(example)}\nerror: {response.text}"
-        response_body = response.json()
-        logger.debug(f"created {resourceType}/{response_body['id']} from {path}")
-        config_resource_urls.append(url)
+    for example_type in ['Practitioner', 'ResearchStudy', 'Patient', 'ResearchSubject', 'DocumentReference', 'Specimen']:
+        for example, path in examples:
+            if example_type not in path:
+                continue
+            resourceType = example['resourceType']
+            id = example['id']
+            url = f"{config.base_url}/{resourceType}/{id}"
+            response = config.connection.put(
+                url=url,
+                json=example,
+            )
+            assert response.ok, f"body:{json.dumps(example)}\nerror: {response.text}"
+            response_body = response.json()
+            logger.debug(f"created {resourceType}/{response_body['id']} from {path}")
+            config_resource_urls.append(url)
 
     return config_resource_urls

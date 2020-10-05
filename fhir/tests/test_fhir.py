@@ -7,7 +7,7 @@ from anvil.transformers.fhir.transformer import FhirTransformer
 logger = logging.getLogger(__name__)
 
 
-def test_configuration(load_configurations, config):
+def test_configuration(debug_caplog, load_configurations, config):
     """Verify config loaded."""
     for url in load_configurations:
         response = config.connection.get(url)
@@ -18,7 +18,7 @@ def test_configuration(load_configurations, config):
 def test_transformers(load_configurations, config, user_project, namespaces):
     """Transform and load."""
     project_pattern = 'AnVIL_CMG_Broad_Muscle_KNC_WGS'
-    reconciler = Reconciler('CCDG', user_project, namespaces, project_pattern)
+    reconciler = Reconciler('CMG', user_project, namespaces, project_pattern)
 
 #   "resourceType": "ResearchStudy",
 #   "id": "CMG-Broad-Muscle-KNC-WGS",

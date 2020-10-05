@@ -36,24 +36,42 @@ Description: "An example representation of a AnvilDocumentReference"
 * id = "example-document-reference-id"
 * content[0].attachment = DRSAttachmentExample
 * status = #current
+* identifier.system = "urn:anvil:unique-string"
+* identifier.value = "example-document-reference-id"
+
+
+Instance: PrincipalInvestigatorExample
+InstanceOf: Practitioner
+Description: "An example representation of a PrincipalInvestigator"
+* identifier.system = "urn:anvil:unique-string"
+* identifier.value = "example-principle-investigator"
+* id = "example-principle-investigator"
+
 
 Instance: AnvilResearchStudyExample
 InstanceOf: AnvilResearchStudy
 Description: "An example representation of an AnvilResearchStudy"
+* identifier.system = "urn:anvil:unique-string"
+* identifier.value = "example-project-id"
 * id = "example-project-id"
 * title = "my anvil research study example"
 * status = #active
+* principalInvestigator = Reference(PrincipalInvestigatorExample)
 * extension[documents][0].valueReference = Reference(AnvilDocumentReferenceExample)
 
 Instance: PatientExample
 InstanceOf: Patient
 Description: "An example representation of a FHIR Patient"
+* identifier.system = "urn:anvil:unique-string"
+* identifier.value = "example-patient-id"
 * id = "example-patient-id"
 // no extension here, created so ResearchSubject can reference it
 
 Instance: AnvilResearchSubjectExample
 InstanceOf: AnvilResearchSubject
 Description: "An example representation of an AnvilResearchSubject"
+* identifier.system = "urn:anvil:unique-string"
+* identifier.value = "example-subject-id"
 * id = "example-subject-id"
 * status = #on-study
 * study = Reference(AnvilResearchStudyExample)
@@ -64,7 +82,10 @@ Description: "An example representation of an AnvilResearchSubject"
 Instance: AnvilSpecimenExample
 InstanceOf: AnvilSpecimen
 Description: "An example representation of an AnvilSpecimen with reference."
+* identifier.system = "urn:anvil:unique-string"
+* identifier.value = "example-sample-id"
 * id = "example-sample-id"
 * status = #available
 * extension[documents][0].valueReference = Reference(AnvilDocumentReferenceExample)
+* subject = Reference(PatientExample)
 

@@ -2,6 +2,7 @@
 # from anvil.transformers.fhir.attachment import Attachment
 from anvil.transformers.fhir.document_reference import DocumentReference
 from anvil.transformers.fhir.patient import Patient
+from anvil.transformers.fhir.practitioner import Practitioner
 from anvil.transformers.fhir.research_study import ResearchStudy
 from anvil.transformers.fhir.research_subject import ResearchSubject
 from anvil.transformers.fhir.specimen import Specimen
@@ -20,15 +21,18 @@ class FhirTransformer(Transformer):
     def transform_workspace(self, workspace):
         """Transform workspace."""
         def entity(self):
-            yield ResearchStudy.build_entity(self.attributes.workspace.attributes)
+            practitioner = Practitioner.build_entity(self)
+            if practitioner:
+                yield practitioner
+            yield ResearchStudy.build_entity(self)
         workspace.entity = types.MethodType(entity, workspace)
         yield workspace
 
     def transform_subject(self, subject):
         """Transform subject."""
         def entity(self):
-            yield ResearchSubject.build_entity(self)
             yield Patient.build_entity(self)
+            yield ResearchSubject.build_entity(self)
         subject.entity = types.MethodType(entity, subject)
         yield subject
 

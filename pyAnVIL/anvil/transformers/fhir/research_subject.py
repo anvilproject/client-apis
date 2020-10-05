@@ -1,7 +1,7 @@
 """Represent fhir entity."""
 
 
-from anvil.transformers.fhir import join, make_identifier
+from anvil.transformers.fhir import CANONICAL, join, make_identifier
 from anvil.transformers.fhir.patient import Patient
 
 
@@ -20,7 +20,7 @@ class ResearchSubject:
         study_id = subject.workspace_name
         study_id_slug = make_identifier(study_id)
         subject_id = subject.id
-        subject_id_slug = make_identifier(subject_id)
+        subject_id_slug = make_identifier(study_id, subject_id)
         research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html
 
         entity = {
@@ -28,7 +28,7 @@ class ResearchSubject:
             "id": subject_id_slug,
             "meta": {
                 "profile": [
-                    "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
+                    f"{CANONICAL}/StructureDefinition/anvil-research-subject"
                 ]
             },
             "identifier": [

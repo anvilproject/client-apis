@@ -27,8 +27,8 @@ Description: "The drs object"
     updated_time 0..1 and
     version 0..1 and
     mime_type 0..1 
-    and DRSChecksum named checksums 1..* MS
-    and DRSAccessMethod named access_methods 1..* MS
+    // and DRSChecksum named checksums 1..* MS
+    // and DRSAccessMethod named access_methods 1..* MS
 
 * extension[id] ^short = "An identifier unique to this `DrsObject`."
 * extension[id].value[x] only string
@@ -94,11 +94,11 @@ Usage: #inline
 * extension[drs].extension[size].valueInteger = 12345
 * extension[drs].extension[version].valueString = "0.0.0"
 * extension[drs].extension[mime_type].valueString = "application/json"
-* extension[drs].extension[checksums].extension[checksum].valueString = "abcdef0123456789"
-* extension[drs].extension[checksums].extension[type].valueString = "etag"
-* extension[drs].extension[access_methods].extension[type].valueString = "s3"
-* extension[drs].extension[access_methods].extension[access_url].valueString = "s3://some-url-here"
-* extension[drs].extension[access_methods].extension[region].valueString = "us-west"
+// * extension[drs].extension[checksums].extension[checksum].valueString = "abcdef0123456789"
+// * extension[drs].extension[checksums].extension[type].valueString = "etag"
+// * extension[drs].extension[access_methods].extension[type].valueString = "s3"
+// * extension[drs].extension[access_methods].extension[access_url].valueString = "s3://some-url-here"
+// * extension[drs].extension[access_methods].extension[region].valueString = "us-west"
 
 
 
