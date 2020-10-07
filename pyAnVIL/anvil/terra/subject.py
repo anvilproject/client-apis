@@ -57,7 +57,7 @@ class Subject(object):
     @property
     def ethnicity(self):
         """Deduce ethnicity."""
-        for p in ['11-ancestry_detail,10-ancestry', 'ancestry', 'Race_Ethnicity', 'Ethnicity', 'RACE']:
+        for p in ['11-ancestry_detail', '10-ancestry', 'ancestry', 'Race_Ethnicity', 'Ethnicity', 'RACE']:
             if p in self.attributes.attributes:
                 ethnicity = self.attributes.attributes[p]
                 if ethnicity in ['null', 'NA', '#N/A']:
@@ -80,6 +80,14 @@ class Subject(object):
                     return 'asian'
                 return ethnicity
         logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing ethnicity parameter")
+        return None
+
+    @property
+    def phenotypes(self):
+        """Deduce phenotype."""
+        for k in ['disease_id', 'hpo_present', '19-hpo_present', '14-disease_id', '21-phenotype_description']:
+            if k in self.attributes.attributes:
+                return self.attributes.attributes[k].split('|')
         return None
 
 
