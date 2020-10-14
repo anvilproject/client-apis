@@ -53,7 +53,7 @@ class Specimen:
                     "value": sample_id,
                 },
                 {
-                    "system": "urn:anvil:unique-string",
+                    "system": "urn:ncpi:unique-string",
                     "value": join(Specimen.resource_type, study_id, sample_id),
                 },
             ],

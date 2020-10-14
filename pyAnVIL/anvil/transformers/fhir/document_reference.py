@@ -148,12 +148,18 @@ class DocumentReference:
         subject_id_slug = make_identifier(study_id, subject_id)
 
         genomic_file_id = make_identifier(join(study_id_slug, sample_id_slug, blob.attributes.property_name))
+        # logging.getLogger(__name__).debug(f"\n\n\n\n\n{blob.attributes}\n\n\n\n\n")
+        # AttrDict({'size': 17734638122, 'etag': 'CJaG//fR9+kCEAE=', 'crc32c': 'eqDkoQ==',
+        # 'time_created': '2020-06-10T16:13:14.288000+00:00',
+        # 'name': 'gs://fc-secure-004e5c03-d24d-4f7f-a26b-9fdc64b0ca3c/AnVIL_CMG_Broad_Muscle_KNC_WGS_Mar2020/RP-1687/WGS/192CP_ZS_1/v1/192CP_ZS_1.cram',
+        # 'property_name': 'cram_path'})
         acl = None
         size = blob.attributes.size
         url_list = [blob.attributes.name]
         file_name = blob.attributes.name.split('/')[-1]
         file_format = file_name.split('.')[-1]
         data_type = file_format
+        time_created = blob.attributes.time_created
 
         entity = {
             "resourceType": DocumentReference.resource_type,
@@ -169,7 +175,7 @@ class DocumentReference:
                     "value": sample_id,
                 },
                 {
-                    "system": "urn:anvil:unique-string",
+                    "system": "urn:ncpi:unique-string",
                     "value": genomic_file_id,
                 },
             ],
@@ -205,19 +211,105 @@ class DocumentReference:
 
         content = {}
 
-        if size:
-            content.setdefault('attachment', {})["extension"] = [
+        # start attachment
+        content["attachment"] = {
+            "id": "any-attachment-id",
+            "extension": [
                 {
-                    "url": "http://fhir.kids-first.io/StructureDefinition/large-size",
-                    "valueDecimal": size,
+                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-meta",
+                    "extension": [
+                        {
+                            "url": "id",
+                            "valueString": url_list[0]
+                        },
+                        {
+                            "url": "self_uri",
+                            "valueString": url_list[0]
+                        },
+                        {
+                            "url": "size",
+                            "valueDecimal": size
+                        },
+                        {
+                            "url": "created_time",
+                            "valueDateTime": time_created
+                        },
+                        {
+                            "url": "name",
+                            "valueString": file_name
+                        },
+                        {
+                            "url": "updated_time",
+                            "valueDateTime": time_created
+                        },
+                        {
+                            "url": "version",
+                            "valueString": "0.0.0"
+                        },
+                        {
+                            "url": "mime_type",
+                            "valueString": "application/json"
+                        }
+                    ]
+                },
+                {
+                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-checksum",
+                    "extension": [
+                        {
+                            "url": "checksum",
+                            "valueString": blob.attributes.etag
+                        },
+                        {
+                            "url": "type",
+                            "valueString": "etag"
+                        }
+                    ]
+                },
+                {
+                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-checksum",
+                    "extension": [
+                        {
+                            "url": "checksum",
+                            "valueString": blob.attributes.crc32c
+                        },
+                        {
+                            "url": "type",
+                            "valueString": "crc32c"
+                        }
+                    ]
+                },
+                {
+                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-access-method",
+                    "extension": [
+                        {
+                            "url": "type",
+                            "valueString": "gs"
+                        },
+                        {
+                            "url": "access_url",
+                            "valueString": blob.attributes.name
+                        }
+                    ]
                 }
-            ]
+            ],
+            "contentType": "application/json"
+        }
 
-        if url_list:
-            content.setdefault('attachment', {})["url"] = url_list[0]
+        # if size:
+        #     content.setdefault('attachment', {})["extension"] = [
+        #         {
+        #             "url": "http://fhir.kids-first.io/StructureDefinition/large-size",
+        #             "valueDecimal": size,
+        #         }
+        #     ]
 
-        if file_name:
-            content.setdefault('attachment', {})["title"] = file_name
+        # if url_list:
+        #     content.setdefault('attachment', {})["url"] = url_list[0]
+
+        # if file_name:
+        #     content.setdefault('attachment', {})["title"] = file_name
+
+        # end attachment
 
         if file_format:
             content["format"] = {

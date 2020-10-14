@@ -1,7 +1,7 @@
 """Represent fhir entity."""
 
 
-from anvil.transformers.fhir import CANONICAL, join, make_identifier
+from anvil.transformers.fhir import join, make_identifier
 from anvil.transformers.fhir.patient import Patient
 
 
@@ -28,7 +28,7 @@ class ResearchSubject:
             "id": subject_id_slug,
             "meta": {
                 "profile": [
-                    f"{CANONICAL}/StructureDefinition/anvil-research-subject"
+                    "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
                 ]
             },
             "identifier": [
@@ -37,7 +37,7 @@ class ResearchSubject:
                     "value": subject_id,
                 },
                 {
-                    "system": "urn:anvil:unique-string",
+                    "system": "urn:ncpi:unique-string",
                     "value": join(Patient.resource_type, study_id, subject_id),
                 },
             ],

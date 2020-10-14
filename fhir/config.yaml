@@ -10,8 +10,8 @@
 # │  supported properties, see: https://fshschool.org/sushi/configuration/                         │
 # ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 id: anvil
-canonical: http://anvilproject.org
-version: 0.2.0
+canonical: http://fhir.ncpi-project-forge.io
+version: 0.2.1
 name: AnVILImplementationGuide
 title: AnVIL Implementation Guide
 status: active

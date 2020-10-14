@@ -1,6 +1,7 @@
 """Transform terra workspaces to FHIR."""
 # from anvil.transformers.fhir.attachment import Attachment
 from anvil.transformers.fhir.document_reference import DocumentReference
+from anvil.transformers.fhir.organization import Organization
 from anvil.transformers.fhir.patient import Patient
 from anvil.transformers.fhir.practitioner import Practitioner
 from anvil.transformers.fhir.research_study import ResearchStudy
@@ -24,6 +25,9 @@ class FhirTransformer(Transformer):
             practitioner = Practitioner.build_entity(self)
             if practitioner:
                 yield practitioner
+            organization = Organization.build_entity(self)
+            if organization:
+                yield organization
             yield ResearchStudy.build_entity(self)
         workspace.entity = types.MethodType(entity, workspace)
         yield workspace

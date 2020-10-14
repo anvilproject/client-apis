@@ -36,7 +36,7 @@ class Patient:
                     "value": subject_id,
                 },
                 {
-                    "system": "urn:anvil:unique-string",
+                    "system": "urn:ncpi:unique-string",
                     "value": join(Patient.resource_type, study_id, subject_id),
                 },
             ],

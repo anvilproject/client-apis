@@ -13,4 +13,4 @@ def join(*args):
 
 
 # note coordinate with StructureDefintions /fhir/config.yaml::canonical
-CANONICAL = "http://anvilproject.org"
+CANONICAL = "http://fhir.ncpi-project-forge.io"

@@ -35,7 +35,7 @@ class ResearchStudy:
             "id": make_identifier(study_id),
             "meta": {
                 "profile": [
-                    f"{CANONICAL}/StructureDefinition/anvil-research-study"
+                    "http://hl7.org/fhir/StructureDefinition/ResearchStudy"
                 ]
             },
             "identifier": [
@@ -44,7 +44,7 @@ class ResearchStudy:
                     "value": study_id,
                 },
                 {
-                    "system": "urn:anvil:unique-string",
+                    "system": "urn:ncpi:unique-string",
                     "value": join(ResearchStudy.resource_type, key),
                 },
             ],

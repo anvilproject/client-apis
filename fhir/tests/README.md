@@ -35,6 +35,11 @@ cp -r build/input/examples/ fhir-artifacts/examples/
 cp -r build/input/extensions/ fhir-artifacts/extensions/
 cp -r build/input/profiles/ fhir-artifacts/profiles/
 
+
+cp -r build/input/examples/ ncpi-model-forge/site_root/input/resources/examples/
+cp -r build/input/extensions/ ncpi-model-forge/site_root/input/resources/extensions/
+cp -r build/input/profiles/  ncpi-model-forge/site_root/input/resources/profiles/
+
 ```
 
 Issues

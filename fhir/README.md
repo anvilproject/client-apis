@@ -57,6 +57,14 @@ cd build
  
 ```
 
+## update ncpi model
+
+```
+cp build/input/examples/*.* ncpi-model-forge/site_root/input/resources/examples
+cp build/input/extensions/*.* ncpi-model-forge/site_root/input/resources/extensions
+cp build/input/profiles/*.* ncpi-model-forge/site_root/input/resources/profiles/
+```
+
 
 ## testing
 

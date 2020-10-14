@@ -8,7 +8,8 @@ import glob
 from requests.auth import HTTPBasicAuth
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-RESOURCE_DIR = os.path.join("build", "input")
+
+RESOURCE_DIR = os.path.join('ncpi-model-forge', 'site_root', 'input', 'resources')
 TEST_DIR = os.path.dirname(__file__)
 # TEST_DATA_DIR = os.path.join(TEST_DIR, "data")
 FHIR_API = os.getenv("FHIR_API") or "http://localhost:8000"
@@ -141,7 +142,7 @@ def load_configurations(config, extensions, profiles, examples):
                 url=url,
                 json=example,
             )
-            assert response.ok, f"body:{json.dumps(example)}\nerror: {response.text}"
+            assert response.ok, f"path:{json.dumps(path)}\nbody:{json.dumps(example)}\nerror: {response.text}"
             response_body = response.json()
             logger.debug(f"created {resourceType}/{response_body['id']} from {path}")
             config_resource_urls.append(url)
