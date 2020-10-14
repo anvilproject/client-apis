@@ -1,5 +1,6 @@
 """Transform terra workspaces to FHIR."""
 # from anvil.transformers.fhir.attachment import Attachment
+from anvil.terra.blob import Blob
 from anvil.transformers.fhir.document_reference import DocumentReference
 from anvil.transformers.fhir.organization import Organization
 from anvil.transformers.fhir.patient import Patient
@@ -7,6 +8,7 @@ from anvil.transformers.fhir.practitioner import Practitioner
 from anvil.transformers.fhir.research_study import ResearchStudy
 from anvil.transformers.fhir.research_subject import ResearchSubject
 from anvil.transformers.fhir.specimen import Specimen
+from anvil.transformers.fhir.task import SpecimenTask
 from anvil.transformers.transformer import Transformer
 import types
 
@@ -42,8 +44,18 @@ class FhirTransformer(Transformer):
 
     def transform_sample(self, sample):
         """Transform sample."""
+        _me = self
+
         def entity(self):
-            yield Specimen.build_entity(self)
+            s = Specimen.build_entity(self)
+            yield s
+            outputs = []
+            for blob in self.blobs.values():
+                for b in _me.transform_blob(Blob(blob, sample)):
+                    b = DocumentReference.build_entity(b)
+                    outputs.append(b)
+                    yield b
+            yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
         sample.entity = types.MethodType(entity, sample)
         yield sample
 

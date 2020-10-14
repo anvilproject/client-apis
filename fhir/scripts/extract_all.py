@@ -37,11 +37,11 @@ def all_instances(clazz):
     """Return all subjects."""
     logging.info("Starting aggregation for all AnVIL workspaces, this will take several minutes.")
     consortiums = (
-        # ('CMG', 'AnVIL_CMG_.*'),
-        # ('CCDG', 'AnVIL_CCDG_.*'),
-        # ('GTEx', '^AnVIL_GTEx_V8_hg38$'),
-        # ('ThousandGenomes', '^1000G-high-coverage-2019$')
-        ('CMG', 'AnVIL_CMG_Broad_Muscle_KNC_WGS'),
+        ('CMG', 'AnVIL_CMG_.*'),
+        ('CCDG', 'AnVIL_CCDG_.*'),
+        ('GTEx', '^AnVIL_GTEx_V8_hg38$'),
+        ('ThousandGenomes', '^1000G-high-coverage-2019$')
+        # ('CMG', 'AnVIL_CMG_Broad_Muscle_KNC_WGS'),
     )
     for item in reconcile_all(user_project=os.environ['GOOGLE_PROJECT'], consortiums=consortiums):
         if isinstance(item, clazz):
@@ -156,7 +156,7 @@ def save_all(workspaces):
 def load_all_files():
     """Load all data to the FHIR server."""
     _config = config()
-    for resourceType in ['Practitioner', 'Organization', 'ResearchStudy', 'Patient', 'ResearchSubject', 'DocumentReference', 'Specimen']:
+    for resourceType in ['Practitioner', 'Organization', 'ResearchStudy', 'Patient', 'ResearchSubject', 'Specimen', 'DocumentReference', 'Task']:
         with open(f"{DASHBOARD_OUTPUT_PATH}/{resourceType}.json", "r") as inputs:
             for line in inputs.readlines():
                 entity = json.loads(line)
@@ -171,4 +171,10 @@ def load_all_files():
 
 workspaces = list(all_instances(Workspace))
 save_all(workspaces)
-# load_all_files()
+load_all_files()
+
+# family_relationships = set()
+# for w in workspaces:
+#     for s in w.subjects:
+#         if 'Family_Relationship' in s.attributes.attributes:
+#             family_relationships.add(s.attributes.attributes['Family_Relationship'])

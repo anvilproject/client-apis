@@ -137,17 +137,22 @@ class DocumentReference:
     resource_type = "DocumentReference"
 
     @staticmethod
+    def identifier(blob):
+        """Make identifier."""
+        study_id_slug = make_identifier(blob.sample.workspace_name)
+        sample_id_slug = make_identifier(blob.sample.id)
+        return make_identifier(join(study_id_slug, sample_id_slug, blob.attributes.property_name))
+
+    @staticmethod
     def build_entity(blob):
         """Render entity."""
         # assert False, blob.attributes
         study_id = blob.sample.workspace_name
-        study_id_slug = make_identifier(study_id)
         sample_id = blob.sample.id
-        sample_id_slug = make_identifier(sample_id)
         subject_id = blob.sample.subject_id
         subject_id_slug = make_identifier(study_id, subject_id)
 
-        genomic_file_id = make_identifier(join(study_id_slug, sample_id_slug, blob.attributes.property_name))
+        genomic_file_id = DocumentReference.identifier(blob)
         # logging.getLogger(__name__).debug(f"\n\n\n\n\n{blob.attributes}\n\n\n\n\n")
         # AttrDict({'size': 17734638122, 'etag': 'CJaG//fR9+kCEAE=', 'crc32c': 'eqDkoQ==',
         # 'time_created': '2020-06-10T16:13:14.288000+00:00',

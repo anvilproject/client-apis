@@ -2,8 +2,6 @@
 
 import logging
 
-from anvil.terra.blob import Blob
-
 
 class Transformer(object):
     """Render workspace into target form, Subclass and override transform_* per your requirements."""
@@ -23,9 +21,6 @@ class Transformer(object):
                 for sample in subject.samples:
                     for s in self.transform_sample(sample):
                         yield s
-                        for blob in sample.blobs.values():
-                            for b in self.transform_blob(Blob(blob, sample)):
-                                yield b
 
     def transform_workspace(self, workspace):
         """Transform workspace (noop)."""

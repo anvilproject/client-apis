@@ -28,12 +28,17 @@ class Specimen:
     resource_type = "Specimen"
 
     @staticmethod
-    def build_entity(sample):
+    def identifier(specimen):
+        """Create identifier."""
+        return make_identifier(specimen.workspace_name, specimen.id)
+
+    @staticmethod
+    def build_entity(specimen):
         """Create fhir entity."""
-        study_id = sample.workspace_name
+        study_id = specimen.workspace_name
         # study_id_slug = make_identifier(study_id)
-        sample_id = sample.id
-        sample_id_slug = make_identifier(sample.workspace_name, sample_id)
+        sample_id = specimen.id
+        sample_id_slug = Specimen.identifier(specimen)
         event_age_days = None
         concentration_mg_per_ml = None
         composition = None
@@ -58,7 +63,7 @@ class Specimen:
                 },
             ],
             "subject": {
-                "reference": f"Patient/{make_identifier(study_id, sample.subject_id)}"
+                "reference": f"Patient/{make_identifier(study_id, specimen.subject_id)}"
             },
         }
 

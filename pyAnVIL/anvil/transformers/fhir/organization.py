@@ -15,18 +15,19 @@ class Organization:
     def build_entity(workspace):
         """Create fhir entity."""
         study_id = workspace.id
-        institution = workspace.get('institute', None)
+        institution = workspace.institute
         if not institution:
             logging.getLogger(__name__).warning(f'workspace {study_id} missing institute')
+            institution = f"{study_id}-missing-institution"
 
         workspace = workspace.attributes.workspace.attributes
 
         entity = {
             "resourceType": Organization.resource_type,
-            "id": f"Organization/{make_identifier(Organization.resource_type, institution)}",
+            "id": f"{make_identifier(Organization.resource_type, institution)}",
             "meta": {
                 "profile": [
-                    "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                    "http://hl7.org/fhir/StructureDefinition/Organization"
                 ]
             },
             "identifier": [
@@ -36,10 +37,10 @@ class Organization:
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": f"Organization/{make_identifier(Organization.resource_type, institution)}",
+                    "value": f"{make_identifier(Organization.resource_type, institution)}",
                 },
             ],
-            "name": [{"text": institution}],
+            "name": institution,
         }
 
         return entity
