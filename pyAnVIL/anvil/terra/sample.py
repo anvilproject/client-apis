@@ -85,8 +85,7 @@ class CCDGSample(Sample):
                 if self.workspace_name == 'AnVIL_CCDG_WashU_CVD_EOCAD_BioImage_WGS':
                     return None
                 if 'participent' not in self.attributes.attributes:
-                    print(self.workspace_name)
-                    print(self)
+                    return None
                 return self.attributes.attributes.participent
             return self.attributes.attributes.participant
         return self.attributes.attributes.participant.entityName
