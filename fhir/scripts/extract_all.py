@@ -1,8 +1,12 @@
 """Extract all workspaces."""
+import sqlite3
 import os
 import logging
+from anvil.gen3.entities import Entities
 from anvil.terra.reconciler import Reconciler
 from anvil.terra.workspace import Workspace
+from anvil.terra.sample import Sample
+# from anvil.terra.subject import Subject
 from anvil.transformers.fhir.transformer import FhirTransformer
 from anvil.util.reconciler import DEFAULT_NAMESPACE
 
@@ -18,6 +22,7 @@ import json
 
 logging.basicConfig(level=logging.WARN, format='%(asctime)s %(levelname)-8s %(message)s')
 DASHBOARD_OUTPUT_PATH = "/tmp"
+gen3_entities = Entities("/Users/walsbr/Downloads/export_2020-11-04T17_48_47.avro")
 
 
 def reconcile_all(user_project, consortiums, namespace=DEFAULT_NAMESPACE, output_path=DASHBOARD_OUTPUT_PATH):
@@ -33,18 +38,31 @@ def reconcile_all(user_project, consortiums, namespace=DEFAULT_NAMESPACE, output
                 yield item
 
 
+def append_drs(sample):
+    """Add ga4gh_drs_uri to blob."""
+    try:
+        for key in sample.blobs.keys():
+            filename = key.split('/')[-1]
+            gen3_file = gen3_entities.get(submitter_id=filename)
+            sample.blobs[key]['ga4gh_drs_uri'] = f"https://gen3.theanvil.io/ga4gh/drs/v1/objects/{gen3_file['object']['ga4gh_drs_uri']}"
+    except Exception as e:
+        logging.info(f"Error sample: {sample.id} {e}")
+
+
 def all_instances(clazz):
     """Return all subjects."""
     logging.info("Starting aggregation for all AnVIL workspaces, this will take several minutes.")
+
     consortiums = (
         ('CMG', 'AnVIL_CMG_.*'),
         ('CCDG', 'AnVIL_CCDG_.*'),
         ('GTEx', '^AnVIL_GTEx_V8_hg38$'),
         ('ThousandGenomes', '^1000G-high-coverage-2019$')
-        # ('CMG', 'AnVIL_CMG_Broad_Muscle_KNC_WGS'),
     )
     for item in reconcile_all(user_project=os.environ['GOOGLE_PROJECT'], consortiums=consortiums):
-        if isinstance(item, clazz):
+        if isinstance(item, Sample):
+            append_drs(item)
+        if clazz is None or isinstance(item, clazz):
             yield item
 
 
@@ -138,17 +156,27 @@ def load_all(workspaces):
 def save_all(workspaces):
     """Save all data to the file system."""
     emitters = {}
+    entity = None
+
+    workspace_exceptions = {}
+    current_workspace = None
     for workspace in workspaces:
+        current_workspace = workspace.name
         transformer = FhirTransformer(workspace=workspace)
-        for item in transformer.transform():
-            for entity in item.entity():
-                resourceType = entity['resourceType']
-                emitter = emitters.get(resourceType, None)
-                if emitter is None:
-                    emitter = open(f"{DASHBOARD_OUTPUT_PATH}/{resourceType}.json", "w")
-                    emitters[resourceType] = emitter
-                json.dump(entity, emitter, separators=(',', ':'))
-                emitter.write('\n')
+        try:
+            for item in transformer.transform():
+                for entity in item.entity():
+                    resourceType = entity['resourceType']
+                    emitter = emitters.get(resourceType, None)
+                    if emitter is None:
+                        emitter = open(f"{DASHBOARD_OUTPUT_PATH}/{resourceType}.json", "w")
+                        emitters[resourceType] = emitter
+                    json.dump(entity, emitter, separators=(',', ':'))
+                    emitter.write('\n')
+        except Exception as e:
+            if current_workspace not in workspace_exceptions:
+                logging.getLogger(__name__).warn(f"{current_workspace} {e}")
+                workspace_exceptions[current_workspace] = True
     for stream in emitters.values():
         stream.close()
 
@@ -169,12 +197,70 @@ def load_all_files():
                 assert response.ok, f"body:{json.dumps(entity)}\nerror: {response.text}"
 
 
-workspaces = list(all_instances(Workspace))
-save_all(workspaces)
-load_all_files()
+def all_schemas():
+    """Return all subjects."""
+    logging.info("Starting aggregation for all AnVIL workspaces, this will take several minutes.")
+    consortiums = (
+        ('CMG', 'AnVIL_CMG_.*'),
+        ('CCDG', 'AnVIL_CCDG_.*'),
+        ('GTEx', '^AnVIL_GTEx_V8_hg38$'),
+        ('ThousandGenomes', '^1000G-high-coverage-2019$')
+    )
+    for (name, workspace_regex) in consortiums:
+        reconciler = Reconciler(name, user_project=os.environ['GOOGLE_PROJECT'], namespaces=DEFAULT_NAMESPACE, project_pattern=workspace_regex)
+        yield reconciler.reconcile_schemas()
+
+
+# emitter = open(f"{DASHBOARD_OUTPUT_PATH}/terra_summary.json", "w")
+# for workspace in all_instances(Workspace):
+#     for subject in workspace.subjects:
+#         for sample in subject.samples:
+#             for property, blob in sample.blobs.items():
+#                 json.dump(
+#                     {
+#                         "workspace_id": workspace.id,
+#                         "subject_id": subject.id,
+#                         "sample_id": sample.id,
+#                         "blob": blob['name'],
+#                     },
+#                     emitter,
+#                     separators=(',', ':')
+#                 )
+#                 emitter.write('\n')
+# emitter.close()
+
+_conn = sqlite3.connect('/tmp/gen3-drs.sqlite')
+cur = _conn.cursor()
+cur.executescript("""
+        CREATE TABLE IF NOT EXISTS terra_details (
+            workspace_id text,
+            subject_id text,
+            sample_id text,
+            blob text
+        );
+        """)
+_conn.commit()
+cur = _conn.cursor()
+with open(f"{DASHBOARD_OUTPUT_PATH}/terra_summary.json", 'rb') as fo:
+    for line in fo.readlines():
+        record = json.loads(line)
+        cur.execute("REPLACE into terra_details values (?, ?, ?, ?);", (record['workspace_id'], record['subject_id'], record['sample_id'], record['blob'],))
+_conn.commit()
+
+cur.executescript("""
+CREATE UNIQUE INDEX IF NOT EXISTS terra_details_idx ON terra_details(workspace_id, subject_id, sample_id, blob);
+""")
+_conn.commit()
+
+# workspaces = list(all_instances(Workspace))
+# save_all(workspaces)
+
+# load_all_files()
 
 # family_relationships = set()
 # for w in workspaces:
 #     for s in w.subjects:
 #         if 'Family_Relationship' in s.attributes.attributes:
 #             family_relationships.add(s.attributes.attributes['Family_Relationship'])
+
+# schemas = all_schemas()

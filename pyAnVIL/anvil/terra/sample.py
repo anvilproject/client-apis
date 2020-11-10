@@ -24,6 +24,9 @@ class Sample(object):
         blob_names = [(property_name, blob_name) for property_name, blob_name in self.attributes.attributes.items() if isinstance(blob_name, str) and blob_name.startswith('gs://')]
         my_blobs = []
         for property_name, blob_name in blob_names:
+            if 'md5' in blob_name:
+                # print(f'skipping md5 {blob_name}')
+                continue
             blob = blobs.get(blob_name, None)
             if blob:
                 blob['property_name'] = property_name
@@ -74,7 +77,10 @@ class CCDGSample(Sample):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        if 'project' not in self.attributes.attributes:
+            return self.attributes.name
+        # format the gen3 uses
+        return f"{self.attributes.attributes['project']}_{self.attributes.attributes['collaborator_sample_id']}"
 
     @property
     def subject_id(self):

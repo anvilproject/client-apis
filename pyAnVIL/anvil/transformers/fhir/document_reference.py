@@ -146,7 +146,6 @@ class DocumentReference:
     @staticmethod
     def build_entity(blob):
         """Render entity."""
-        # assert False, blob.attributes
         study_id = blob.sample.workspace_name
         sample_id = blob.sample.id
         subject_id = blob.sample.subject_id
@@ -158,20 +157,20 @@ class DocumentReference:
         # 'time_created': '2020-06-10T16:13:14.288000+00:00',
         # 'name': 'gs://fc-secure-004e5c03-d24d-4f7f-a26b-9fdc64b0ca3c/AnVIL_CMG_Broad_Muscle_KNC_WGS_Mar2020/RP-1687/WGS/192CP_ZS_1/v1/192CP_ZS_1.cram',
         # 'property_name': 'cram_path'})
-        acl = None
-        size = blob.attributes.size
-        url_list = [blob.attributes.name]
+        # acl = None
+        # size = blob.attributes.size
+        # url_list = [blob.attributes.name]
         file_name = blob.attributes.name.split('/')[-1]
         file_format = file_name.split('.')[-1]
-        data_type = file_format
-        time_created = blob.attributes.time_created
+        # data_type = file_format
+        # time_created = blob.attributes.time_created
 
         entity = {
             "resourceType": DocumentReference.resource_type,
             "id": genomic_file_id,
             "meta": {
                 "profile": [
-                    "http://hl7.org/fhir/StructureDefinition/DocumentReference"
+                    "http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-drs-document-reference"
                 ]
             },
             "identifier": [
@@ -187,28 +186,6 @@ class DocumentReference:
             "status": "current",
         }
 
-        if acl:
-            entity.setdefault("extension", []).append(
-                {
-                    "extension": [
-                        {
-                            "url": "file-accession",
-                            "valueIdentifier": {
-                                "value": accession
-                            },
-                        }
-                        for accession in acl
-                    ],
-                    "url": "http://fhir.kids-first.io/StructureDefinition/accession-identifier",
-                }
-            )
-
-        if data_type:
-            if data_type_dict.get(data_type):
-                entity["type"] = data_type_dict[data_type]
-            else:
-                entity.setdefault('type', {})['text'] = data_type
-
         if subject_id_slug:
             entity["subject"] = {
                 "reference": f"Patient/{subject_id_slug}"
@@ -218,101 +195,8 @@ class DocumentReference:
 
         # start attachment
         content["attachment"] = {
-            "id": "any-attachment-id",
-            "extension": [
-                {
-                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-meta",
-                    "extension": [
-                        {
-                            "url": "id",
-                            "valueString": url_list[0]
-                        },
-                        {
-                            "url": "self_uri",
-                            "valueString": url_list[0]
-                        },
-                        {
-                            "url": "size",
-                            "valueDecimal": size
-                        },
-                        {
-                            "url": "created_time",
-                            "valueDateTime": time_created
-                        },
-                        {
-                            "url": "name",
-                            "valueString": file_name
-                        },
-                        {
-                            "url": "updated_time",
-                            "valueDateTime": time_created
-                        },
-                        {
-                            "url": "version",
-                            "valueString": "0.0.0"
-                        },
-                        {
-                            "url": "mime_type",
-                            "valueString": "application/json"
-                        }
-                    ]
-                },
-                {
-                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-checksum",
-                    "extension": [
-                        {
-                            "url": "checksum",
-                            "valueString": blob.attributes.etag
-                        },
-                        {
-                            "url": "type",
-                            "valueString": "etag"
-                        }
-                    ]
-                },
-                {
-                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-checksum",
-                    "extension": [
-                        {
-                            "url": "checksum",
-                            "valueString": blob.attributes.crc32c
-                        },
-                        {
-                            "url": "type",
-                            "valueString": "crc32c"
-                        }
-                    ]
-                },
-                {
-                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/drs-access-method",
-                    "extension": [
-                        {
-                            "url": "type",
-                            "valueString": "gs"
-                        },
-                        {
-                            "url": "access_url",
-                            "valueString": blob.attributes.name
-                        }
-                    ]
-                }
-            ],
-            "contentType": "application/json"
+            "url": blob.attributes.ga4gh_drs_uri
         }
-
-        # if size:
-        #     content.setdefault('attachment', {})["extension"] = [
-        #         {
-        #             "url": "http://fhir.kids-first.io/StructureDefinition/large-size",
-        #             "valueDecimal": size,
-        #         }
-        #     ]
-
-        # if url_list:
-        #     content.setdefault('attachment', {})["url"] = url_list[0]
-
-        # if file_name:
-        #     content.setdefault('attachment', {})["title"] = file_name
 
         # end attachment
 

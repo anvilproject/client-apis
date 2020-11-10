@@ -27,7 +27,7 @@ description: An example of Terra workspace data mapped to FHIR model.
 license: CC0-1.0
 fhirVersion: 4.0.1
 dependencies:
-  hl7.fhir.us.core: 3.1.0
+  hl7.fhir.us.core: 3.1.1
 parameters:
   show-inherited-invariants: false
 copyrightYear: 2020+

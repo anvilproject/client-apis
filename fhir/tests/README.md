@@ -29,17 +29,13 @@ fish sushi .
 # run the tests, which will deploy generated config to FHIR server & test workspace transform
 pytest --log-cli-level DEBUG tests/test_fhir.py  --user_project <your terra google billing project>
 
-# for collaboration store the generated items
+# for collaboration copy the generated items into ncpi-model-forge
 
-cp -r build/input/examples/ fhir-artifacts/examples/
-cp -r build/input/extensions/ fhir-artifacts/extensions/
-cp -r build/input/profiles/ fhir-artifacts/profiles/
+rm build/input/examples/*.* ; rm build/input/extensions/*.* ; rm build/input/profiles/
 
+fish sushi .
 
-cp -r build/input/examples/ ncpi-model-forge/site_root/input/resources/examples/
-cp -r build/input/extensions/ ncpi-model-forge/site_root/input/resources/extensions/
-cp -r build/input/profiles/  ncpi-model-forge/site_root/input/resources/profiles/
-
+cp -r build/input/examples/*example*.json ncpi-model-forge/site_root/input/resources/examples/ ; cp -r build/input/extensions/ ncpi-model-forge/site_root/input/resources/extensions/ ; cp -r build/input/profiles/  ncpi-model-forge/site_root/input/resources/profiles/
 ```
 
 Issues

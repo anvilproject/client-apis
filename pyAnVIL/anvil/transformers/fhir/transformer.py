@@ -52,10 +52,13 @@ class FhirTransformer(Transformer):
             outputs = []
             for blob in self.blobs.values():
                 for b in _me.transform_blob(Blob(blob, sample)):
-                    b = DocumentReference.build_entity(b)
-                    outputs.append(b)
-                    yield b
-            yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
+                    if 'ga4gh_drs_uri' in b.attributes:
+                        b = DocumentReference.build_entity(b)
+                        outputs.append(b)
+                        yield b
+                        yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
+                    else:
+                        raise Exception(f"{sample.id} missing drs")
         sample.entity = types.MethodType(entity, sample)
         yield sample
 

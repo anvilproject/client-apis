@@ -13,14 +13,17 @@ class Transformer(object):
 
     def transform(self):
         """Transform entities."""
-        for w in self.transform_workspace(self.workspace):
-            yield w
-        for subject in self.workspace.subjects:
-            for s in self.transform_subject(subject):
-                yield s
-                for sample in subject.samples:
-                    for s in self.transform_sample(sample):
-                        yield s
+        try:
+            for w in self.transform_workspace(self.workspace):
+                yield w
+            for subject in self.workspace.subjects:
+                for s in self.transform_subject(subject):
+                    yield s
+                    for sample in subject.samples:
+                        for s in self.transform_sample(sample):
+                            yield s
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"{self.workspace.id} {e}")
 
     def transform_workspace(self, workspace):
         """Transform workspace (noop)."""
