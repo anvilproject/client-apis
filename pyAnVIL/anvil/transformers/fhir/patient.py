@@ -13,9 +13,8 @@ class Patient:
     def build_entity(subject):
         """Create fhir entity."""
         study_id = subject.workspace_name
-        # study_id_slug = make_identifier(study_id)
         subject_id = subject.id
-        subject_id_slug = make_identifier(study_id, subject_id)
+        subject_id_slug = make_identifier('P', subject_id)
 
         # ethnicity = None
         # race = None
@@ -73,9 +72,7 @@ class Patient:
         #         if species_dict.get(species):
         #             entity.setdefault("extension", []).append(species_dict[species])
 
-        # species QUESTION: gender ?
-        #     if gender:
-        #         if administrative_gender.get(gender):
-        #             entity["gender"] = administrative_gender[gender]
+        if subject.gender:
+            entity["gender"] = subject.gender
 
         return entity

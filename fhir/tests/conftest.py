@@ -6,6 +6,7 @@ import pytest
 import requests
 import glob
 from requests.auth import HTTPBasicAuth
+import time
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -99,7 +100,19 @@ def examples():
 
 
 @pytest.fixture(scope="session")
-def load_configurations(config, extensions, profiles, examples):
+def codesystems():
+    """Load terminology.codesystems paths."""
+    return [(loader(path), path) for path in glob.glob(os.path.join(RESOURCE_DIR, "terminology", "CodeSystem*.json"))]
+
+
+@pytest.fixture(scope="session")
+def valuesets():
+    """Load terminology.valuesets paths."""
+    return [(loader(path), path) for path in glob.glob(os.path.join(RESOURCE_DIR, "terminology", "ValueSet*.json"))]
+
+
+@pytest.fixture(scope="session")
+def load_configurations(config, extensions, profiles, examples, codesystems, valuesets):
     """Load customizations from IG into server.
 
     This is done once before any tests run.
@@ -131,10 +144,38 @@ def load_configurations(config, extensions, profiles, examples):
         logger.debug(f"created {url} from {path}")
         config_resource_urls.append(url)
 
-    for example_type in ['Practitioner', 'ResearchStudy', 'Patient', 'ResearchSubject', 'DocumentReference', 'Specimen']:
+    for codesystem, path in codesystems:
+        id = codesystem['id']
+        url = f"{config.base_url}/CodeSystem/{id}"
+        response = config.connection.put(
+            url=url,
+            json=codesystem,
+        )
+        assert response.ok, f"body:{codesystem}\nerror: {response.text}"
+        response_body = response.json()
+        logger.info(f"created {url} from {path}")
+        print(f"created {url} from {path}")
+        config_resource_urls.append(url)
+
+    for valueset, path in valuesets:
+        id = valueset['id']
+        url = f"{config.base_url}/ValueSet/{id}"
+        response = config.connection.put(
+            url=url,
+            json=valueset,
+        )
+        assert response.ok, f"body:{valueset}\nerror: {response.text}"
+        response_body = response.json()
+        logger.info(f"created {url} from {path}")
+        print(f"created {url} from {path}")
+        config_resource_urls.append(url)
+
+    time.sleep(60)
+    for example_type in ['Organization', 'Practitioner', 'PractitionerRole', 'ResearchStudy', 'Patient', 'ResearchSubject', 'DocumentReference', 'Specimen', 'Observation']:
         for example, path in examples:
             if example_type not in path:
                 continue
+            print(f"created example from {path}")
             resourceType = example['resourceType']
             id = example['id']
             url = f"{config.base_url}/{resourceType}/{id}"

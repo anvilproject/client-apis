@@ -18,6 +18,7 @@ class Subject(object):
         self.namespace = workspace.attributes.workspace.namespace
         # find all samples associated with blobs
         self.samples = self._find_samples(samples)
+        self.workspace_diseaseOntologyId = workspace.diseaseOntologyId
 
     def __repr__(self):
         """Return attributes."""
@@ -30,7 +31,7 @@ class Subject(object):
 
     def _find_samples(self, samples):
         """Get samples."""
-        return samples[self.id]
+        return samples[self.attributes.name]
 
     @property
     def missing_samples(self):
@@ -47,10 +48,10 @@ class Subject(object):
         """Deduce gender."""
         for p in ['gender', 'sex']:
             if p in self.attributes.attributes:
-                gender = self.attributes.attributes[p]
-                if gender in ['null', 'NA']:
+                gender = self.attributes.attributes[p].lower()
+                if gender in ['null', 'na', 'not reported', 'notreported']:
                     return None
-                return gender
+                return gender.lower()
         logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing gender parameter")
         return None
 
@@ -85,9 +86,24 @@ class Subject(object):
     @property
     def phenotypes(self):
         """Deduce phenotype."""
-        for k in ['disease_id', 'hpo_present', '19-hpo_present', '14-disease_id', '21-phenotype_description']:
+        for k in ['hpo_present', '19-hpo_present', '21-phenotype_description']:
             if k in self.attributes.attributes:
-                return self.attributes.attributes[k].split('|')
+                _s = self.attributes.attributes[k].replace(' ', '').replace(';', '|')
+                return _s.split('|')
+        return None
+
+    @property
+    def diseases(self):
+        """Deduce diseases."""
+        for k in ['disease_id', '14-disease_id']:
+            if k in self.attributes.attributes:
+                if not self.attributes.attributes[k] == '-':
+                    _s = self.attributes.attributes[k].replace(' ', '').replace(';', '|')
+                    return _s.split('|')
+        # CCDG
+        if 'Disease_Status' in self.attributes.attributes:
+            if self.attributes.attributes.get('Disease_Status', '').lower() == 'case':
+                return [self.workspace_diseaseOntologyId]
         return None
 
 
@@ -101,7 +117,7 @@ class CCDGSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
 
     @property
     def age(self):
@@ -110,7 +126,7 @@ class CCDGSubject(Subject):
             if p in self.attributes.attributes:
                 age = self.attributes.attributes[p]
                 if not str(age).isnumeric():
-                    logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric")
+                    logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric '{age}'")
                     return None
                 return int(age)
         logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age parameter")
@@ -127,19 +143,21 @@ class CMGSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
+
 
     @property
     def age(self):
         """Deduce age."""
-        if '18-age_of_onset' not in self.attributes.attributes:
-            logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing 18-age_of_onset")
-            return None
-        age_of_onset = self.attributes.attributes['18-age_of_onset']
-        if not str(age_of_onset).isnumeric():
-            # logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} 18-age_of_onset not numeric {age_of_onset}")
-            return None
-        return int(age_of_onset)
+        for p in ['18-age_of_onset', "12-age_at_last_observation"]:
+            if p in self.attributes.attributes:
+                age = self.attributes.attributes[p]
+                if not str(age).isnumeric():
+                    if not age == '-':
+                        logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric '{age}'")
+                    return None
+                return int(age)
+        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age parameter")
 
 
 class GTExSubject(Subject):
@@ -152,7 +170,7 @@ class GTExSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
 
     @property
     def age(self):
@@ -177,7 +195,7 @@ class ThousandGenomesSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
 
     @property
     def age(self):
@@ -195,7 +213,7 @@ class eMERGESUbject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
 
     @property
     def age(self):

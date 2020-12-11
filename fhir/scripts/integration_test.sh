@@ -94,10 +94,10 @@ fi
 # currently there isn't a reliable way to tell when server is finishes
 # re-indexing.
 echo "Test server deployed, begin execution of integration tests ..."
-# pytest -x tests/test_fhir.py::test_configuration
+pytest -x tests/test_fhir.py::test_configuration
 
 if [[ $EXECUTOR == "jenkins" ]]; then
     docker container rm -f $DOCKER_CONTAINER
 fi
 
-echo "✅ Finished integration tests!"
+echo "✅ Finished integration test setup!"

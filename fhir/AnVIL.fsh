@@ -39,6 +39,7 @@ Description: "An example representation of an NCPIResearchStudy"
 * title = "my NCPI research study example"
 * status = #active
 * principalInvestigator = Reference(PractitionerRoleExample)
+* condition = #DOID:0060224
 
 Instance: PatientExample
 InstanceOf: Patient

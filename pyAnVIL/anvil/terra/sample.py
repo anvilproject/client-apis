@@ -1,15 +1,41 @@
 """Client for reconciling terra subject."""
 
 import logging
+from anvil.gen3.entities import Entities
 from attrdict import AttrDict
 from collections import defaultdict
+import os
+
+# AVRO_PATH = "/tmp/export_2020-11-05T23_26_49.avro"
+# assert os.path.isfile(AVRO_PATH), f"{AVRO_PATH} should exist. Please export PFB from https://gen3.theanvil.io/"
+
+gen3_entities = None
+
+
+def _shorten_workspace(name):
+    name = name.replace('AnVIL_', '')
+    name = name.replace('CMG_', '')
+    name = name.replace('CCDG_', '')
+    return name
+
+
+def _append_drs(sample):
+    """Add ga4gh_drs_uri to blob."""
+    try:
+        for key in sample.blobs.keys():
+            filename = key.split('/')[-1]
+            gen3_file = gen3_entities.get(submitter_id=filename)
+            sample.blobs[key]['ga4gh_drs_uri'] = gen3_file['object']['ga4gh_drs_uri']   # f"https://gen3.theanvil.io/ga4gh/drs/v1/objects/{gen3_file['object']['object_id']}"
+    except Exception as e:
+        logging.info(f"Append DRS: {sample.id} {e}")
 
 
 class Sample(object):
     """Represent terra sample."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
         """Pass all args to AttrDict."""
+        global gen3_entities
         self._logger = logging.getLogger(__name__)
         self.attributes = AttrDict(*args)
         self.missing_blobs = True
@@ -18,6 +44,13 @@ class Sample(object):
         self.workspace_name = workspace.name
         self.blobs = self._find_blobs(blobs, sequencing)
         self.missing_blob_path = False
+        self.avro_path = avro_path
+
+        if not gen3_entities:
+            assert os.path.isfile(avro_path), f"{avro_path} should exist. Please export PFB from https://gen3.theanvil.io/"
+            gen3_entities = Entities(avro_path)
+            gen3_entities.load()
+        _append_drs(self)
 
     def _find_blobs(self, blobs, sequencing):
         """Find all blobs associated with sample."""
@@ -70,15 +103,15 @@ class Sample(object):
 class CCDGSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
 
     @property
     def id(self):
         """Deduce id."""
         if 'project' not in self.attributes.attributes:
-            return self.attributes.name
+            return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
         # format the gen3 uses
         return f"{self.attributes.attributes['project']}_{self.attributes.attributes['collaborator_sample_id']}"
 
@@ -114,9 +147,9 @@ class CCDGSample(Sample):
 class CMGSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
 
     def _find_blobs(self, blobs, sequencing):
         """Find all blobs associated with sample."""
@@ -189,20 +222,20 @@ class CMGSample(Sample):
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
 
 
 class GTExSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
 
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
 
     @property
     def subject_id(self):
@@ -228,14 +261,14 @@ class GTExSample(Sample):
 class ThousandGenomesSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
 
     @property
     def id(self):
         """Deduce id."""
-        return self.attributes.name
+        return f"{self.workspace_name}/Sa/{self.attributes.name}"
 
     @property
     def subject_id(self):
@@ -261,9 +294,9 @@ class ThousandGenomesSample(Sample):
 class eMERGESample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
 
     @property
     def id(self):

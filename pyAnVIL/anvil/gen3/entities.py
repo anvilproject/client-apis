@@ -34,6 +34,9 @@ class Entities:
             src_name text,
             dst_name text
         );
+        CREATE TABLE IF NOT EXISTS history (
+            key text
+        );
         """)
         self._conn.commit()
 
@@ -56,7 +59,18 @@ class Entities:
         """Load sqlite db from file."""
         cur = self._conn.cursor()
         ids = {}
-        logging.getLogger(__name__).info('Loading')
+        logging.getLogger(__name__).info(f'Loading {self.path}')
+
+        loaded_already = cur.execute("SELECT count(*) FROM history WHERE key=?;", (self.path,)).fetchone()[0]
+        if loaded_already == 1:
+            logging.getLogger(__name__).info(f'Already indexed {self.path}')
+            return
+
+        # index_count = cur.execute("SELECT count(*) FROM sqlite_master WHERE type='index' and name='vertices_submitter_id';").fetchone()[0]
+        # if index_count == 1:
+        #     logging.getLogger(__name__).info('Already indexed')
+        #     return
+
         with open(self.path, 'rb') as fo:
             for record in reader(fo):
                 if record['id'] not in ids:
@@ -117,6 +131,12 @@ class Entities:
                     left join flattened as m on f.project_id = m.project_id and f.anvil_project_id = m.anvil_project_id
                 group by f.project_id, f.anvil_project_id;
         """)
+        self._conn.commit()
+
+        logging.getLogger(__name__).info('Updating history')
+        cur.execute("""
+            insert into history(key) values(?);
+        """, (self.path,))
         self._conn.commit()
 
     def _submitter_id(self, record):

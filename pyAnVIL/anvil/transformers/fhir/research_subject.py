@@ -20,8 +20,8 @@ class ResearchSubject:
         study_id = subject.workspace_name
         study_id_slug = make_identifier(study_id)
         subject_id = subject.id
-        subject_id_slug = make_identifier(study_id, subject_id)
-        research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html
+        subject_id_slug = make_identifier('P', subject_id)
+        research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html        
 
         entity = {
             "resourceType": ResearchSubject.resource_type,
@@ -38,7 +38,7 @@ class ResearchSubject:
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": join(Patient.resource_type, study_id, subject_id),
+                    "value": make_identifier('P', subject_id), # join(Patient.resource_type, study_id, subject_id),
                 },
             ],
             "status": research_subject_status,

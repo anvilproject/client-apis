@@ -16,7 +16,7 @@ from anvil.terra.sample import sample_factory
 class Workspace():
     """Represent terra workspace."""
 
-    def __init__(self, *args, user_project=None):
+    def __init__(self, *args, user_project=None, avro_path=None):
         """Pass all args to AttrDict, set id for cacheing."""
         self.attributes = AttrDict(*args)
         assert user_project, "Must have user_project"
@@ -30,6 +30,7 @@ class Workspace():
         self._project_files = None
         self._missing_project_files = None
         self.missing_sequence = False
+        self.avro_path = avro_path
 
     @property
     def subjects(self):
@@ -46,7 +47,7 @@ class Workspace():
             blobs = self.blobs()
             sequencing = self._get_entities('sequencing')
             for s in self._get_entities('sample'):
-                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing)
+                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing, avro_path=self.avro_path)
                 self._samples[s.subject_id].append(s)
                 if s.missing_sequence:
                     self.missing_sequence = s.missing_sequence
@@ -231,7 +232,7 @@ class Workspace():
     @property
     def subject_schema(self):
         """Return schema for workspace subject."""
-        return self._schemas[self.subject_property_name]
+        return self.schemas.get(self.subject_property_name, None)
 
     @property
     def sample_schema(self):
@@ -325,6 +326,16 @@ class Workspace():
         if _institute and 'items' in _institute:
             return _institute['items'][0]
         return _institute
+
+    @property
+    def diseaseOntologyId(self):
+        """Deduce disease."""
+        _diseaseOntologyID = self.attributes.workspace.attributes.get('diseaseOntologyID', None)
+        if not _diseaseOntologyID:
+            _diseaseOntologyID = self.attributes.workspace.attributes.get('library:diseaseOntologyID', None)
+        if _diseaseOntologyID:
+            _diseaseOntologyID = _diseaseOntologyID.split('/')[-1].replace('_', ':')
+        return _diseaseOntologyID
 
 
 def _project_files(w):

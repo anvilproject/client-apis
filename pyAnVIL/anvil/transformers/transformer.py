@@ -20,7 +20,7 @@ class Transformer(object):
                 for s in self.transform_subject(subject):
                     yield s
                     for sample in subject.samples:
-                        for s in self.transform_sample(sample):
+                        for s in self.transform_sample(sample, subject):
                             yield s
         except Exception as e:
             logging.getLogger(__name__).warning(f"{self.workspace.id} {e}")

@@ -19,7 +19,6 @@ class Practitioner:
             return None
 
         workspace = workspace.attributes.workspace.attributes
-
         entity = {
             "resourceType": Practitioner.resource_type,
             "id": make_identifier(Practitioner.resource_type, investigator_name),

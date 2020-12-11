@@ -4,7 +4,14 @@ create table missing_sequencing (
     submitter_id text
 ) ;
 
-insert into missing_sequencing
+// No subjects with samples with no sequencing
+create table subjects_missing_sequencing (
+    key text,
+    submitter_id text
+) ;
+
+create table missing_sequencing
+as 
 select s.key, s.submitter_id  from vertices  as s
 where s.name = 'sample' 
 and
@@ -13,13 +20,8 @@ not EXISTS(
 ) ;
 
 
-// No subjects with samples with no sequencing
-create table subjects_missing_sequencing (
-    key text,
-    submitter_id text
-) ;
-
-insert into subjects_missing_sequencing
+create table subjects_missing_sequencing
+as
 select s.key, s.submitter_id  from vertices  as s
 where s.name = 'subject' 
 and s.key in
@@ -27,13 +29,7 @@ and s.key in
     select q.dst from edges as q where q.src in (select ms.key from missing_sequencing as ms)
 ) ;
 
-select 
-edges.dst 
-missing_sequencing.key ,
-missing_sequencing.missing_sequencing.key  
-from missing_sequencing join on edges where missing_sequencing.key = edges.src ;
-
-
+ 
 -- has sequencing
 select 
     json_extract(su.json, '$.object.project_id'),
@@ -140,5 +136,5 @@ select w.workspace_id,
     0 as "gen3_drs_uri_count"
 from terra_details  as w
 where workspace_id not in ( select distinct workspace_id from reconcile_counts ) 
-group by w.workspace_id    
+group by w.workspace_id    ;
 ;

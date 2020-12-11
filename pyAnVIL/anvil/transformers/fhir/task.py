@@ -56,7 +56,7 @@ class SpecimenTask:
 
         return {
             "resourceType": "Task",
-            "id": make_identifier("SpecimenTask", specimen['id']),
+            "id": make_identifier("T", specimen['id']),
             "status": "accepted",
             "intent": "unknown",
             "input": inputs,

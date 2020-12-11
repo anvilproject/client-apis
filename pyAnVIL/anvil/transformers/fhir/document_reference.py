@@ -139,17 +139,15 @@ class DocumentReference:
     @staticmethod
     def identifier(blob):
         """Make identifier."""
-        study_id_slug = make_identifier(blob.sample.workspace_name)
         sample_id_slug = make_identifier(blob.sample.id)
-        return make_identifier(join(study_id_slug, sample_id_slug, blob.attributes.property_name))
+        return make_identifier(join(sample_id_slug, blob.attributes.property_name))
 
     @staticmethod
-    def build_entity(blob):
+    def build_entity(blob, subject):
         """Render entity."""
         study_id = blob.sample.workspace_name
-        sample_id = blob.sample.id
-        subject_id = blob.sample.subject_id
-        subject_id_slug = make_identifier(study_id, subject_id)
+        subject_id = subject.id
+        subject_id_slug = make_identifier('P', subject_id)
 
         genomic_file_id = DocumentReference.identifier(blob)
         # logging.getLogger(__name__).debug(f"\n\n\n\n\n{blob.attributes}\n\n\n\n\n")
@@ -168,15 +166,10 @@ class DocumentReference:
         entity = {
             "resourceType": DocumentReference.resource_type,
             "id": genomic_file_id,
-            "meta": {
-                "profile": [
-                    "http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-drs-document-reference"
-                ]
-            },
             "identifier": [
                 {
                     "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
-                    "value": sample_id,
+                    "value": genomic_file_id,
                 },
                 {
                     "system": "urn:ncpi:unique-string",
@@ -194,8 +187,14 @@ class DocumentReference:
         content = {}
 
         # start attachment
+        if 'ga4gh_drs_uri' in blob.attributes:
+            entity["meta"] = {
+                "profile": [
+                    "http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-drs-document-reference"
+                ]
+            }
         content["attachment"] = {
-            "url": blob.attributes.ga4gh_drs_uri
+            "url": blob.attributes.get('ga4gh_drs_uri', blob.attributes['name'])
         }
 
         # end attachment

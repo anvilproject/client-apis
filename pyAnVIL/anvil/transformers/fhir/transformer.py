@@ -2,6 +2,7 @@
 # from anvil.transformers.fhir.attachment import Attachment
 from anvil.terra.blob import Blob
 from anvil.transformers.fhir.document_reference import DocumentReference
+from anvil.transformers.fhir.observation import DiseaseObservation
 from anvil.transformers.fhir.organization import Organization
 from anvil.transformers.fhir.patient import Patient
 from anvil.transformers.fhir.practitioner import Practitioner
@@ -39,26 +40,27 @@ class FhirTransformer(Transformer):
         def entity(self):
             yield Patient.build_entity(self)
             yield ResearchSubject.build_entity(self)
+            if self.diseases:
+                for d in self.diseases:
+                    yield DiseaseObservation.build_entity(self, disease=d)
+
         subject.entity = types.MethodType(entity, subject)
         yield subject
 
-    def transform_sample(self, sample):
+    def transform_sample(self, sample, subject):
         """Transform sample."""
         _me = self
 
         def entity(self):
-            s = Specimen.build_entity(self)
+            s = Specimen.build_entity(self, subject)
             yield s
             outputs = []
             for blob in self.blobs.values():
                 for b in _me.transform_blob(Blob(blob, sample)):
-                    if 'ga4gh_drs_uri' in b.attributes:
-                        b = DocumentReference.build_entity(b)
-                        outputs.append(b)
-                        yield b
-                        yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
-                    else:
-                        raise Exception(f"{sample.id} missing drs")
+                    b = DocumentReference.build_entity(b, subject)
+                    outputs.append(b)
+                    yield b
+            yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
         sample.entity = types.MethodType(entity, sample)
         yield sample
 

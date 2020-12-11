@@ -6,6 +6,8 @@ from anvil.transformers.fhir.organization import Organization
 
 import logging
 
+from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
+
 
 class ResearchStudy:
     """Create fhir entity."""
@@ -19,16 +21,37 @@ class ResearchStudy:
         study_id = workspace.id
         investigator_name = workspace.investigator
         if not investigator_name:
-            logging.getLogger(__name__).warning(f'workspace {study_id} missing investigator')
+            logging.getLogger(__name__).warning(f'{study_id} missing investigator')
+        diseaseOntologyId = workspace.diseaseOntologyId
+
+        diseaseOntologyIdText = 'Missing'
+        if diseaseOntologyId and diseaseOntologyId not in disease_text:
+            logging.getLogger(__name__).error(f'{study_id} missing {diseaseOntologyId}')
+        else:
+            diseaseOntologyIdText = disease_text.get(diseaseOntologyId, 'Missing')
 
         workspace = workspace.attributes.workspace.attributes
         institution = workspace.get('institute', None)
         if not institution:
-            logging.getLogger(__name__).warning(f'workspace {study_id} missing institute')
+            logging.getLogger(__name__).warning(f'{study_id} missing institute')
         study_name = study_id
         attribution = study_id
         short_name = study_id
         key = study_id
+        condition = None
+        if diseaseOntologyId:
+            prefix = diseaseOntologyId.split(':')[0]
+            condition = [
+                {
+                    "coding": [
+                        {
+                            "system": disease_system[prefix],
+                            "code": diseaseOntologyId,
+                            "display": diseaseOntologyIdText,
+                        }
+                    ]
+                }
+            ]
 
         entity = {
             "resourceType": ResearchStudy.resource_type,
@@ -80,5 +103,7 @@ class ResearchStudy:
                     "valueString": short_name,
                 }
             )
+        if condition:
+            entity['condition'] = condition
 
         return entity
