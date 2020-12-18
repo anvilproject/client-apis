@@ -60,7 +60,7 @@ class DiseaseObservation:
                 "text": f"{diseaseOntologyText}"
             },
             "subject": {
-                "reference": f"Patient/{make_identifier(subject.workspace_name, subject.id)}"
+                "reference": f"Patient/{make_identifier('P', subject.id)}"
             },
             "valueCodeableConcept": {
                 "coding": [

@@ -30,6 +30,9 @@ class Reconciler():
         """Terra workspaces that match namespace & project_pattern."""
         if not self._workspaces:
             self._workspaces = [workspace_factory(w, user_project=self._user_project, avro_path=self.avro_path) for w in get_projects(self.namespaces, self.project_pattern)]
+            for w in self._workspaces:
+                w.attributes['reconciler_name'] = self.name
+
         return self._workspaces
 
     # @memoize
@@ -150,7 +153,7 @@ class Reconciler():
         for w in self.workspaces:
             if w.name in names:
                 raise Exception(w.name)
-            names.append(w.name)    
+            names.append(w.name)
             entities.save(w)
         entities.index()
 

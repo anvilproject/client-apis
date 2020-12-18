@@ -1,22 +1,13 @@
 """Extract all workspaces."""
-import sqlite3
 import os
 import logging
-from anvil.gen3.entities import Entities
-from anvil.terra.reconciler import Reconciler
-from anvil.terra.workspace import Workspace
-from anvil.terra.sample import Sample
-# from anvil.terra.subject import Subject
-from anvil.transformers.fhir.transformer import FhirTransformer
-from anvil.util.reconciler import DEFAULT_NAMESPACE
 
-import pandas
-import upsetplot
-import matplotlib.pyplot
 from collections import defaultdict
+import glob
 
 import concurrent.futures
-CONNECTIONS = 1 # 100
+# TODO - smilecdr throws exceptions when multiple connections (validating each request)
+CONNECTIONS = 1  # 100
 TIMEOUT = 50
 
 import requests
@@ -26,7 +17,7 @@ import json
 
 logging.basicConfig(level=logging.WARN, format='%(asctime)s %(levelname)-8s %(message)s')
 DASHBOARD_OUTPUT_PATH = "/tmp"
-gen3_entities = Entities("/Users/walsbr/Downloads/export_2020-11-04T17_48_47.avro")
+
 
 def entity_plots(clazz):
     """Plot upsert figures of entity in all terra workspaces."""
@@ -96,20 +87,21 @@ def load_all_files():
     """Load all data to the FHIR server."""
     _config = config()
     for resourceType in ['Practitioner', 'Organization', 'ResearchStudy', 'Patient', 'ResearchSubject', 'Specimen', 'Observation', 'DocumentReference', 'Task']:
-        if not os.path.isfile(f"{DASHBOARD_OUTPUT_PATH}/{resourceType}.json"):
+        paths = glob.glob(f"{DASHBOARD_OUTPUT_PATH}/**/{resourceType}.json", recursive=True)
+        if len(paths) == 0:
             print(f"Loading {resourceType} missing")
-            continue
-        with open(f"{DASHBOARD_OUTPUT_PATH}/{resourceType}.json", "r") as inputs:
-            print(f"Loading {resourceType}")
+        for path in paths:
+            with open(path, "r") as inputs:
+                print(f"Loading {path}")
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=CONNECTIONS) as executor:
-                future_to_url = (executor.submit(put, _config.connection, url, entity) for url, entity in entity_reader(_config, resourceType, inputs))
-                for future in concurrent.futures.as_completed(future_to_url):
-                    try:
-                        data = future.result()
-                    except Exception as exc:
-                        logging.getLogger(__name__).error(f"{exc}")
-                        exit()
+                with concurrent.futures.ThreadPoolExecutor(max_workers=CONNECTIONS) as executor:
+                    future_to_url = (executor.submit(put, _config.connection, url, entity) for url, entity in entity_reader(_config, resourceType, inputs))
+                    for future in concurrent.futures.as_completed(future_to_url):
+                        try:
+                            data = future.result()
+                        except Exception as exc:
+                            logging.getLogger(__name__).error(f"{exc}")
+                            exit()
 
 
 load_all_files()

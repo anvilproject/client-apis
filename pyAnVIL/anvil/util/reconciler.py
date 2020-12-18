@@ -9,10 +9,11 @@ import logging
 DEFAULT_NAMESPACE = 'anvil-datastorage'
 
 
-def reconcile(name, user_project, namespace, workspace_regex):
+def reconcile(name, user_project, namespace, workspace_regex, avro_path=None):
     """Run a reconciler on a set of workspaces, ."""
     logger = logging.getLogger('anvil.util.reconciler')
-    reconciler = Reconciler(name, user_project, namespace, workspace_regex)
+    reconciler = Reconciler(name, user_project, namespace, workspace_regex, avro_path)
+    reconciler.save()
     for view in reconciler.dashboard_views:
         accession = get_accession(namespace, view['project_id'])
         if accession:
@@ -32,13 +33,13 @@ def reconcile(name, user_project, namespace, workspace_regex):
         yield view
 
 
-def aggregate(namespace, user_project, consortium):
+def aggregate(namespace, user_project, consortium, avro_path=None):
     """Run a series of reconciliations."""
     def counts_factory():
         return {'expected_sample_count': 0, 'actual_sample_count': 0, 'problems': []}
     accessions = defaultdict(counts_factory)
     for name, workspace_regex in consortium:
-        for view in reconcile(name, user_project, namespace, workspace_regex):
+        for view in reconcile(name, user_project, namespace, workspace_regex, avro_path):
             if 'qualified_accession' in view:
                 accessions[view['qualified_accession']]['expected_sample_count'] = view['dbgap_sample_count']
                 accessions[view['qualified_accession']]['actual_sample_count'] += [n for n in view['nodes'] if n['type'] == 'Samples'][0]['count']
