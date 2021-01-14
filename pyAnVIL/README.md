@@ -78,7 +78,7 @@ Pre-requisites:
 ### Terra utilities
 
 ```
-   from anvil.terra import get_projects
+   from anvil.terra.api import get_projects
    projects = get_projects(namespaces=['anvil-datastorage'], project_pattern='AnVIL_CCDG.*')
    [p['workspace']['name'] for p in projects]
    >>> ['AnVIL_CCDG_WashU_CVD_EOCAD_BioMe_WGS',
