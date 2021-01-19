@@ -1,60 +1,42 @@
 """Extract all workspaces."""
 import os
 import logging
-
-from collections import defaultdict
 import glob
-
 import concurrent.futures
-# TODO - smilecdr throws exceptions when multiple connections (validating each request)
-CONNECTIONS = 1  # 100
-TIMEOUT = 50
-
 import requests
 from requests.auth import HTTPBasicAuth
-
 import json
 
+# TODO - smilecdr throws exceptions when multiple connections (validating each request)
+
+
+CONNECTIONS = 10
+TIMEOUT = 50
+
+
 logging.basicConfig(level=logging.WARN, format='%(asctime)s %(levelname)-8s %(message)s')
-DASHBOARD_OUTPUT_PATH = "/tmp"
-
-
-def entity_plots(clazz):
-    """Plot upsert figures of entity in all terra workspaces."""
-    if (clazz == Workspace):
-        clazz_dictionaries = {s.id: set(s.attributes.workspace.attributes.keys()) for s in all_instances(clazz)}
-    else:
-        clazz_dictionaries = {s.workspace_name: set(s.attributes.attributes.keys()) for s in all_instances(clazz)}
-    sample_df = pandas.DataFrame(upsetplot.from_contents(clazz_dictionaries))
-    upsetplot.plot(sample_df, sort_by="cardinality", sum_over=False, show_counts='%d')
-    current_figure = matplotlib.pyplot.gcf()
-    current_figure.suptitle(f'Count of shared {clazz.__name__} properties')
-    current_figure.savefig(f"{clazz.__name__}_projects.png")
-    entity_by_project = defaultdict(set)
-    for workspace_name, keys in clazz_dictionaries.items():
-        for k in keys:
-            entity_by_project[k].add(workspace_name)
-    entity_df = pandas.DataFrame(upsetplot.from_contents(entity_by_project))
-    upsetplot.plot(entity_df, sort_by="cardinality", sum_over=False, show_counts='%d')
-    current_figure = matplotlib.pyplot.gcf()
-    current_figure.set_size_inches(10.5, 40.5)
-    current_figure.suptitle(f'"{clazz.__name__}" Count of shared attribute names')
-    current_figure.savefig(f"{clazz.__name__}_attributes.png")
-    return clazz_dictionaries
-
-
+DASHBOARD_OUTPUT_PATH = "/tmp/ThousandGenomes"
 
 
 FHIR_API = os.getenv("FHIR_API") or "http://localhost:8000"
 FHIR_USER = os.getenv("FHIR_USER") or "admin"
 FHIR_PW = os.getenv("FHIR_PW") or "password"
 
+# see https://github.com/ncpi-fhir/ncpi-api-fhir-service
+FHIR_COOKIE = os.getenv("FHIR_COOKIE") or None
+
 
 def config():
     """Configure context used for all tests."""
     session = requests.session()
-    session.auth = HTTPBasicAuth(FHIR_USER, FHIR_PW)
-    session.headers = {"Content-Type": "application/fhir+json"}
+    if not FHIR_COOKIE:
+        session.auth = HTTPBasicAuth(FHIR_USER, FHIR_PW)
+    session.headers = {
+        "Content-Type": "application/fhir+json",
+        "accept": "application/fhir+json;charset=utf-8"
+    }
+    if FHIR_COOKIE:
+        session.headers["cookie"] = f"AWSELBAuthSessionCookie-0={FHIR_COOKIE}"
 
     class Config:
         """Store config in class."""
@@ -72,6 +54,10 @@ def put(connection, url, entity):
         json=entity,
     )
     assert response.ok, f"body:{json.dumps(entity)}\nerror: {response.text}"
+    try:
+        response.json()
+    except Exception as ex:
+        logging.error(f"url:{url}\nbody:{json.dumps(entity)}\nerror: {response.text}\n{ex}")
 
 
 def entity_reader(_config, resourceType, inputs):
@@ -79,7 +65,7 @@ def entity_reader(_config, resourceType, inputs):
     for line in inputs.readlines():
         entity = json.loads(line)
         id = entity['id']
-        url = f"{_config.base_url}/{resourceType}/{id}"
+        url = f"{_config.base_url}{resourceType}/{id}"
         yield (url, entity, )
 
 
@@ -87,7 +73,8 @@ def load_all_files():
     """Load all data to the FHIR server."""
     _config = config()
     for resourceType in ['Practitioner', 'Organization', 'ResearchStudy', 'Patient', 'ResearchSubject', 'Specimen', 'Observation', 'DocumentReference', 'Task']:
-        paths = glob.glob(f"{DASHBOARD_OUTPUT_PATH}/**/{resourceType}.json", recursive=True)
+        path = f"{DASHBOARD_OUTPUT_PATH}/**/{resourceType}.json"
+        paths = glob.glob(path, recursive=True)
         if len(paths) == 0:
             print(f"Loading {resourceType} missing")
         for path in paths:
@@ -99,9 +86,33 @@ def load_all_files():
                     for future in concurrent.futures.as_completed(future_to_url):
                         try:
                             data = future.result()
+                            assert data, "Future should return result"
                         except Exception as exc:
                             logging.getLogger(__name__).error(f"{exc}")
-                            exit()
 
 
+def get(connection, url):
+    """Read entity from connection."""
+    print(connection.headers)
+    print(url)
+    response = connection.get(
+        url=url
+    )
+    assert response.ok, f"url:{url}\nerror: {response.text}"
+    print(response)
+    print(response.text)
+    return response.json()
+
+
+def read_all(resourceTypes):
+    """Load all data to the FHIR server."""
+    _config = config()
+    for resourceType in resourceTypes:
+        url = f"{_config.base_url}{resourceType}"
+        entity = get(_config.connection, url)
+        assert entity, f"{url} should return entity"
+
+
+# TODO - add cli handler
 load_all_files()
+# read_all(['ResearchStudy'])
