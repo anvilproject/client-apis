@@ -123,6 +123,7 @@ def load_configurations(config, extensions, profiles, examples, codesystems, val
     for extension, path in extensions:
         id = extension['id']
         url = f"{config.base_url}/StructureDefinition/{id}"
+        print(f"attempting {url} from {path}")
         response = config.connection.put(
             url=url,
             json=extension,
@@ -170,7 +171,8 @@ def load_configurations(config, extensions, profiles, examples, codesystems, val
         print(f"created {url} from {path}")
         config_resource_urls.append(url)
 
-    time.sleep(60)
+    print("sleeping for 120 seconds")
+    time.sleep(120)
     for example_type in ['Organization', 'Practitioner', 'PractitionerRole', 'ResearchStudy', 'Patient', 'ResearchSubject', 'DocumentReference', 'Specimen', 'Observation']:
         for example, path in examples:
             if example_type not in path:
