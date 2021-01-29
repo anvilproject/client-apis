@@ -1,15 +1,38 @@
 
 
+
 # AnVIL FHIR
+
+##  Transforming AnVIL to FHIR
+
+> contributing to https://github.com/ncpi-fhir/ncpi-model-forge IG
+
+
+* creates a local docker environment consisting of the smilecdr FHIR server
+    * see ./tests
+    * see ./scripts/integration_test.sh
+
+
+* extract and transform the data, see ./scripts/extract_all.py - this script has been superseded by the dashboard-fhir notebook
+
+
+* load the data into smilecdr docker image,  see ./scripts/fhir_load.py
+
+
+
+
+## IG playground 
+
+> uses https://github.com/FHIR/sushi to bootstrap an development toolchain to create FHIR extensions and profiles
 
 ![image](https://user-images.githubusercontent.com/47808/80027524-c00a0900-8498-11ea-8a30-a5d340995a6c.png)
 
 
-## use case
+### use case
 
 ![image](https://user-images.githubusercontent.com/47808/80027617-e29c2200-8498-11ea-84a8-91c5b974c53a.png)
 
-## getting started
+### getting started
 
 Pre requisites
 * docker
@@ -57,7 +80,7 @@ cd build
  
 ```
 
-## update ncpi model
+### update ncpi model
 
 ```
 cp build/input/examples/*.* ncpi-model-forge/site_root/input/resources/examples
@@ -66,7 +89,7 @@ cp build/input/profiles/*.* ncpi-model-forge/site_root/input/resources/profiles/
 ```
 
 
-## testing
+### testing
 
 see tests/README.md
 

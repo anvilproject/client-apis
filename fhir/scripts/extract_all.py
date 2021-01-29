@@ -1,5 +1,4 @@
 """Extract all workspaces."""
-import sqlite3
 import os
 import logging
 from anvil.gen3.entities import Entities
@@ -10,13 +9,6 @@ from anvil.terra.sample import Sample
 from anvil.transformers.fhir.transformer import FhirTransformer
 from anvil.util.reconciler import DEFAULT_NAMESPACE
 
-import pandas
-# import upsetplot
-import matplotlib.pyplot
-from collections import defaultdict
-
-import requests
-from requests.auth import HTTPBasicAuth
 
 import json
 
@@ -112,6 +104,7 @@ def validate():
         with open(path, 'r') as inputs:
             for line in inputs.readlines():
                 fhir_obj = json.loads(line)
+                assert fhir_obj, "must be non-null"
                 break
 
 
