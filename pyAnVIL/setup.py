@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.2rc17',  # Required
+    version='0.0.5rc5',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -135,7 +135,8 @@ setup(
         'xmltodict==0.12.0',
         'Click==7.0',
         'attrdict==2.0.1',
-        'google-cloud-storage==1.19.1'
+        'google-cloud-storage==1.19.1',
+        'fastavro==1.2.0'
     ],
 
     # List additional groups of dependencies here (e.g. development

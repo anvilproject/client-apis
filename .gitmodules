@@ -1,0 +1,3 @@
+[submodule "fhir/ncpi-model-forge"]
+	path = fhir/ncpi-model-forge
+	url = https://github.com/ncpi-fhir/ncpi-model-forge

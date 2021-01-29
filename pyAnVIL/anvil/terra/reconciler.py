@@ -1,17 +1,20 @@
 """Retrieve google bucket meta data, dbGap information and gen3 meta associated with terra workspace."""
 import logging
 
-from anvil.terra.workspace import Workspace
+from anvil.terra.workspace import workspace_factory
 from anvil.terra.api import get_projects
 # from anvil.cache import memoize
 from collections import defaultdict
 from attrdict import AttrDict
 
+import sqlite3
+import pickle
+
 
 class Reconciler():
     """Retrieve google bucket meta data, dbGap information and gen3 meta associated with terra workspace."""
 
-    def __init__(self, name, user_project, namespaces, project_pattern):
+    def __init__(self, name, user_project, namespaces, project_pattern, avro_path):
         """Initialize properties, set id to namespaces/project_pattern."""
         self.name = name
         self._user_project = user_project
@@ -20,12 +23,16 @@ class Reconciler():
         self._workspaces = None
         self._logger = logging.getLogger(__name__)
         self.id = f"{namespaces}/{project_pattern}"
+        self.avro_path = avro_path
 
     @property
     def workspaces(self):
         """Terra workspaces that match namespace & project_pattern."""
         if not self._workspaces:
-            self._workspaces = [Workspace(w, user_project=self._user_project) for w in get_projects(self.namespaces, self.project_pattern)]
+            self._workspaces = [workspace_factory(w, user_project=self._user_project, avro_path=self.avro_path) for w in get_projects(self.namespaces, self.project_pattern)]
+            for w in self._workspaces:
+                w.attributes['reconciler_name'] = self.name
+
         return self._workspaces
 
     # @memoize
@@ -138,3 +145,103 @@ class Reconciler():
             # }
 
             yield v
+
+    def save(self):
+        """Persist workspaces to db."""
+        entities = Entities(path='/tmp/terra.sqlite')
+        names = []
+        for w in self.workspaces:
+            if w.name in names:
+                raise Exception(w.name)
+            names.append(w.name)
+            entities.save(w)
+        entities.index()
+
+
+class Entities:
+    """Represent workspace objects."""
+
+    def __init__(self, path):
+        """Simplify blob."""
+        self.path = path
+        self._conn = sqlite3.connect(self.path)
+        cur = self._conn.cursor()
+        cur.executescript("""
+        CREATE TABLE IF NOT EXISTS vertices (
+            key text PRIMARY KEY,
+            submitter_id text,
+            name text,
+            json text NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS edges (
+            src text,
+            dst text,
+            src_name text,
+            dst_name text
+        );
+        """)
+        self._conn.commit()
+
+    def put(self, key, submitter_id, name, data, cur):
+        """Save an item."""
+        cur.execute("REPLACE into vertices values (?, ?, ?, ?);", (key, submitter_id, name, pickle.dumps(data)))
+        # self._logger.debug(f"put {key}")
+
+    def get(self, key=None):
+        """Retrieve an item."""
+        cur = self._conn.cursor()
+        data = cur.execute("SELECT json FROM vertices where key=?", (key,)).fetchone()
+        if data:
+            v = pickle.loads(data[0])
+            src_edges = [(d[0], d[1]) for d in cur.execute("SELECT src, src_name FROM edges where dst=?", (key,)).fetchall()]
+            edges = {}
+            for src in src_edges:
+                if src[1] not in edges:
+                    edges[src[1]] = []
+                for d in cur.execute("SELECT json, key, name FROM vertices where key=?", (src[0],)).fetchall():                    
+                    edges[src[1]].append(pickle.loads(d[0]))
+
+            return {'vertex': v, 'edges': edges}
+        assert False, f"NOT FOUND {key}"
+
+    def get_by_name(self, name=None):
+        """Retrieve all items with name."""
+        cur = self._conn.cursor()
+        data = cur.execute("SELECT json FROM vertices where name=?", (name,)).fetchall()
+        return [pickle.loads(d[0]) for d in data]
+
+    def put_edge(self, src, dst, src_name, dst_name, cur):
+        """Save edge."""
+        cur.execute("REPLACE into edges values (?, ?, ?, ?);", (src, dst, src_name, dst_name))
+
+    def save(self, workspace):
+        """Load sqlite db from workspace."""
+        cur = self._conn.cursor()
+        logging.getLogger(__name__).info(f'Loading {workspace.name}')
+        self.put(workspace.id, workspace.name, 'workspace', workspace, cur)
+        for subject in workspace.subjects:
+            self.put(subject.id, subject.id, 'subject', subject, cur)
+            self.put_edge(subject.id, workspace.id, 'subject', 'workspace', cur)
+            for sample in subject.samples:
+                self.put(sample.id, sample.id, 'sample', sample, cur)
+                self.put_edge(sample.id, subject.id, 'sample', 'subject', cur)
+                for blob_id, blob in sample.blobs.items():
+                    self.put(blob_id, blob_id, 'blob', blob, cur)
+                    self.put_edge(blob_id, sample.id, 'blob', 'sample', cur)
+                    if 'ga4gh_drs_uri' in blob:
+                        drs = {'uri': blob['ga4gh_drs_uri']}
+                        self.put(drs['uri'], sample.id, 'drs', drs, cur)
+                        self.put_edge(drs['uri'], sample.id, 'drs', 'sample', cur)
+
+        self._conn.commit()
+
+    def index(self):
+        """Index the vertices and edges."""
+        logging.getLogger(__name__).info('Indexing')
+        cur = self._conn.cursor()
+        cur.executescript("""
+        CREATE  INDEX IF NOT EXISTS vertices_submitter_id ON vertices(submitter_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS edges_src_dst ON edges(src, dst, src_name, dst_name);
+        CREATE  INDEX IF NOT EXISTS edges_dst ON edges(dst);
+        """)
+        self._conn.commit()
