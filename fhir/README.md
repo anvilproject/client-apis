@@ -30,7 +30,10 @@
 
 ### use case
 
-![image](https://user-images.githubusercontent.com/47808/80027617-e29c2200-8498-11ea-84a8-91c5b974c53a.png)
+> Map *existing* terra workspaces, decorated with DRS ids from gen3/pfb
+
+![image](https://user-images.githubusercontent.com/47808/106366620-e4c9c180-62f1-11eb-8c21-d64a4fb78425.png)
+
 
 ### getting started
 
