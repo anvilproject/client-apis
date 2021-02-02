@@ -8,13 +8,16 @@ firecloud==0.16.29
 # external requirements
 
 ## cmd arguments
-click==7.0
+click==7.1.2
 
 ## dot notation dicts
 attrdict==2.0.1
 
 ## google storage
-google-cloud-storage==1.19.1
+google-cloud-storage==1.35.0
 
 ## gen3 requires pandas
 pandas==0.25.3
+
+## gen3 PFB export
+fastavro==1.2.0

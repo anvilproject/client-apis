@@ -1,0 +1,25 @@
+{
+ "name": "anvil",
+ "version" : "0.2.0",  
+ "canonical" : "http://theanvil.io/fhir/anvil",
+ "url" : "http://theanvil.io/fhir/anvil",
+ "title" : "AnVIL Implementation Guide",
+ "description": "An example of Terra workspace data mapped to FHIR model.",
+ "dependencies": {
+    "hl7.fhir.r4.core": "4.0.1",
+    "hl7.fhir.us.core": "3.1.0"
+ },
+ "keywords": [
+   "AnVIL",
+   "BioInformatics"
+ ],
+ "language": "en",
+ "author": "AnVIL",
+ "maintainers": [
+   {
+     "name": "anvilproject.org",
+     "email": "help@lists.anvilproject.org"
+   }
+ ],
+ "license": "CC0-1.0"
+}

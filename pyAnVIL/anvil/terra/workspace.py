@@ -16,7 +16,7 @@ from anvil.terra.sample import sample_factory
 class Workspace():
     """Represent terra workspace."""
 
-    def __init__(self, *args, user_project=None):
+    def __init__(self, *args, user_project=None, avro_path=None):
         """Pass all args to AttrDict, set id for cacheing."""
         self.attributes = AttrDict(*args)
         assert user_project, "Must have user_project"
@@ -30,6 +30,7 @@ class Workspace():
         self._project_files = None
         self._missing_project_files = None
         self.missing_sequence = False
+        self.avro_path = avro_path
 
     @property
     def subjects(self):
@@ -46,7 +47,7 @@ class Workspace():
             blobs = self.blobs()
             sequencing = self._get_entities('sequencing')
             for s in self._get_entities('sample'):
-                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing)
+                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing, avro_path=self.avro_path)
                 self._samples[s.subject_id].append(s)
                 if s.missing_sequence:
                     self.missing_sequence = s.missing_sequence
@@ -58,6 +59,15 @@ class Workspace():
         if not self._project_files:
             self._project_file_blobs()
         return self._project_files
+
+    @property
+    def project_files_attributes(self):
+        """Find attributes that are files."""
+        _files = {}
+        for k, v in self.attributes.workspace.items():
+            if isinstance(v, str) and v.startswith('gs://'):
+                _files[k] = v
+        return _files
 
     @property
     def missing_project_files(self):
@@ -222,7 +232,7 @@ class Workspace():
     @property
     def subject_schema(self):
         """Return schema for workspace subject."""
-        return self._schemas[self.subject_property_name]
+        return self.schemas.get(self.subject_property_name, None)
 
     @property
     def sample_schema(self):
@@ -296,6 +306,37 @@ class Workspace():
             'problems': self.problems
         })
 
+    @property
+    def investigator(self):
+        """Deduce investigator name."""
+        _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
+        if _investigator == 'NA':
+            return None
+        return _investigator
+
+    @property
+    def accession(self):
+        """Deduce accession."""
+        return self.attributes.workspace.attributes.get("library:datasetVersion", None)
+
+    @property
+    def institute(self):
+        """Deduce institute."""
+        _institute = self.attributes.workspace.attributes.get("library:institute", None)
+        if _institute and 'items' in _institute:
+            return _institute['items'][0]
+        return _institute
+
+    @property
+    def diseaseOntologyId(self):
+        """Deduce disease."""
+        _diseaseOntologyID = self.attributes.workspace.attributes.get('diseaseOntologyID', None)
+        if not _diseaseOntologyID:
+            _diseaseOntologyID = self.attributes.workspace.attributes.get('library:diseaseOntologyID', None)
+        if _diseaseOntologyID:
+            _diseaseOntologyID = _diseaseOntologyID.split('/')[-1].replace('_', ':')
+        return _diseaseOntologyID
+
 
 def _project_files(w):
     """Deduce attributes that are files."""
@@ -312,3 +353,52 @@ def _bucket_contents(user_project, bucket_name):
         name = f"gs://{project_bucket.name}/{b.name}"
         project_blobs[name] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name}
     return project_blobs
+
+
+class CMGWorkspace(Workspace):
+    """Extend Workspace class."""
+
+    def __init__(self, *args, **kwargs):
+        """Call super."""
+        super().__init__(*args, **kwargs)
+
+    @property
+    def investigator(self):
+        """Deduce investigator name."""
+        _investigator = self.attributes.workspace.attributes.get('study_pi', None)
+        if not _investigator:
+            _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
+        return _investigator
+
+    @property
+    def accession(self):
+        """Deduce accession."""
+        _accession = super().accession
+        if not _accession:
+            _accession = self.attributes.workspace.attributes.get("study_accession", None)
+        return _accession
+
+
+class CCDGWorkspace(Workspace):
+    """Extend Workspace class."""
+
+    def __init__(self, *args, **kwargs):
+        """Call super."""
+        super().__init__(*args, **kwargs)
+
+
+def workspace_factory(*args, **kwargs):
+    """Return a specialized Workspace class instance."""
+    name = args[0]['workspace']['name']
+    if 'CCDG' in name.upper():
+        return CCDGWorkspace(*args, **kwargs)
+    if 'CMG' in name.upper():
+        return CMGWorkspace(*args, **kwargs)
+    return Workspace(*args, **kwargs)
+    # if 'GTEX' in kwargs['workspace'].name.upper():
+    #     return GTExSubject(*args, **kwargs)
+    # if '1000G-HIGH-COVERAGE' in kwargs['workspace'].name.upper():
+    #     return ThousandGenomesSubject(*args, **kwargs)
+    # if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
+    #     return eMERGESUbject(*args, **kwargs)
+    raise Exception('Not implemented')

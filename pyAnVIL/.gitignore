@@ -1,0 +1,6 @@
+service_account.json
+.DS_Store
+.vscode/
+client_secret.json
+apps/
+data/
