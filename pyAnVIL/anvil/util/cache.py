@@ -1,10 +1,12 @@
 """Cache items into sqlite."""
-
+import os
 import sqlite3
 import json
 import functools
 import logging
 from datetime import date, datetime, timedelta
+
+CACHE_PATH = os.getenv('PYANVIL_CACHE_PATH', '/tmp/pyanvil-cache.sqlite')
 
 
 def json_serial(obj):
@@ -17,7 +19,7 @@ def json_serial(obj):
 class Cache():
     """Cache items in sqlite."""
 
-    def __init__(self, path='/tmp/pyanvil-cache.sqlite', timeout=60 * 60 * 24):
+    def __init__(self, path=CACHE_PATH, timeout=60 * 60 * 24):
         """Set up sqlite db."""
         self._conn = sqlite3.connect(path)
         self._timeout = timeout
