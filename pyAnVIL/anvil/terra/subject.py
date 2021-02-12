@@ -102,9 +102,9 @@ class Subject(object):
                     return _s.split('|')
         # CCDG
         if 'Disease_Status' in self.attributes.attributes:
-            if self.attributes.attributes.get('Disease_Status', '').lower() == 'case':
+            if self.attributes.attributes.get('Disease_Status', '').lower() == 'case' and self.workspace_diseaseOntologyId:
                 return [self.workspace_diseaseOntologyId]
-        return None
+        return []
 
 
 class CCDGSubject(Subject):
@@ -144,7 +144,6 @@ class CMGSubject(Subject):
     def id(self):
         """Deduce id."""
         return f"{self.workspace_name}/Su/{self.attributes.name}"
-
 
     @property
     def age(self):

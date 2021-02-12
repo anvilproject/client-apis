@@ -1,13 +1,11 @@
 """Represent fhir entity."""
 
-from re import sub
-from anvil.transformers.fhir import CANONICAL, join, make_identifier
-
+from anvil.transformers.fhir import make_identifier
 import logging
-
 from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
 
 logged_already = []
+
 
 class DiseaseObservation:
     """Create fhir entity."""
@@ -17,12 +15,8 @@ class DiseaseObservation:
 
     @staticmethod
     def build_entity(subject, disease):
-
-        # print(subject)
-        # print(disease)
-        # raise Exception(subject.workspace_diseaseOntologyId)
-        assert disease, 'Should have disease'
-        # assert subject.workspace_diseaseOntologyId, 'Should have subject.workspace_diseaseOntologyId'
+        """Create FHIR entity."""
+        assert disease, f'Should have disease {subject}'
 
         workspace_diseaseOntologyId = disease  # subject.workspace_diseaseOntologyId
         diseaseOntologyText = disease_text.get(disease, None)
