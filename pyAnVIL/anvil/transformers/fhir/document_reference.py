@@ -2,6 +2,15 @@
 
 from anvil.transformers.fhir import join, make_identifier
 # from anvil.transformers.fhir.patient import Patient
+from urllib.parse import urlsplit, urlunsplit
+
+
+def strip_port(url):
+    """Remove port from url (BUG in gen3)."""
+    if not url:
+        return url
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc.split(':')[0], parts.path, parts.query, parts.fragment,))
 
 
 class GENOMIC_FILE:
@@ -177,6 +186,9 @@ class DocumentReference:
                 },
             ],
             "status": "current",
+            "custodian": {
+                "reference": f"Organization/{study_id.lower()}"
+            }
         }
 
         if subject_id_slug:
@@ -193,8 +205,11 @@ class DocumentReference:
                     "http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-drs-document-reference"
                 ]
             }
+        url = strip_port(blob.attributes.get('ga4gh_drs_uri', None))
+        if not url:
+            url = blob.attributes['name']
         content["attachment"] = {
-            "url": blob.attributes.get('ga4gh_drs_uri', blob.attributes['name'])
+            "url": url
         }
 
         # end attachment

@@ -28,7 +28,7 @@ class FhirTransformer(Transformer):
             practitioner = Practitioner.build_entity(self)
             if practitioner:
                 yield practitioner
-            organization = Organization.build_entity(self)
+            organization = Organization.build_entity(self, f'Organization/{workspace.attributes.reconciler_name.lower()}')
             if organization:
                 yield organization
             yield ResearchStudy.build_entity(self)
