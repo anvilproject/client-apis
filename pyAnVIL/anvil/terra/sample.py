@@ -199,6 +199,8 @@ class CMGSample(Sample):
                 return self.attributes.attributes.participant.entityName
             if 'subject_id' in self.attributes.attributes:
                 return self.attributes.attributes.subject_id
+            if 'participant_id' in self.attributes.attributes:
+                return self.attributes.attributes.participant_id
             print(self.attributes)
             print(self.attributes.keys())
             assert False, 'inconsistent_subject unknown subject identifier'

@@ -335,6 +335,8 @@ class Workspace():
             _diseaseOntologyID = self.attributes.workspace.attributes.get('library:diseaseOntologyID', None)
         if _diseaseOntologyID:
             _diseaseOntologyID = _diseaseOntologyID.split('/')[-1].replace('_', ':')
+        else:
+            logging.warn(f"{self.id} missing diseaseOntologyID")
         return _diseaseOntologyID
 
 

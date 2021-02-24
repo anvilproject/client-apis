@@ -18,7 +18,7 @@ class ResearchStudy:
     @staticmethod
     def build_entity(workspace):
         """Create fhir entity."""
-        study_id = workspace.id
+        study_id = workspace.id.lower()
         investigator_name = workspace.investigator
         if not investigator_name:
             logging.getLogger(__name__).warning(f'{study_id} missing investigator')
@@ -86,6 +86,9 @@ class ResearchStudy:
             ],
             "title": study_name,
             "status": "completed",
+            "sponsor": {
+                "reference": f"Organization/{study_id.lower()}"
+            }
         }
 
         if investigator_name:

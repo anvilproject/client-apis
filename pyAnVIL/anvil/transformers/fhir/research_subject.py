@@ -1,8 +1,7 @@
 """Represent fhir entity."""
 
 
-from anvil.transformers.fhir import join, make_identifier
-from anvil.transformers.fhir.patient import Patient
+from anvil.transformers.fhir import make_identifier
 
 
 class ResearchSubject:
@@ -18,10 +17,10 @@ class ResearchSubject:
     def build_entity(subject):
         """Create fhir entity."""
         study_id = subject.workspace_name
-        study_id_slug = make_identifier(study_id)
+        study_id_slug = make_identifier(study_id.lower())
         subject_id = subject.id
         subject_id_slug = make_identifier('P', subject_id)
-        research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html        
+        research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html
 
         entity = {
             "resourceType": ResearchSubject.resource_type,
@@ -38,7 +37,7 @@ class ResearchSubject:
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": make_identifier('P', subject_id), # join(Patient.resource_type, study_id, subject_id),
+                    "value": make_identifier('P', subject_id),
                 },
             ],
             "status": research_subject_status,

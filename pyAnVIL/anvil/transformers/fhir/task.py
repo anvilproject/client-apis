@@ -60,5 +60,8 @@ class SpecimenTask:
             "status": "accepted",
             "intent": "unknown",
             "input": inputs,
-            "output": outputs
+            "output": outputs,
+            "owner": {
+                "reference": "Organization/thousandgenomes"
+            }
         }

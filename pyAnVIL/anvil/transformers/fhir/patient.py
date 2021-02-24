@@ -39,6 +39,9 @@ class Patient:
                     "value": join(Patient.resource_type, study_id, subject_id),
                 },
             ],
+            "managingOrganization": {
+                "reference": f"Organization/{study_id.lower()}"
+            }
         }
 
         # ethnicity QUESTION: http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity

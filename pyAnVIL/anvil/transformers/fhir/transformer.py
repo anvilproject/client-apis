@@ -28,7 +28,7 @@ class FhirTransformer(Transformer):
             practitioner = Practitioner.build_entity(self)
             if practitioner:
                 yield practitioner
-            organization = Organization.build_entity(self)
+            organization = Organization.build_entity(self, f'Organization/{workspace.attributes.reconciler_name.lower()}')
             if organization:
                 yield organization
             yield ResearchStudy.build_entity(self)
@@ -42,6 +42,7 @@ class FhirTransformer(Transformer):
             yield ResearchSubject.build_entity(self)
             if self.diseases:
                 for d in self.diseases:
+                    assert d, f"should have disease {self} {self.diseases}"
                     yield DiseaseObservation.build_entity(self, disease=d)
 
         subject.entity = types.MethodType(entity, subject)

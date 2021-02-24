@@ -1,10 +1,6 @@
 """Represent fhir entity."""
 
 
-import logging
-from anvil.transformers.fhir import make_identifier
-
-
 class Organization:
     """Create fhir entity."""
 
@@ -12,19 +8,20 @@ class Organization:
     resource_type = "Organization"
 
     @staticmethod
-    def build_entity(workspace):
+    def build_entity(workspace, parent=None):
         """Create fhir entity."""
         study_id = workspace.id
-        institution = workspace.institute
-        if not institution:
-            logging.getLogger(__name__).warning(f'workspace {study_id} missing institute')
-            institution = f"{study_id}-missing-institution"
+        id = study_id.lower()  # make_identifier(Organization.resource_type, study_id)
+        # institution = workspace.institute
+        # if not institution:
+        #     logging.getLogger(__name__).warning(f'workspace {study_id} missing institute')
+        #     institution = f"{study_id}-missing-institution"
 
-        workspace = workspace.attributes.workspace.attributes
+        # workspace = workspace.attributes.workspace.attributes
 
         entity = {
             "resourceType": Organization.resource_type,
-            "id": f"{make_identifier(Organization.resource_type, institution)}",
+            "id": f"{id}",
             "meta": {
                 "profile": [
                     "http://hl7.org/fhir/StructureDefinition/Organization"
@@ -37,10 +34,19 @@ class Organization:
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": f"{make_identifier(Organization.resource_type, institution)}",
+                    "value": f"{id}",
                 },
             ],
-            "name": institution,
+            "name": study_id,
         }
+
+        if parent:
+            entity['partOf'] = {
+                "reference": parent
+            }
+        elif 'attributes' in workspace:
+            entity['partOf'] = {
+                "reference": f"Organization/{workspace.attributes.reconciler_name.lower()}"
+            }
 
         return entity

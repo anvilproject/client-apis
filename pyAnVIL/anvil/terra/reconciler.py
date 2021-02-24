@@ -171,7 +171,7 @@ class Entities:
             key text PRIMARY KEY,
             submitter_id text,
             name text,
-            json text NOT NULL
+            pickle text NOT NULL
         );
         CREATE TABLE IF NOT EXISTS edges (
             src text,
@@ -190,7 +190,7 @@ class Entities:
     def get(self, key=None):
         """Retrieve an item."""
         cur = self._conn.cursor()
-        data = cur.execute("SELECT json FROM vertices where key=?", (key,)).fetchone()
+        data = cur.execute("SELECT pickle FROM vertices where key=?", (key,)).fetchone()
         if data:
             v = pickle.loads(data[0])
             src_edges = [(d[0], d[1]) for d in cur.execute("SELECT src, src_name FROM edges where dst=?", (key,)).fetchall()]
@@ -198,7 +198,7 @@ class Entities:
             for src in src_edges:
                 if src[1] not in edges:
                     edges[src[1]] = []
-                for d in cur.execute("SELECT json, key, name FROM vertices where key=?", (src[0],)).fetchall():                    
+                for d in cur.execute("SELECT pickle, key, name FROM vertices where key=?", (src[0],)).fetchall():
                     edges[src[1]].append(pickle.loads(d[0]))
 
             return {'vertex': v, 'edges': edges}
@@ -207,7 +207,7 @@ class Entities:
     def get_by_name(self, name=None):
         """Retrieve all items with name."""
         cur = self._conn.cursor()
-        data = cur.execute("SELECT json FROM vertices where name=?", (name,)).fetchall()
+        data = cur.execute("SELECT pickle FROM vertices where name=?", (name,)).fetchall()
         return [pickle.loads(d[0]) for d in data]
 
     def put_edge(self, src, dst, src_name, dst_name, cur):
