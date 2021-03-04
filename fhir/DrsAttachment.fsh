@@ -27,10 +27,4 @@ Instance: DRSAttachmentExample
 InstanceOf: DRSAttachment
 Description: "An example representation of a DRSAttachment"
 Usage: #inline
-// * meta.profile = "http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-drs-attachment"
-// The element or path you referenced does not exist: meta.profile
-
-// * extension = ["http://fhir.ncpi-project-forge.io/StructureDefinition/drs-uri"]
-// Cannot find definition for Instance: ["http://fhir.ncpi-project-forge.io/StructureDefinition/drs-uri"].
-
 * url = "drs://example.com/ga4gh/drs/v1/objects/0f8c27b9-3300-4249-bb28-f49ffb80e277"
