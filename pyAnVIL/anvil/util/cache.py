@@ -21,6 +21,7 @@ class Cache():
 
     def __init__(self, path=CACHE_PATH, timeout=60 * 60 * 24):
         """Set up sqlite db."""
+        logging.getLogger(__name__).debug(path)
         self._conn = sqlite3.connect(path)
         self._timeout = timeout
         cur = self._conn.cursor()
@@ -36,12 +37,17 @@ class Cache():
         # if cur.rowcount > 0:
         #     self._logger.debug(f"expired {cur.rowcount} rows")
         # self._conn.commit()
+
         self._conn.execute('PRAGMA synchronous = OFF')
+        self._conn.commit()
+        self._conn.close()
+        self._conn = sqlite3.connect(path)
 
     def get(self, key):
         """Retrieve an item."""
         _logger = logging.getLogger(__name__)
 
+        _logger.debug(f"? {key}")
         now = datetime.now().replace(microsecond=0).isoformat()
         cur = self._conn.cursor()
         data = cur.execute("SELECT json FROM items where key=? and expiry > ?", (key, now)).fetchone()
@@ -50,16 +56,17 @@ class Cache():
             _logger.debug(f"hit {key}")
         else:
             _logger.debug(f"miss {key}")
-
+        cur.close()
         return data
 
     def put(self, key, data):
         """Save an item."""
+        logging.getLogger(__name__).debug(f"put {key}")
         expiry = (datetime.now() + timedelta(seconds=self._timeout)).replace(microsecond=0).isoformat()
         cur = self._conn.cursor()
         cur.execute("REPLACE into items values (?, ?, ?);", (key, expiry, json.dumps(data, default=json_serial)))
-        cur = self._conn.commit()
-        # self._logger.debug(f"put {key}")
+        self._conn.commit()
+        cur.close()
 
 
 def memoize(func):
