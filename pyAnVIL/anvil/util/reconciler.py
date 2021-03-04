@@ -14,6 +14,8 @@ def reconcile(name, user_project, namespace, workspace_regex, avro_path=None):
     logger = logging.getLogger('anvil.util.reconciler')
     reconciler = Reconciler(name, user_project, namespace, workspace_regex, avro_path)
     reconciler.save()
+    reconciled_schemas = reconciler.reconcile_schemas()
+    reconciled_schemas['name'] = name
     for view in reconciler.dashboard_views:
         accession = get_accession(namespace, view['project_id'])
         if accession:
@@ -31,6 +33,7 @@ def reconcile(name, user_project, namespace, workspace_regex, avro_path=None):
                     logger.warning(f"Study missing sample list {view['project_id']} accession: {accession} {e}")
                     view['dbgap_sample_count'] = 0
         yield view
+    yield reconciled_schemas
 
 
 def aggregate(namespace, user_project, consortium, avro_path=None):
