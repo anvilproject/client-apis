@@ -9,6 +9,8 @@ from attrdict import AttrDict
 
 import sqlite3
 import pickle
+import hashlib
+import json
 
 
 class Reconciler():
@@ -35,7 +37,15 @@ class Reconciler():
 
         return self._workspaces
 
-    # @memoize
+    def make_hash(self, d):
+        """Return the hash of a dictionary."""
+        d_hash = hashlib.md5()
+        # We need to sort arguments so {'a': 1, 'b': 2} is
+        # the same as {'b': 2, 'a': 1}
+        encoded = json.dumps(d, sort_keys=True).encode()
+        d_hash.update(encoded)
+        return d_hash.hexdigest()
+
     def reconcile_schemas(self):
         """Report workspaces that share common entities. Sorted in descending order of number of matching workspaces."""
         # sort workspaces into those who share a common schema
@@ -47,8 +57,13 @@ class Reconciler():
             entity_list = ",".join(sorted(w.schemas.keys()))
             workspace_entities[entity_list].append(w.attributes.workspace.name)
 
-        # print(datetime.datetime.now(), 'start')
         sorted_workspaces = sorted([(entities, workspaces) for (entities, workspaces) in workspace_entities.items()], key=workspace_len, reverse=True)
+        consensus_schema = None
+        for w in self.workspaces:
+            if w.attributes.workspace.name == sorted_workspaces[0][1][0]:
+                consensus_schema = w.schemas
+                break
+
         reconciled_schemas = {
             'conformant': {
                 'entities': sorted_workspaces[0][0].split(","),
@@ -57,6 +72,7 @@ class Reconciler():
             'incompatible': [{'entities': rs[0], 'workspaces': rs[1]} for rs in sorted_workspaces[1:]],
             'schema_conflict_sample': [],
             'schema_conflict_subject': [],
+            'consensus_schema': consensus_schema
         }
         reconciled_schemas = AttrDict(reconciled_schemas)
         # print(datetime.datetime.now(), 'sorted_schemas')
@@ -65,16 +81,13 @@ class Reconciler():
         for name in reconciled_schemas.conformant.workspaces:
             for w in self.workspaces:
                 if name == w.attributes.workspace.name:
-
                     if sorted(w.schemas[w.subject_property_name]['attributeNames']) != sorted(w.subjects[0].attributes.keys()):
                         reconciled_schemas['schema_conflict_subject'].append(name)
                         self._logger.debug(f"{w.name} schema_conflict due to subject.")
-                        continue
 
                     if sorted(w.schemas['sample']['attributeNames']) != sorted(w.samples[0].attributes.keys()):
                         reconciled_schemas['schema_conflict_sample'].append(name)
                         self._logger.debug(f"{w.name} schema_conflict due to sample.")
-                        continue
 
                     if w.subject_property_name not in w.schemas:
                         self._logger.debug(f"ERROR {w.name} no {w.subject_property_name} in schema? {w.schema}.")
@@ -135,15 +148,6 @@ class Reconciler():
             v = w.dashboard_view
             v['problems'] = [k for k, v in v['problems'].items() if v]
             v['source'] = self.name
-            #     "source": "CCDG",
-            #     "gen3_project_id": null,
-            #     "gen3_file_histogram": null,
-            #     "dbGAP_project_id": null,
-            #     "dbGAP_study_id": "phs001155",
-            #     "dbGAP_acession": null,
-            #     "dbGAP_sample_count": null
-            # }
-
             yield v
 
     def save(self):

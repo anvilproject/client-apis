@@ -336,7 +336,7 @@ class Workspace():
         if _diseaseOntologyID:
             _diseaseOntologyID = _diseaseOntologyID.split('/')[-1].replace('_', ':')
         else:
-            logging.warn(f"{self.id} missing diseaseOntologyID")
+            logging.debug(f"{self.id} missing diseaseOntologyID")
         return _diseaseOntologyID
 
 
