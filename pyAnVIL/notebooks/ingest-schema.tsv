@@ -1,0 +1,13 @@
+entity:schema_id	bucket_fields	consortium	entity	relationship	required
+1000G-attributes		1000G	attributes		study_phs,study_accession,library:diseaseOntologyID,library:diseaseOntologyLabel
+1000G-linked_field		1000G	linked_field	sample.attributes.participant=participant.name	
+1000G-participant		1000G	participant		participant_id,EXPERIMENT_ID
+1000G-sample	cram	1000G	sample		sample_id,participant
+ccdg-attributes		ccdg	attributes		study_phs,study_accession,library:diseaseOntologyID,library:diseaseOntologyLabel
+ccdg-file		ccdg	file		id, sample_id, uri
+ccdg-sample	cram	ccdg	sample		id, subject_id
+ccdg-subject		ccdg	subject		id, name
+cmg-attributes		cmg	attributes		study_phs,study_accession,library:diseaseOntologyID,library:diseaseOntologyLabel
+cmg-file		cmg	file		id, sample_id, uri
+cmg-sample	cram	cmg	sample		id, subject_id
+cmg-subject		cmg	subject		id, name
