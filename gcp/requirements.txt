@@ -1,0 +1,5 @@
+# config
+python-dotenv==0.17.1
+
+# Core
+pyAnVIL==0.0.7

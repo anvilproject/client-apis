@@ -1,6 +1,6 @@
 # AnVIL GCP Integration
 
-> NodeJS script that takes an `.avro` upload and loads the data into Google's Healthcare API
+> Python scripts that take an `.avro` upload and loads the data into Google's Healthcare API
 
 ## Goals
 
