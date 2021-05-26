@@ -2,6 +2,7 @@ import os
 import json
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from anvil.gen3.entities import Entities
@@ -13,16 +14,21 @@ from anvil.util.reconciler import DEFAULT_NAMESPACE
 
 # env constants
 BILLING_PROJECT = os.getenv("GCP_BILLING_PROJECT")
-AVRO_PATH = os.getenv("AVRO_PATH", './export_1000_genomes.avro')
+AVRO_PATH = os.getenv("AVRO_PATH", "./export_1000_genomes.avro")
 OUTPUT_DIR = os.getenv("OUTPUT_PATH", "./data")
 
 # generate initial entities with AVRO file
 gen3_entities = Entities(AVRO_PATH)
 
 
-def reconcile_all(user_project, consortiums, namespace=DEFAULT_NAMESPACE, output_path=OUTPUT_DIR):
+def reconcile_all(
+    user_project,
+    consortiums,
+    namespace=DEFAULT_NAMESPACE,
+    output_path=OUTPUT_DIR,
+):
     """Reconcile and aggregate results
-    
+
     e.g. bin/reconciler --user_project <your-billing-project> --consortium ThousandGenomes ^1000G-high-coverage-2019$
     --consortium CMG AnVIL_CMG.* --consortium CCDG AnVIL_CCDG.* --consortium GTEx ^AnVIL_GTEx_V8_hg38$
     """
@@ -35,7 +41,9 @@ def reconcile_all(user_project, consortiums, namespace=DEFAULT_NAMESPACE, output
         for workspace in reconciler.workspaces:
             transformer = FhirTransformer(workspace=workspace)
             num_processed += 1
-            print(f"Reconciled: {str(num_processed)}/{str(len(reconciler.workspaces))}" )
+            print(
+                f"Reconciled: {str(num_processed)}/{str(len(reconciler.workspaces))}"
+            )
             for item in transformer.transform():
                 yield item
         print("[DONE]")
@@ -45,23 +53,27 @@ def append_drs(sample):
     """Add ga4gh_drs_uri to blob"""
     try:
         for key in sample.blobs.keys():
-            filename = key.split('/')[-1]
+            filename = key.split("/")[-1]
             gen3_file = gen3_entities.get(submitter_id=filename)
             # f"https://gen3.theanvil.io/ga4gh/drs/v1/objects/{gen3_file['object']['object_id']}"
-            sample.blobs[key]['ga4gh_drs_uri'] = gen3_file['object']['ga4gh_drs_uri']
+            sample.blobs[key]["ga4gh_drs_uri"] = gen3_file["object"][
+                "ga4gh_drs_uri"
+            ]
     except Exception as e:
         print(f"[Error] {e}:", sample.id)
 
 
 def all_instances(clazz):
     """Return all subjects"""
-    print("Starting aggregation for all AnVIL workspaces, this will take several minutes")
-
-    consortiums = (
-        ('ThousandGenomes', '^1000G-high-coverage-2019$'),
+    print(
+        "Starting aggregation for all AnVIL workspaces, this will take several minutes"
     )
 
-    for item in reconcile_all(user_project=BILLING_PROJECT, consortiums=consortiums):
+    consortiums = (("ThousandGenomes", "^1000G-high-coverage-2019$"),)
+
+    for item in reconcile_all(
+        user_project=BILLING_PROJECT, consortiums=consortiums
+    ):
         if isinstance(item, Sample):
             append_drs(item)
         if clazz is None or isinstance(item, clazz):
@@ -79,12 +91,12 @@ def save_summary(workspace, emitter):
                             "workspace_id": workspace.id,
                             "subject_id": subject.id,
                             "sample_id": sample.id,
-                            "blob": blob['name']
+                            "blob": blob["name"],
                         },
                         emitter,
-                        separators=(',',':')
+                        separators=(",", ":"),
                     )
-                    emitter.write('\n')
+                    emitter.write("\n")
     except:
         print("Summary save failed")
 
@@ -101,23 +113,27 @@ def save_all(workspaces):
     num_workspaces = len(workspaces)
     workspace_index = 1
     for workspace in workspaces:
-        print(f"Processing {str(workspace_index)}/{str(num_workspaces)}: {workspace.name}...")
+        print(
+            f"Processing {str(workspace_index)}/{str(num_workspaces)}: {workspace.name}..."
+        )
         workspace_index += 1
 
         current_workspace = workspace.name
         transformer = FhirTransformer(workspace=workspace)
         save_summary(workspace, summary_emitter)
-        
+
         try:
             for item in transformer.transform():
                 for entity in item.entity():
-                    resourceType = entity['resourceType']
+                    resourceType = entity["resourceType"]
                     emitter = emitters.get(resourceType, None)
                     if emitter is None:
-                        emitter = open(f"{OUTPUT_DIR}/{resourceType}.json", "w+")
+                        emitter = open(
+                            f"{OUTPUT_DIR}/{resourceType}.json", "w+"
+                        )
                         emitters[resourceType] = emitter
-                    json.dump(entity, emitter, separators=(',', ':'))
-                    emitter.write('\n')
+                    json.dump(entity, emitter, separators=(",", ":"))
+                    emitter.write("\n")
         except Exception as e:
             if current_workspace not in workspace_exceptions:
                 print(f"[Error] {e}", {current_workspace})
@@ -129,7 +145,9 @@ def save_all(workspaces):
 
 def validate():
     """Check all validations exist"""
-    FHIR_OUTPUT_PATHS = [f"{OUTPUT_DIR}/{p}" for p in """
+    FHIR_OUTPUT_PATHS = [
+        f"{OUTPUT_DIR}/{p}"
+        for p in """
     DocumentReference.json
     Organization.json
     Patient.json
@@ -137,11 +155,12 @@ def validate():
     ResearchStudy.json
     ResearchSubject.json
     Specimen.json
-    Task.json""".split()]
+    Task.json""".split()
+    ]
 
     for path in FHIR_OUTPUT_PATHS:
         assert os.path.isfile(path), f"{path} should exist"
-        with open(path, 'r') as inputs:
+        with open(path, "r") as inputs:
             for line in inputs.readlines():
                 fhir_obj = json.loads(line)
                 assert fhir_obj, f"json de-serialization failed {line}"
