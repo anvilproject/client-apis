@@ -116,11 +116,15 @@ class Workspace():
             bucket = storage_client.bucket(workspace['bucketName'], user_project=self._user_project)
             # get subset of data
             _blobs = {}
-            for b in bucket.list_blobs(fields='items(size, etag, crc32c, name, timeCreated),nextPageToken'):
-                name = f"gs://{workspace['bucketName']}/{b.name}"
-                # cache.put(name, {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
-                _blobs[name] = AttrDict({'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
-            self._blobs = _blobs
+            try:
+                for b in bucket.list_blobs(fields='items(size, etag, crc32c, name, timeCreated),nextPageToken'):
+                    name = f"gs://{workspace['bucketName']}/{b.name}"
+                    # cache.put(name, {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
+                    _blobs[name] = AttrDict({'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
+                self._blobs = _blobs
+            except Exception as e:
+                print(f"{self.id} {workspace['bucketName']} {e}")
+                self._blobs = _blobs
         return self._blobs
 
     @property
@@ -237,6 +241,9 @@ class Workspace():
     @property
     def sample_schema(self):
         """Return schema for workspace sample."""
+        if 'sample' not in self._schemas:
+            logging.debug(f"{self.id} - no schema? {self._schemas}")
+            return None
         return self._schemas['sample']
 
     def __repr__(self):

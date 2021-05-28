@@ -338,4 +338,4 @@ def sample_factory(*args, **kwargs):
         return ThousandGenomesSample(*args, **kwargs)
     if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
         return eMERGESample(*args, **kwargs)
-    raise Exception('Not implemented')
+    raise Exception(f'Not implemented {args} {kwargs}')

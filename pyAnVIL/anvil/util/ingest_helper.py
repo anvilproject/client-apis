@@ -18,7 +18,7 @@ class NestedNamespace(SimpleNamespace):
     """Extend SimpleNamespace."""
 
     def __init__(self, dictionary, **kwargs):
-        """Recurse dict, adding NestedNamespace."""
+        """Initialize nested attributes."""
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             if isinstance(value, dict):
