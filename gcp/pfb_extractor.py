@@ -1,10 +1,6 @@
 import os
 import json
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 from anvil.gen3.entities import Entities
 from anvil.terra.reconciler import Reconciler
 from anvil.terra.workspace import Workspace
@@ -12,12 +8,15 @@ from anvil.terra.sample import Sample
 from anvil.transformers.fhir.transformer import FhirTransformer
 from anvil.util.reconciler import DEFAULT_NAMESPACE
 
-# env constants
+from dotenv import load_dotenv
+
+# Load env variables
+load_dotenv()
 BILLING_PROJECT = os.getenv("GCP_BILLING_PROJECT")
 AVRO_PATH = os.getenv("AVRO_PATH", "./export_1000_genomes.avro")
-OUTPUT_DIR = os.getenv("OUTPUT_PATH", "./data")
+DASHBOARD_OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./data")
 
-# generate initial entities with AVRO file
+# init AVRO file
 gen3_entities = Entities(AVRO_PATH)
 
 
@@ -25,7 +24,7 @@ def reconcile_all(
     user_project,
     consortiums,
     namespace=DEFAULT_NAMESPACE,
-    output_path=OUTPUT_DIR,
+    output_path=DASHBOARD_OUTPUT_PATH,
 ):
     """Reconcile and aggregate results
 
@@ -46,7 +45,7 @@ def reconcile_all(
             )
             for item in transformer.transform():
                 yield item
-        print("[DONE]")
+        print("Reconciliation Completed!")
 
 
 def append_drs(sample):
@@ -60,7 +59,7 @@ def append_drs(sample):
                 "ga4gh_drs_uri"
             ]
     except Exception as e:
-        print(f"[Error] {e}:", sample.id)
+        print(f"{e}: sample.id")
 
 
 def all_instances(clazz):
@@ -69,7 +68,12 @@ def all_instances(clazz):
         "Starting aggregation for all AnVIL workspaces, this will take several minutes"
     )
 
-    consortiums = (("ThousandGenomes", "^1000G-high-coverage-2019$"),)
+    consortiums = (
+        # ("CMG", "AnVIL_CMG_.*"),
+        # ("CCDG", "AnVIL_CCDG_.*"),
+        # ("GTEx", "^AnVIL_GTEx_V8_hg38$"),
+        ("ThousandGenomes", "^1000G-high-coverage-2019$"),
+    )
 
     for item in reconcile_all(
         user_project=BILLING_PROJECT, consortiums=consortiums
@@ -80,27 +84,6 @@ def all_instances(clazz):
             yield item
 
 
-def save_summary(workspace, emitter):
-    """Save a workspace summary for downstream QA"""
-    try:
-        for subject in workspace.subjects:
-            for sample in subject.samples:
-                for property, blob in sample.blobs.items():
-                    json.dump(
-                        {
-                            "workspace_id": workspace.id,
-                            "subject_id": subject.id,
-                            "sample_id": sample.id,
-                            "blob": blob["name"],
-                        },
-                        emitter,
-                        separators=(",", ":"),
-                    )
-                    emitter.write("\n")
-    except:
-        print("Summary save failed")
-
-
 def save_all(workspaces):
     """Save all data to the file system"""
     emitters = {}
@@ -108,7 +91,6 @@ def save_all(workspaces):
 
     workspace_exceptions = {}
     current_workspace = None
-    summary_emitter = open(f"{OUTPUT_DIR}/terra_summary.json", "w+")
 
     num_workspaces = len(workspaces)
     workspace_index = 1
@@ -120,42 +102,45 @@ def save_all(workspaces):
 
         current_workspace = workspace.name
         transformer = FhirTransformer(workspace=workspace)
-        save_summary(workspace, summary_emitter)
 
         try:
+            # Create output directory
+            if not os.path.isdir(DASHBOARD_OUTPUT_PATH):
+                os.mkdir(DASHBOARD_OUTPUT_PATH)
+
             for item in transformer.transform():
                 for entity in item.entity():
                     resourceType = entity["resourceType"]
                     emitter = emitters.get(resourceType, None)
                     if emitter is None:
                         emitter = open(
-                            f"{OUTPUT_DIR}/{resourceType}.json", "w+"
+                            f"{DASHBOARD_OUTPUT_PATH}/{resourceType}.ndjson",
+                            "w+",
                         )
                         emitters[resourceType] = emitter
                     json.dump(entity, emitter, separators=(",", ":"))
                     emitter.write("\n")
         except Exception as e:
             if current_workspace not in workspace_exceptions:
-                print(f"[Error] {e}", {current_workspace})
+                print(f"{e}: {current_workspace}")
                 workspace_exceptions[current_workspace] = True
     for stream in emitters.values():
         stream.close()
-    summary_emitter.close()
 
 
 def validate():
     """Check all validations exist"""
     FHIR_OUTPUT_PATHS = [
-        f"{OUTPUT_DIR}/{p}"
+        f"{DASHBOARD_OUTPUT_PATH}/{p}"
         for p in """
-    DocumentReference.json
-    Organization.json
-    Patient.json
-    Practitioner.json
-    ResearchStudy.json
-    ResearchSubject.json
-    Specimen.json
-    Task.json""".split()
+    DocumentReference.ndjson
+    Organization.ndjson
+    Patient.ndjson
+    Practitioner.ndjson
+    ResearchStudy.ndjson
+    ResearchSubject.ndjson
+    Specimen.ndjson
+    Task.ndjson""".split()
     ]
 
     for path in FHIR_OUTPUT_PATHS:
@@ -163,7 +148,7 @@ def validate():
         with open(path, "r") as inputs:
             for line in inputs.readlines():
                 fhir_obj = json.loads(line)
-                assert fhir_obj, f"json de-serialization failed {line}"
+                assert fhir_obj, "must be non-null"
                 break
 
 
@@ -172,5 +157,8 @@ print("Loading entities...")
 gen3_entities.load()
 workspaces = list(all_instances(Workspace))
 save_all(workspaces)
+print("Entities loaded!")
+
+print("Validating files...")
 validate()
-print("Entities loaded")
+print("Files validated!")
