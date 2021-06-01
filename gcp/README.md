@@ -4,6 +4,8 @@
 
 ## Goals
 
-[ ] Create a script that puts test data in Google Healthcare API
-[ ] Transform script to accept an `.avro` export and insert into Google Healthcare API
+[x] Create a script that puts test data in Google Healthcare API
+[x] Transform script to accept an `.avro` export and insert into Google Healthcare API
 [ ] Deploy script to run off bucket trigger on GCP (may require App Engine)
+[ ] Deploy IG to Google Healthcare API
+[ ] Review service w/ Broad devops & security teams
