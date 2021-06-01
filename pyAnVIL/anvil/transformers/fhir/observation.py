@@ -17,7 +17,8 @@ class DiseaseObservation:
     def build_entity(subject, disease):
         """Create FHIR entity."""
         assert disease, f'Should have disease {subject}'
-
+        if disease.startswith("PS"):
+            disease = f"OMIM:{disease}"
         workspace_diseaseOntologyId = disease  # subject.workspace_diseaseOntologyId
         diseaseOntologyText = disease_text.get(disease, None)
         diseaseOntologySystem = disease_system.get(disease.split(':')[0], None)
@@ -25,7 +26,10 @@ class DiseaseObservation:
             if workspace_diseaseOntologyId not in logged_already:
                 logging.getLogger(__name__).error(f'Need text "{workspace_diseaseOntologyId}"')
                 logged_already.append(workspace_diseaseOntologyId)
-        assert diseaseOntologySystem, "Should have system"
+        if not diseaseOntologySystem:
+            if workspace_diseaseOntologyId not in logged_already:
+                logging.getLogger(__name__).error(f"Should have system. {subject} {disease}")
+            diseaseOntologySystem = "MISSING"
         slug = make_identifier(f"Observation|{subject.id}|{workspace_diseaseOntologyId}")
 
         entity = {

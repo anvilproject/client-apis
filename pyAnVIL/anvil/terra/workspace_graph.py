@@ -4,6 +4,16 @@ import json
 import logging
 
 
+from datetime import date, datetime
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code."""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
+
+
 class WorkspaceGraph:
     """Represent workspace as in a graph."""
 
@@ -32,9 +42,9 @@ class WorkspaceGraph:
     def put(self, key, submitter_id, name, data, cur):
         """Save an item."""
         if hasattr(data, 'attributes'):
-            _json = json.dumps(data.attributes)
+            _json = json.dumps(data.attributes, default=json_serial)
         else:
-            _json = json.dumps(data)
+            _json = json.dumps(data, default=json_serial)
         cur.execute("REPLACE into vertices values (?, ?, ?, ?);", (key, submitter_id, name, _json))
         # self._logger.debug(f"put {key}")
 
