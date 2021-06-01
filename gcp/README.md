@@ -50,4 +50,9 @@ Upload these files into a Cloud Storage bucket to prepare for installation
 
 ### `data_uploader.py`
 
-This script will upload all files from the `OUTPUT_PATH` to the `GCP_JSON_BUCKET`.
+This script will upload all files from the `OUTPUT_PATH` to the `GCP_JSON_BUCKET`
+
+### `json_splitter.py`
+
+This script splits the `.ndjson` files into indivudal `.json` files.
+The script is not currently used, but is nice to have if needed
