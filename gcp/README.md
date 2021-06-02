@@ -31,17 +31,22 @@ Install
 pip install -r requirements.txt
 ```
 
-> These scripts heavily rely on [dotenv](https://pypi.org/project/python-dotenv/) to work.
-> Therefore a `.env` file needs to be created in this folder with these params:
+These scripts heavily rely on [dotenv](https://pypi.org/project/python-dotenv/) to work.
+Therefore a `.env` file needs to be created in this folder with these params:
 
-| key                 | default                      | description                                                  |
-| ------------------- | ---------------------------- | ------------------------------------------------------------ |
-| GCP_BILLING_PROJECT | _REQUIRED_                   | The GCP project to charge to                                 |
-| GCP_JSON_BUCKET     | _REQUIRED_                   | A Cloud Storage bucket name to upload the `.ndjson` files to |
-| AVRO_PATH           | `./export_1000_genomes.avro` | The path to the `.avro` file to be extracted                 |
-| OUTPUT_PATH         | `./data`                     | The path to save the `.ndjson` files to                      |
+| key             | default                      | description                                                    |
+| --------------- | ---------------------------- | -------------------------------------------------------------- |
+| GCP_PROJECT_ID  | _REQUIRED_                   | The GCP project ID                                             |
+| GCP_LOCATION    | _REQUIRED_                   | The location of the GCP data center                            |
+| GCP_DATASET     | _REQUIRED_                   | The Healthcare API Dataset name                                |
+| GCP_DATASTORE   | _REQUIRED_                   | The FHIR Store name                                            |
+| GCP_JSON_BUCKET | _REQUIRED_                   | The Cloud Storage bucket name to upload the `.ndjson` files to |
+| AVRO_PATH       | `./export_1000_genomes.avro` | The local path to the `.avro` file to be extracted             |
+| OUTPUT_PATH     | `./data`                     | The local path to save the `.ndjson` files to                  |
 
 ## Scripts
+
+> There is a [demo Jupyter Notebook](./demo.ipynb) to show the functionality of these scripts included in the repo
 
 ### `pfb_extractor.py`
 

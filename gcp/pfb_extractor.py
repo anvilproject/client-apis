@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 # Load env variables
 load_dotenv()
-BILLING_PROJECT = os.getenv("GCP_BILLING_PROJECT")
+BILLING_PROJECT = os.getenv("GCP_PROJECT_ID")
 AVRO_PATH = os.getenv("AVRO_PATH", "./export_1000_genomes.avro")
 DASHBOARD_OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./data")
 
