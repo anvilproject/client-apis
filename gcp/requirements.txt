@@ -1,0 +1,8 @@
+# config
+python-dotenv==0.17.1
+
+# Core
+pyAnVIL==0.0.7
+
+# GCP
+google-cloud-storage==1.19.1

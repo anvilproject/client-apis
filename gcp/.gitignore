@@ -1,0 +1,6 @@
+# PFB exports
+*.avro
+
+# Data output
+/data/*
+*.BAK
