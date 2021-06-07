@@ -5,4 +5,6 @@ python-dotenv==0.17.1
 pyAnVIL==0.0.7
 
 # GCP
-google-cloud-storage==1.19.1
+google-cloud-storage>=1.19.1
+Flask==1.1.4
+gunicorn==20.1.0

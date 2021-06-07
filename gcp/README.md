@@ -40,6 +40,7 @@ Therefore a `.env` file needs to be created in this folder with these params:
 | GCP_LOCATION    | _REQUIRED_                   | The location of the GCP data center                            |
 | GCP_DATASET     | _REQUIRED_                   | The Healthcare API Dataset name                                |
 | GCP_DATASTORE   | _REQUIRED_                   | The FHIR Store name                                            |
+| GCP_PFB_BUCKET  | _REQUIRED_                   | The Cloud Storage bucket name containing the PFB exports       |
 | GCP_JSON_BUCKET | _REQUIRED_                   | The Cloud Storage bucket name to upload the `.ndjson` files to |
 | AVRO_PATH       | `./export_1000_genomes.avro` | The local path to the `.avro` file to be extracted             |
 | OUTPUT_PATH     | `./data`                     | The local path to save the `.ndjson` files to                  |
