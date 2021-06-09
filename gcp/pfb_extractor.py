@@ -58,8 +58,8 @@ def append_drs(sample):
             sample.blobs[key]["ga4gh_drs_uri"] = gen3_file["object"][
                 "ga4gh_drs_uri"
             ]
-    except Exception as e:
-        print(f"{e}: sample.id")
+    except Exception as err:
+        print(f"{err}: sample.id")
 
 
 def all_instances(clazz):
@@ -144,21 +144,31 @@ def validate():
     ]
 
     for path in FHIR_OUTPUT_PATHS:
-        assert os.path.isfile(path), f"{path} should exist"
+        if not os.path.isfile(path):
+            err = f"{path} should exist"
+            raise Exception(f"500 Internal Server Error: {err}")
         with open(path, "r") as inputs:
             for line in inputs.readlines():
                 fhir_obj = json.loads(line)
-                assert fhir_obj, "must be non-null"
+                if not fhir_obj:
+                    err = "{path} must be non-null"
+                    raise Exception(f"500 Internal Server Error: {err}")
+                print(f"Validated {path}")
                 break
 
 
-# generate JSON
-print("Loading entities...")
-gen3_entities.load()
-workspaces = list(all_instances(Workspace))
-save_all(workspaces)
-print("Entities loaded!")
+def main():
+    # generate JSON
+    print("Loading entities...")
+    gen3_entities.load()
+    workspaces = list(all_instances(Workspace))
+    save_all(workspaces)
+    print("Loaded entities!")
 
-print("Validating files...")
-validate()
-print("Files validated!")
+    print("Validating files...")
+    validate()
+    print("Validated files!")
+
+
+if __name__ == "__main__":
+    main()
