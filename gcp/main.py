@@ -1,13 +1,16 @@
-import base64
-import json
 import os
 
+# debugger imports
+# from . import pfb_downloader
+# from . import pfb_extractor
+# from . import data_uploader
+
+# production imports
 import pfb_downloader
 import pfb_extractor
 import data_uploader
 
 from flask import Flask, request
-from google.cloud import storage
 
 from dotenv import load_dotenv
 
@@ -43,15 +46,11 @@ def index():
         return f"[Error] {err}", 202
 
     # extract PFB
-    # try:
-    #     path = "./data"
-    #     print(f"PREV DATA: {os.listdir(path)}")
-    #     # RUN SCRIPTS HERE
-    #     pfb_extractor.main()
-    #     print(f"POST DATA: {os.listdir(path)}")
-    # except Exception as err:
-    #     print(f"[Error] {err}")
-    #     return f"[Error] {err}", 202
+    try:
+        pfb_extractor.main()
+    except Exception as err:
+        print(f"[Error] {err}")
+        return f"[Error] {err}", 202
 
     # upload ndjson
     try:
@@ -62,7 +61,7 @@ def index():
 
     # successful run
     print(f"[Successful]: files processed without errors")
-    return "[Successful]: ", 200
+    return "[Successful]: files processed without errors", 200
 
 
 if __name__ == "__main__":

@@ -1,12 +1,12 @@
 import os
 import json
 
-from anvil.gen3.entities import Entities
-from anvil.terra.reconciler import Reconciler
-from anvil.terra.workspace import Workspace
-from anvil.terra.sample import Sample
-from anvil.transformers.fhir.transformer import FhirTransformer
-from anvil.util.reconciler import DEFAULT_NAMESPACE
+from pyAnVIL.anvil.gen3.entities import Entities
+from pyAnVIL.anvil.terra.reconciler import Reconciler
+from pyAnVIL.anvil.terra.workspace import Workspace
+from pyAnVIL.anvil.terra.sample import Sample
+from pyAnVIL.anvil.transformers.fhir.transformer import FhirTransformer
+from pyAnVIL.anvil.util.reconciler import DEFAULT_NAMESPACE
 
 from dotenv import load_dotenv
 
@@ -15,9 +15,6 @@ load_dotenv()
 BILLING_PROJECT = os.getenv("GCP_PROJECT_ID")
 AVRO_PATH = os.getenv("AVRO_PATH", "./export_1000_genomes.avro")
 DASHBOARD_OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./data")
-
-# init AVRO file
-gen3_entities = Entities(AVRO_PATH)
 
 
 def reconcile_all(
@@ -59,7 +56,7 @@ def append_drs(sample):
                 "ga4gh_drs_uri"
             ]
     except Exception as err:
-        print(f"{err}: sample.id")
+        print(f"{err}: {sample.id}")
 
 
 def all_instances(clazz):
@@ -130,6 +127,7 @@ def save_all(workspaces):
 
 def validate():
     """Check all validations exist"""
+    print("Validating files...")
     FHIR_OUTPUT_PATHS = [
         f"{DASHBOARD_OUTPUT_PATH}/{p}"
         for p in """
@@ -155,19 +153,21 @@ def validate():
                     raise Exception(f"500 Internal Server Error: {err}")
                 print(f"Validated {path}")
                 break
+    print("Validated files!")
 
 
 def main():
+    # init AVRO file
+    global gen3_entities
+    gen3_entities = Entities(AVRO_PATH)
+
     # generate JSON
     print("Loading entities...")
     gen3_entities.load()
     workspaces = list(all_instances(Workspace))
     save_all(workspaces)
     print("Loaded entities!")
-
-    print("Validating files...")
     validate()
-    print("Validated files!")
 
 
 if __name__ == "__main__":

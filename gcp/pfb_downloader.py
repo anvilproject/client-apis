@@ -41,7 +41,8 @@ def main(envelope):
 
     # download avro
     try:
-        storage_client = storage.Client()
+        # create storage client with service account
+        storage_client = storage.Client.from_service_account_json("creds.json")
 
         print(f"Downloading {avro_file}...")
         with open("export.avro", "w+b") as export_file:

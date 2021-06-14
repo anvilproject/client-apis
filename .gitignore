@@ -111,6 +111,7 @@ caches/
 # harvested swagger docs
 openapis/input
 
+.vscode
 .DS_Store
 
 fhir/ncpi-model-forge/
