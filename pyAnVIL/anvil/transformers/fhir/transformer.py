@@ -42,8 +42,8 @@ class FhirTransformer(Transformer):
             yield ResearchSubject.build_entity(self)
             if self.diseases:
                 for d in self.diseases:
-                    assert d, f"should have disease {self} {self.diseases}"
-                    yield DiseaseObservation.build_entity(self, disease=d)
+                    if d:
+                        yield DiseaseObservation.build_entity(self, disease=d)
 
         subject.entity = types.MethodType(entity, subject)
         yield subject

@@ -84,7 +84,15 @@ class Reconciler():
                     if sorted(w.schemas[w.subject_property_name]['attributeNames']) != sorted(w.subjects[0].attributes.keys()):
                         reconciled_schemas['schema_conflict_subject'].append(name)
                         self._logger.debug(f"{w.name} schema_conflict due to subject.")
-
+                    if 'sample' not in w.schemas:
+                        reconciled_schemas['schema_conflict_sample'].append(name)
+                        continue
+                    if len(w.samples) == 0:
+                        reconciled_schemas['schema_conflict_sample'].append(name)
+                        continue
+                    if 'attributes' not in w.samples[0]:
+                        reconciled_schemas['schema_conflict_sample'].append(name)
+                        continue
                     if sorted(w.schemas['sample']['attributeNames']) != sorted(w.samples[0].attributes.keys()):
                         reconciled_schemas['schema_conflict_sample'].append(name)
                         self._logger.debug(f"{w.name} schema_conflict due to sample.")
@@ -95,11 +103,13 @@ class Reconciler():
         conformant_workspace_names = list(set(reconciled_schemas.conformant.workspaces))
 
         for name in reconciled_schemas.schema_conflict_sample:
-            self._logger.debug(f"removing schema_conflict {name}")
-            conformant_workspace_names.remove(name)
+            if name in conformant_workspace_names:
+                self._logger.debug(f"removing schema_conflict {name}")
+                conformant_workspace_names.remove(name)
         for name in reconciled_schemas.schema_conflict_subject:
-            self._logger.debug(f"removing schema_conflict {name}")
-            conformant_workspace_names.remove(name)
+            if name in conformant_workspace_names:
+                self._logger.debug(f"removing schema_conflict {name}")
+                conformant_workspace_names.remove(name)
 
         # print(datetime.datetime.now(), 'reconciled_schemas')
 

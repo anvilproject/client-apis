@@ -36,6 +36,8 @@ class Subject(object):
     @property
     def missing_samples(self):
         """Test if no samples."""
+        if not self.sample_schema:
+            return True
         return len(self.samples) == 0
 
     @property
