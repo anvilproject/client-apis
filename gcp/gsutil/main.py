@@ -49,10 +49,11 @@ def index():
         pubsub_message = (
             base64.b64decode(pubsub_message["data"]).decode("utf-8").strip()
         )
+    print(f"PUBSUB: {pubsub_message}")
 
     # setup gcloud
     try:
-        gcloud_cmd = f"gcloud auth activate-service-account {SA_NAME}@gcp-testing-308520.iam.gserviceaccount.com --key-file=creds.json"
+        gcloud_cmd = f"gcloud auth activate-service-account {SA_NAME}@{GCP_PROJECT_ID}.iam.gserviceaccount.com --key-file=./creds.json"
         print(f"CMD: {gcloud_cmd}")
         process = subprocess.Popen(gcloud_cmd.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
