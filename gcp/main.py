@@ -4,11 +4,13 @@ import os
 # from . import pfb_downloader
 # from . import pfb_extractor
 # from . import data_uploader
+# from . import data_transfer
 
 # production imports
 import pfb_downloader
 import pfb_extractor
 import data_uploader
+import data_transfer
 
 from flask import Flask, request
 
@@ -55,6 +57,13 @@ def index():
     # upload ndjson
     try:
         data_uploader.main()
+    except Exception as err:
+        print(f"[Error] {err}")
+        return f"[Error] {err}", 202
+
+    # transfer ndjson to healthcare API
+    try:
+        data_transfer.main()
     except Exception as err:
         print(f"[Error] {err}")
         return f"[Error] {err}", 202

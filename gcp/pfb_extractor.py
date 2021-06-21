@@ -1,5 +1,6 @@
-import os
+import subprocess
 import json
+import os
 
 from pyAnVIL.anvil.gen3.entities import Entities
 from pyAnVIL.anvil.terra.reconciler import Reconciler
@@ -15,6 +16,12 @@ load_dotenv()
 BILLING_PROJECT = os.getenv("GCP_PROJECT_ID")
 AVRO_PATH = os.getenv("AVRO_PATH", "./export_1000_genomes.avro")
 DASHBOARD_OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./data")
+GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
+GCP_LOCATION = os.getenv("GCP_LOCATION", "")
+GCP_DATASET = os.getenv("GCP_DATASET", "")
+GCP_DATASTORE = os.getenv("GCP_DATASTORE", "")
+GCP_JSON_BUCKET = os.getenv("GCP_JSON_BUCKET", "")
+SA_NAME = os.getenv("SA_NAME", "")
 
 
 def reconcile_all(
@@ -157,6 +164,20 @@ def validate():
 
 
 def main():
+    # setup gcloud
+    try:
+        gcloud_cmd = f"gcloud auth activate-service-account {SA_NAME}@{GCP_PROJECT_ID}.iam.gserviceaccount.com --key-file=./creds.json"
+        print(f"CMD: {gcloud_cmd}")
+        process = subprocess.Popen(gcloud_cmd.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        print(f"OUTPUT: {output}")
+
+        if error:
+            raise Exception(error)
+    except Exception as err:
+        print(f"[Error] 500 Internal Server Error: {err}")
+        return f"[Error] 500 Internal Server Error: {err}", 202
+
     # init AVRO file
     global gen3_entities
     gen3_entities = Entities(AVRO_PATH)

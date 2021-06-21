@@ -1,7 +1,7 @@
 version: "3.8"
 services:
-  gsutil:
-    image: gsutil
+  firefly:
+    image: firefly
     build:
       context: .
       dockerfile: Dockerfile

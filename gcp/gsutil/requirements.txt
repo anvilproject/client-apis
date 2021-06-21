@@ -1,6 +1,0 @@
-# config
-python-dotenv==0.17.1
-
-# GCP
-Flask==1.1.4
-gunicorn==20.1.0
