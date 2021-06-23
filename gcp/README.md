@@ -44,10 +44,16 @@ Therefore a `.env` file needs to be created in this folder with these params:
 | GCP_JSON_BUCKET | _REQUIRED_                   | The Cloud Storage bucket name to upload the `.ndjson` files to |
 | AVRO_PATH       | `./export_1000_genomes.avro` | The local path to the `.avro` file to be extracted             |
 | OUTPUT_PATH     | `./data`                     | The local path to save the `.ndjson` files to                  |
+| PORT            | 8080                         | The port to run the Flask server on                            |
 
 ## Scripts
 
 > There is a [demo Jupyter Notebook](./demo.ipynb) to show the functionality of these scripts included in the repo
+
+### `pfb_downloader.py`
+
+This script will download the `.avro` file from `GCP_PFB_BUCKET` locally.
+This is mainly used in the container to download the uploaded PFB.
 
 ### `pfb_extractor.py`
 
@@ -57,6 +63,10 @@ Upload these files into a Cloud Storage bucket to prepare for installation
 ### `data_uploader.py`
 
 This script will upload all files from the `OUTPUT_PATH` to the `GCP_JSON_BUCKET`
+
+### `data_transfer.py`
+
+This script will transfer the `ndjson` files from the `GCP_JSON_BUCKET` over to the Healthcare API
 
 ### `json_splitter.py`
 

@@ -6,7 +6,7 @@
 *.BAK
 
 # Dev
-deployment.ipynb
+*.ipynb
 
 # Creds
 creds.json

@@ -1,3 +1,4 @@
+import threading
 import os
 
 # debugger imports
@@ -20,6 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+sem = threading.Semaphore()
 
 
 @app.route("/", methods=["POST"])
@@ -28,16 +30,22 @@ def index():
 
     Note: We send 202 for error messages to ack PubSub, else it infinitely loops
     """
+    # grabs semaphore
+    sem.acquire()
+
+    # gets the pubsub message
     envelope = request.get_json()
 
     # error checking
     if not envelope:
         err = "no PubSub message received"
         print(f"[Error] 400 Bad Request: {err}")
+        sem.release()
         return f"[Error] 400 Bad Request: {err}", 400
     if not isinstance(envelope, dict) or "message" not in envelope:
         err = "invalid PubSub message format"
         print(f"[Error] 400 Bad Request: {err}")
+        sem.release()
         return f"[Error] 400 Bad Request: {err}", 400
 
     # download PFB
@@ -45,6 +53,7 @@ def index():
         pfb_downloader.main(envelope)
     except Exception as err:
         print(f"[Error] {err}")
+        sem.release()
         return f"[Error] {err}", 202
 
     # extract PFB
@@ -52,6 +61,7 @@ def index():
         pfb_extractor.main()
     except Exception as err:
         print(f"[Error] {err}")
+        sem.release()
         return f"[Error] {err}", 202
 
     # upload ndjson
@@ -59,6 +69,7 @@ def index():
         data_uploader.main()
     except Exception as err:
         print(f"[Error] {err}")
+        sem.release()
         return f"[Error] {err}", 202
 
     # transfer ndjson to healthcare API
@@ -66,10 +77,12 @@ def index():
         data_transfer.main()
     except Exception as err:
         print(f"[Error] {err}")
+        sem.release()
         return f"[Error] {err}", 202
 
-    # successful run
+    # release semaphore after successful run
     print(f"[Successful]: files processed without errors")
+    sem.release()
     return "[Successful]: files processed without errors", 200
 
 
