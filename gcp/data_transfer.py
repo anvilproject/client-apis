@@ -1,5 +1,4 @@
 import subprocess
-import base64
 import os
 
 from dotenv import load_dotenv

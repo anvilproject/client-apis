@@ -2,13 +2,7 @@
 python-dotenv==0.17.1
 
 # pyAnVIL
-gen3==2.4.0
-firecloud==0.16.29
-click==7.1.2
-attrdict==2.0.1
-google-cloud-storage==1.35.0
-xmltodict
-fastavro==1.2.0
+pyAnVIL==0.0.8rc4
 
 # GCP
 Flask==1.1.4

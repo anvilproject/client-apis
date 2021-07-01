@@ -2,12 +2,12 @@ import subprocess
 import json
 import os
 
-from pyAnVIL.anvil.gen3.entities import Entities
-from pyAnVIL.anvil.terra.reconciler import Reconciler
-from pyAnVIL.anvil.terra.workspace import Workspace
-from pyAnVIL.anvil.terra.sample import Sample
-from pyAnVIL.anvil.transformers.fhir.transformer import FhirTransformer
-from pyAnVIL.anvil.util.reconciler import DEFAULT_NAMESPACE
+from anvil.gen3.entities import Entities
+from anvil.terra.reconciler import Reconciler
+from anvil.terra.workspace import Workspace
+from anvil.terra.sample import Sample
+from anvil.transformers.fhir.transformer import FhirTransformer
+from anvil.util.reconciler import DEFAULT_NAMESPACE
 
 from dotenv import load_dotenv
 
