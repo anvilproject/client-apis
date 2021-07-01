@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM gcr.io/google.com/cloudsdktool/cloud-sdk:slim
-
 ENV PYTHONUNBUFFERED True
+
+# uses creds.json file to activate service account
 ENV GOOGLE_APPLICATION_CREDENTIALS ./creds.json
 
 COPY requirements.txt .

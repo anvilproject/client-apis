@@ -1,3 +1,7 @@
+"""
+Extracts .avro and creates .ndjson files in FHIR format
+"""
+
 import subprocess
 import json
 import os

@@ -1,3 +1,7 @@
+"""
+Transfer .ndjson files from GCP_JSON_BUCKET to Healthcare API
+"""
+
 import subprocess
 import os
 

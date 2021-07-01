@@ -1,3 +1,8 @@
+"""
+Handles PubSub requests sent to the container
+- This performs all ETL operations and transfers to Healthcare API
+"""
+
 import threading
 import os
 
@@ -81,7 +86,7 @@ def index():
         return f"[Error] {err}", 202
 
     # release semaphore after successful run
-    print(f"[Successful]: files processed without errors")
+    print("[Successful]: files processed without errors")
     sem.release()
     return "[Successful]: files processed without errors", 200
 

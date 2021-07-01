@@ -1,3 +1,7 @@
+"""
+Downloads .avro file from PubSub envelope
+"""
+
 import base64
 import json
 import os

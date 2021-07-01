@@ -1,3 +1,7 @@
+"""
+Upload files form OUTPUT_PATH to GCP_JSON_BUCKET
+"""
+
 import os
 
 from google.cloud import storage
