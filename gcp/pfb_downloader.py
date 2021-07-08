@@ -54,7 +54,7 @@ def main(envelope):
                 f"gs://{GCP_PFB_BUCKET}/{avro_file}", export_file
             )
             export_file.close()
-        print(f"Download Completed!")
+        print("Download Completed!")
     except Exception as err:
         raise Exception(f"500 Internal Server Error: {err}")
 
