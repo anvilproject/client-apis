@@ -16,7 +16,8 @@ class Patient:
         subject_id = subject.id
         subject_id_slug = make_identifier('P', subject_id)
 
-        # ethnicity = None
+        ethnicity = subject.ethnicity
+
         # race = None
         # species = None
         # gender = None
@@ -45,17 +46,27 @@ class Patient:
         }
 
         # ethnicity QUESTION: http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity
-        # if ethnicity:
-        #     if omb_ethnicity_category.get(ethnicity):
-        #         entity.setdefault("extension", []).append(
-        #             {
-        #                 "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
-        #                 "extension": [
-        #                     omb_ethnicity_category[ethnicity],
-        #                     {"url": "text", "valueString": ethnicity},
-        #                 ],
-        #             }
-        #         )
+        if ethnicity:
+            entity.setdefault("extension", []).append(
+                {
+                    "url": "http://terminology.hl7.org/ValueSet/v3-Race",
+                    "extension": [
+                        ethnicity[0],
+                        {"url": "text", "valueString": ethnicity[1]},
+                    ],
+                }
+            )
+
+            # if omb_ethnicity_category.get(ethnicity):
+            #     entity.setdefault("extension", []).append(
+            #         {
+            #             "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+            #             "extension": [
+            #                 omb_ethnicity_category[ethnicity],
+            #                 {"url": "text", "valueString": ethnicity},
+            #             ],
+            #         }
+            #     )
 
         # race QUESTION: http://hl7.org/fhir/us/core/StructureDefinition/us-core-race
         #     if race:
