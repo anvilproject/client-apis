@@ -1,5 +1,10 @@
-import os
+"""
+Extracts .avro and creates .ndjson files in FHIR format
+"""
+
+import subprocess
 import json
+import os
 
 from anvil.gen3.entities import Entities
 from anvil.terra.reconciler import Reconciler
@@ -15,9 +20,12 @@ load_dotenv()
 BILLING_PROJECT = os.getenv("GCP_PROJECT_ID")
 AVRO_PATH = os.getenv("AVRO_PATH", "./export_1000_genomes.avro")
 DASHBOARD_OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./data")
-
-# init AVRO file
-gen3_entities = Entities(AVRO_PATH)
+GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "")
+GCP_LOCATION = os.getenv("GCP_LOCATION", "")
+GCP_DATASET = os.getenv("GCP_DATASET", "")
+GCP_DATASTORE = os.getenv("GCP_DATASTORE", "")
+GCP_JSON_BUCKET = os.getenv("GCP_JSON_BUCKET", "")
+SA_NAME = os.getenv("SA_NAME", "")
 
 
 def reconcile_all(
@@ -58,8 +66,8 @@ def append_drs(sample):
             sample.blobs[key]["ga4gh_drs_uri"] = gen3_file["object"][
                 "ga4gh_drs_uri"
             ]
-    except Exception as e:
-        print(f"{e}: sample.id")
+    except Exception as err:
+        print(f"{err}: {sample.id}")
 
 
 def all_instances(clazz):
@@ -130,6 +138,7 @@ def save_all(workspaces):
 
 def validate():
     """Check all validations exist"""
+    print("Validating files...")
     FHIR_OUTPUT_PATHS = [
         f"{DASHBOARD_OUTPUT_PATH}/{p}"
         for p in """
@@ -144,21 +153,47 @@ def validate():
     ]
 
     for path in FHIR_OUTPUT_PATHS:
-        assert os.path.isfile(path), f"{path} should exist"
+        if not os.path.isfile(path):
+            err = f"{path} should exist"
+            raise Exception(f"500 Internal Server Error: {err}")
         with open(path, "r") as inputs:
             for line in inputs.readlines():
                 fhir_obj = json.loads(line)
-                assert fhir_obj, "must be non-null"
+                if not fhir_obj:
+                    err = "{path} must be non-null"
+                    raise Exception(f"500 Internal Server Error: {err}")
+                print(f"Validated {path}")
                 break
+    print("Validated files!")
 
 
-# generate JSON
-print("Loading entities...")
-gen3_entities.load()
-workspaces = list(all_instances(Workspace))
-save_all(workspaces)
-print("Entities loaded!")
+def main():
+    # setup gcloud
+    try:
+        gcloud_cmd = f"gcloud auth activate-service-account {SA_NAME}@{GCP_PROJECT_ID}.iam.gserviceaccount.com --key-file=./creds.json"
+        print(f"CMD: {gcloud_cmd}")
+        process = subprocess.Popen(gcloud_cmd.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        print(f"OUTPUT: {output}")
 
-print("Validating files...")
-validate()
-print("Files validated!")
+        if error:
+            raise Exception(error)
+    except Exception as err:
+        print(f"[Error] 500 Internal Server Error: {err}")
+        return f"[Error] 500 Internal Server Error: {err}", 202
+
+    # init AVRO file
+    global gen3_entities
+    gen3_entities = Entities(AVRO_PATH)
+
+    # generate JSON
+    print("Loading entities...")
+    gen3_entities.load()
+    workspaces = list(all_instances(Workspace))
+    save_all(workspaces)
+    print("Loaded entities!")
+    validate()
+
+
+if __name__ == "__main__":
+    main()

@@ -4,3 +4,9 @@
 # Data output
 /data/*
 *.BAK
+
+# Dev
+*.ipynb
+
+# Creds
+creds.json

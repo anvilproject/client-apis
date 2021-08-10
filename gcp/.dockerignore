@@ -1,0 +1,16 @@
+# PFB exports
+*.avro
+
+# Data output
+/data/*
+*.BAK
+
+# Jupyter
+*.ipynb
+/.ipynb_checkpoints/*
+
+# Misc.
+Dockerfile
+README.md
+*.DS_Store
+/.venv/*

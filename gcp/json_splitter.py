@@ -1,3 +1,7 @@
+"""
+Splits .ndjson files into individual .json files
+"""
+
 import os
 import json
 
