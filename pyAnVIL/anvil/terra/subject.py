@@ -189,9 +189,16 @@ class GTExSubject(Subject):
 class ThousandGenomesSubject(Subject):
     """Extend Subject class."""
 
-    def __init__(self, *args, workspace=None, samples=None):
+    def __init__(self, *args, workspace=None, samples=None, pedigrees=None):
         """Call super."""
         super().__init__(*args, workspace=workspace, samples=samples)
+        sample_name = args[0]['attributes']['SAMPLE_NAME']
+        my_pedigrees = [p for p in pedigrees if p['name'] == sample_name]
+        if len(my_pedigrees) == 1:
+            self.pedigree = my_pedigrees[0]
+        else:
+            self.pedigree = None
+            print(f'No pedigree found sample_name:{sample_name}')
 
     @property
     def id(self):
@@ -202,6 +209,32 @@ class ThousandGenomesSubject(Subject):
     def age(self):
         """Deduce age."""
         return None
+
+    @property
+    def gender(self):
+        """Deduce gender."""
+        sex = self.pedigree['attributes']['Sex']
+        if sex == '1':
+            return 'male'
+        if sex == '2':
+            return 'female'
+        raise Exception(f'{self.id} missing gender')
+
+    @property
+    def ethnicity(self):
+        """Deduce ethnicity."""
+        super_population = self.pedigree['attributes']['Superpopulation']
+        super_populations = "AFR AMR EAS EUR SAS".split()
+        assert super_population in super_populations, f'{super_population} not found'
+        ethnicities = [
+            ("2060-2", "African"),
+            ("1002-5", "American Indian or Alaska Native"),
+            ("2028-9", "Asian"),
+            ("2108-9", "European"),
+            ("2029-7", "Asian Indian")
+        ]
+        index = super_populations.index(super_population)
+        return ethnicities[index]
 
 
 class eMERGESUbject(Subject):

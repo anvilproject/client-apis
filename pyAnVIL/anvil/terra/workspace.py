@@ -36,7 +36,7 @@ class Workspace():
     def subjects(self):
         """Return raw subjects from terra."""
         if not self._subjects:
-            self._subjects = [subject_factory(s, workspace=self, samples=self.samples) for s in self._get_entities(self.subject_property_name)]
+            self._subjects = [subject_factory(s, workspace=self, samples=self.samples, pedigrees=self.pedigrees) for s in self._get_entities(self.subject_property_name)]
         return self._subjects
 
     @property
@@ -345,6 +345,13 @@ class Workspace():
         else:
             logging.debug(f"{self.id} missing diseaseOntologyID")
         return _diseaseOntologyID
+
+    @property
+    def pedigrees(self):
+        """Deduce pedigree."""
+        if 'pedigree' in self.schemas.keys():
+            return self._get_entities('pedigree')
+        return None
 
 
 def _project_files(w):
