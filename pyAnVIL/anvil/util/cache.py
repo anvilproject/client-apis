@@ -22,7 +22,8 @@ class Cache():
     def __init__(self, path=CACHE_PATH, timeout=60 * 60 * 24):
         """Set up sqlite db."""
         logging.getLogger(__name__).debug(path)
-        self._conn = sqlite3.connect(path)
+        # works better w/ flask
+        self._conn = sqlite3.connect(path, check_same_thread=False)
         self._timeout = timeout
         cur = self._conn.cursor()
         cur.execute("""
@@ -41,7 +42,7 @@ class Cache():
         self._conn.execute('PRAGMA synchronous = OFF')
         self._conn.commit()
         self._conn.close()
-        self._conn = sqlite3.connect(path)
+        self._conn = sqlite3.connect(path, check_same_thread=False)
 
     def get(self, key):
         """Retrieve an item."""
