@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.8rc4',  # Required
+    version='0.0.9rc2',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -77,9 +77,9 @@ setup(
     # above.
     author_email='walsbr@ohsu.edu',  # Optional
 
-    cmdclass={
-        'data_ingestion_tracker': DownloadDataIngestionSpreadsheetCommand,
-    },
+    # cmdclass={
+    #     'data_ingestion_tracker': DownloadDataIngestionSpreadsheetCommand,
+    # },
 
 
     # For a list of valid classifiers, see https://pypi.org/classifiers/
@@ -136,7 +136,8 @@ setup(
         'Click==7.1.2',
         'attrdict==2.0.1',
         'google-cloud-storage==1.35.0',
-        'fastavro==1.2.0'
+        'fastavro==1.2.0',
+        # 'fhirclient @ git+https://github.com/smart-on-fhir/client-py#egg=fhirclient'
     ],
 
     # List additional groups of dependencies here (e.g. development
