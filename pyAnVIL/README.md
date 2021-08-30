@@ -74,6 +74,38 @@ Pre-requisites:
    >>> 'anvil.user@gmail.com'
 ```
 
+### FHIR
+
+We incorporated `fhirclient`, a flexible Python client for FHIR servers supporting the SMART on FHIR protocol. 
+
+Note: You will need to install the fhir client separately.  see  https://github.com/smart-on-fhir/client-py/issues/70
+
+```
+pip install  git+https://github.com/smart-on-fhir/client-py#egg=fhirclient
+```
+
+Example
+
+```
+
+from anvil.fhir.client import FHIRClient
+settings = {
+    'app_id': 'my_web_app',
+    'api_base': 'https://healthcare.googleapis.com/v1/projects/gcp-testing-308520/locations/us-east4/datasets/testset/fhirStores/fhirstore/fhir'
+}
+smart = FHIRClient(settings=settings)
+assert smart.ready, "server should be ready"
+# search for all ResearchStudy
+import fhirclient.models.researchstudy as rs
+[s.title for s in rs.ResearchStudy.where(struct={}).perform_resources(smart.server)]
+>>> 
+['1000g-high-coverage-2019', 'my NCPI research study example']
+
+```
+
+For more information on usage see [smart-on-fhir/client-py](https://github.com/smart-on-fhir/client-py)
+
+
 ### Terra utilities
 
 ```
