@@ -326,6 +326,116 @@ class eMERGESample(Sample):
         return False
 
 
+class NHGRISample(Sample):
+    """Extend Sample class."""
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return self.attributes.name
+
+    @property
+    def subject_id(self):
+        """Deduce id."""
+        return self.attributes.attributes.participant.entityName
+
+    @property
+    def inconsistent_entityName(self):
+        """Flag entityName inconsistencies."""
+        return False
+
+    @property
+    def misspelled_subject(self):
+        """Flag misspellings."""
+        return False
+
+    @property
+    def inconsistent_subject(self):
+        """Flag misspellings."""
+        return False
+
+
+class NIMHSample(Sample):
+    """Extend Sample class."""
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return self.attributes.name
+
+    @property
+    def subject_id(self):
+        """Deduce id."""
+        try:
+            return self.attributes.attributes.participant.entityName
+        except Exception:
+            return self.attributes.attributes.subject_id
+
+    @property
+    def inconsistent_entityName(self):
+        """Flag entityName inconsistencies."""
+        return 'participant' not in self.attributes.attributes
+
+    @property
+    def misspelled_subject(self):
+        """Flag misspellings."""
+        return False
+
+    @property
+    def inconsistent_subject(self):
+        """Flag misspellings."""
+        return False
+
+
+class PAGESample(Sample):
+    """Extend Sample class."""
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return self.attributes.name
+
+    @property
+    def subject_id(self):
+        """Deduce id."""
+        try:
+            return self.attributes.attributes.participant_id
+        except Exception:
+            pass
+        try:
+            return self.attributes.attributes.subject_id
+        except Exception:
+            pass
+        raise Exception(f"can't find participant_id or subject_id  {self.attributes}")
+
+    @property
+    def inconsistent_entityName(self):
+        """Flag entityName inconsistencies."""
+        return 'participant' not in self.attributes.attributes
+
+    @property
+    def misspelled_subject(self):
+        """Flag misspellings."""
+        return False
+
+    @property
+    def inconsistent_subject(self):
+        """Flag misspellings."""
+        return False
+
+
 def sample_factory(*args, **kwargs):
     """Return a specialized Subject class instance."""
     if 'CCDG' in kwargs['workspace'].name.upper():
@@ -338,4 +448,10 @@ def sample_factory(*args, **kwargs):
         return ThousandGenomesSample(*args, **kwargs)
     if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
         return eMERGESample(*args, **kwargs)
-    raise Exception(f'Not implemented {args} {kwargs}')
+    if 'NHGRI' in kwargs['workspace'].name.upper():
+        return NHGRISample(*args, **kwargs)
+    if 'NIMH' in kwargs['workspace'].name.upper():
+        return NIMHSample(*args, **kwargs)
+    if 'PAGE' in kwargs['workspace'].name.upper():
+        return PAGESample(*args, **kwargs)
+    raise Exception(f'Not implemented {kwargs["workspace"].name.upper()}')

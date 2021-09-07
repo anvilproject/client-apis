@@ -26,7 +26,7 @@ class ResearchStudy:
 
         diseaseOntologyIdText = 'Missing'
         if diseaseOntologyId and diseaseOntologyId not in disease_text:
-            logging.getLogger(__name__).error(f'{study_id} missing {diseaseOntologyId}')
+            logging.getLogger(__name__).error(f'{study_id} missing {diseaseOntologyId} see anvil.transformers.fhir.disease_normalizer.disease_text')
         else:
             diseaseOntologyIdText = disease_text.get(diseaseOntologyId, 'Missing')
 

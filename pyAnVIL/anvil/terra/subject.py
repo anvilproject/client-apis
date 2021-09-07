@@ -222,6 +222,60 @@ class eMERGESUbject(Subject):
         return None
 
 
+class NHGRISubject(Subject):
+    """Extend Subject class."""
+
+    def __init__(self, *args, workspace=None, samples=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, samples=samples)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
+
+    @property
+    def age(self):
+        """Deduce age."""
+        return None
+
+
+class NIMHSubject(Subject):
+    """Extend Subject class."""
+
+    def __init__(self, *args, workspace=None, samples=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, samples=samples)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
+
+    @property
+    def age(self):
+        """Deduce age."""
+        return None
+
+
+class PAGESubject(Subject):
+    """Extend Subject class."""
+
+    def __init__(self, *args, workspace=None, samples=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, samples=samples)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return f"{self.workspace_name}/Su/{self.attributes.name}"
+
+    @property
+    def age(self):
+        """Deduce age."""
+        return None
+
+
 def subject_factory(*args, **kwargs):
     """Return a specialized Subject class instance."""
     if 'CCDG' in kwargs['workspace'].name.upper():
@@ -234,4 +288,10 @@ def subject_factory(*args, **kwargs):
         return ThousandGenomesSubject(*args, **kwargs)
     if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
         return eMERGESUbject(*args, **kwargs)
-    raise Exception('Not implemented')
+    if 'NHGRI' in kwargs['workspace'].name.upper():
+        return NHGRISubject(*args, **kwargs)
+    if 'NIMH' in kwargs['workspace'].name.upper():
+        return NIMHSubject(*args, **kwargs)
+    if 'PAGE' in kwargs['workspace'].name.upper():
+        return PAGESubject(*args, **kwargs)
+    raise Exception(f'Not implemented {kwargs["workspace"].name.upper()}')

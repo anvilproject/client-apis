@@ -16,6 +16,8 @@ disease_text = {
     "DOID:5844": "myocardial infarction",
     "DOID:1826": "epilepsy",
     "DOID:630": "genetic disease",
+    "DOID:5419": "schizophrenia",
+    "DOID:12377": "spinal muscular atrophy",
     "OMIM:613801": "Retinitis pigmentosa-40",
     "OMIM:213300": "Joubert syndrome 1",
     "OMIM:615780": "Retinitis pigmentosa 69",

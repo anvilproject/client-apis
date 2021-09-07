@@ -54,12 +54,17 @@ class Reconciler():
 
         workspace_entities = defaultdict(list)
         for w in self.workspaces:
+            if len(w.schemas.keys()) == 0:
+                workspace_entities[""].append(w.attributes.workspace.name)
+                continue
             entity_list = ",".join(sorted(w.schemas.keys()))
             workspace_entities[entity_list].append(w.attributes.workspace.name)
 
         sorted_workspaces = sorted([(entities, workspaces) for (entities, workspaces) in workspace_entities.items()], key=workspace_len, reverse=True)
         consensus_schema = None
         for w in self.workspaces:
+            if len(w.schemas.keys()) == 0:
+                continue
             if w.attributes.workspace.name == sorted_workspaces[0][1][0]:
                 consensus_schema = w.schemas
                 break
@@ -72,6 +77,7 @@ class Reconciler():
             'incompatible': [{'entities': rs[0], 'workspaces': rs[1]} for rs in sorted_workspaces[1:]],
             'schema_conflict_sample': [],
             'schema_conflict_subject': [],
+            'missing_schema': [],
             'consensus_schema': consensus_schema
         }
         reconciled_schemas = AttrDict(reconciled_schemas)
@@ -81,6 +87,11 @@ class Reconciler():
         for name in reconciled_schemas.conformant.workspaces:
             for w in self.workspaces:
                 if name == w.attributes.workspace.name:
+                    if w.subject_property_name not in w.schemas:
+                        reconciled_schemas['missing_schema'].append(name)
+                        self._logger.debug(f"{w.name} {w.subject_property_name} not found in schema {w.schemas}.")
+                        continue
+                        # raise Exception(f"{w.name} {w.subject_property_name} not found in schema {w.schemas}.")
                     if sorted(w.schemas[w.subject_property_name]['attributeNames']) != sorted(w.subjects[0].attributes.keys()):
                         reconciled_schemas['schema_conflict_subject'].append(name)
                         self._logger.debug(f"{w.name} schema_conflict due to subject.")
