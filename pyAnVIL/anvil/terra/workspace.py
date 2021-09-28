@@ -241,7 +241,7 @@ class Workspace():
     @property
     def sample_schema(self):
         """Return schema for workspace sample."""
-        if 'sample' not in self._schemas:
+        if not self._schemas or 'sample' not in self._schemas:
             logging.debug(f"{self.id} - no schema? {self._schemas}")
             return None
         return self._schemas['sample']

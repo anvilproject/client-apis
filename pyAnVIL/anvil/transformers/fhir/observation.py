@@ -19,6 +19,8 @@ class DiseaseObservation:
         assert disease, f'Should have disease {subject}'
         if disease.startswith("PS"):
             disease = f"OMIM:{disease}"
+        if ":" not in disease:
+            disease = f"OMIM:{disease}"
         workspace_diseaseOntologyId = disease  # subject.workspace_diseaseOntologyId
         diseaseOntologyText = disease_text.get(disease, None)
         diseaseOntologySystem = disease_system.get(disease.split(':')[0], None)
