@@ -30,7 +30,7 @@ def reconcile(name, user_project, namespace, workspace_regex, avro_path=None):
                 try:
                     view['dbgap_sample_count'] = len(study['DbGap']['Study']['SampleList']['Sample'])
                 except Exception as e:
-                    logger.warning(f"Study missing sample list {view['project_id']} accession: {accession} {e}")
+                    logger.warning(f"dbGAP's Study missing sample list {view['project_id']} accession: {accession} {e}")
                     view['dbgap_sample_count'] = 0
         yield view
     yield reconciled_schemas

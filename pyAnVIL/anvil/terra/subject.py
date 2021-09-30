@@ -3,6 +3,9 @@
 import logging
 from attrdict import AttrDict
 
+gender_already_reported = []
+age_already_reported = []
+
 
 class Subject(object):
     """Represent terra subject."""
@@ -54,7 +57,9 @@ class Subject(object):
                 if gender in ['null', 'na', 'not reported', 'notreported']:
                     return None
                 return gender.lower()
-        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing gender parameter")
+        if self.workspace_name not in gender_already_reported:
+            logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing gender parameter, supressing this warning for this workspace")
+            gender_already_reported.append(self.workspace_name)
         return None
 
     @property
@@ -131,7 +136,9 @@ class CCDGSubject(Subject):
                     logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric '{age}'")
                     return None
                 return int(age)
-        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age parameter")
+        if self.workspace_name not in age_already_reported:
+            logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing age parameter, supressing this warning for this workspace")
+            age_already_reported.append(self.workspace_name)
         return None
 
 
@@ -158,7 +165,9 @@ class CMGSubject(Subject):
                         logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric '{age}'")
                     return None
                 return int(age)
-        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age parameter")
+        if self.workspace_name not in age_already_reported:
+            logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing age parameter, supressing this warning for this workspace")
+            age_already_reported.append(self.workspace_name)
 
 
 class GTExSubject(Subject):
@@ -177,7 +186,9 @@ class GTExSubject(Subject):
     def age(self):
         """Deduce age."""
         if 'age' not in self.attributes.attributes:
-            logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age")
+            if self.workspace_name not in age_already_reported:
+                logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing age parameter, supressing thiswarning for this workspace")
+                age_already_reported.append(self.workspace_name)
             return None
         age = self.attributes.attributes['age']
         if not str(age).isnumeric():

@@ -10,6 +10,7 @@ import os
 # assert os.path.isfile(AVRO_PATH), f"{AVRO_PATH} should exist. Please export PFB from https://gen3.theanvil.io/"
 
 gen3_entities = None
+workspace_already_logged = []
 
 
 def _shorten_workspace(name):
@@ -27,7 +28,9 @@ def _append_drs(sample):
             gen3_file = gen3_entities.get(submitter_id=filename)
             sample.blobs[key]['ga4gh_drs_uri'] = gen3_file['object']['ga4gh_drs_uri']   # f"https://gen3.theanvil.io/ga4gh/drs/v1/objects/{gen3_file['object']['object_id']}"
     except Exception as e:
-        logging.info(f"Append DRS: {sample.id} {e}")
+        if sample.workspace_name not in workspace_already_logged:
+            logging.warn(f"DRS not found {sample.workspace_name} {sample.id} (supressing further errors for this workspace) {e}")
+        workspace_already_logged.append(sample.workspace_name)
 
 
 class Sample(object):
@@ -113,6 +116,8 @@ class CCDGSample(Sample):
         if 'project' not in self.attributes.attributes:
             return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
         # format the gen3 uses
+        if 'collaborator_sample_id' not in self.attributes.attributes:
+            return f"{self.attributes.attributes['project']}_{self.attributes.attributes['sample']}"
         return f"{self.attributes.attributes['project']}_{self.attributes.attributes['collaborator_sample_id']}"
 
     @property

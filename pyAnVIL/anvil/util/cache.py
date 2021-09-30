@@ -21,9 +21,10 @@ class Cache():
 
     def __init__(self, path=CACHE_PATH, timeout=60 * 60 * 24):
         """Set up sqlite db."""
-        logging.getLogger(__name__).debug(path)
         # works better w/ flask
-        self._conn = sqlite3.connect(path, check_same_thread=False)
+        self._path = path
+        logging.getLogger(__name__).debug(f"opening {path}")
+        self._conn = sqlite3.connect(path, check_same_thread=True)
         self._timeout = timeout
         cur = self._conn.cursor()
         cur.execute("""
