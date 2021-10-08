@@ -5,7 +5,9 @@ import json
 import functools
 import logging
 from datetime import date, datetime, timedelta
+import sys
 
+# TODO refactor cache to test configure path
 CACHE_PATH = os.getenv('PYANVIL_CACHE_PATH', '/tmp/pyanvil-cache.sqlite')
 
 
@@ -19,11 +21,10 @@ def json_serial(obj):
 class Cache():
     """Cache items in sqlite."""
 
-    def __init__(self, path=CACHE_PATH, timeout=60 * 60 * 24):
+    def __init__(self, path=CACHE_PATH, timeout=60 * 60 * 24 * 365):
         """Set up sqlite db."""
         # works better w/ flask
         self._path = path
-        logging.getLogger(__name__).debug(f"opening {path}")
         self._conn = sqlite3.connect(path, check_same_thread=True)
         self._timeout = timeout
         cur = self._conn.cursor()
@@ -40,10 +41,14 @@ class Cache():
         #     self._logger.debug(f"expired {cur.rowcount} rows")
         # self._conn.commit()
 
+        # optimize for single thread speed
         self._conn.execute('PRAGMA synchronous = OFF')
+        self._conn.execute('PRAGMA journal_mode = OFF')
         self._conn.commit()
         self._conn.close()
-        self._conn = sqlite3.connect(path, check_same_thread=False)
+        self._conn = sqlite3.connect(path, check_same_thread=False, isolation_level='DEFERRED')
+        logging.getLogger(__name__).info(f"Initialized cache {path}")
+        print(f"Initialized cache {path}", file=sys.stderr)
 
     def get(self, key):
         """Retrieve an item."""
@@ -94,4 +99,5 @@ def memoize(func):
     return memoized_func
 
 
+# TODO -- initialize when needed, don't just blindly instantitate
 cache = Cache()
