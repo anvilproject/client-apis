@@ -2,10 +2,14 @@
 -e .
 
 ## core integration
-gen3==2.4.0
+gen3==4.2.0
 firecloud==0.16.29
 
+
 # external requirements
+
+## to read dbGap XML 
+xmltodict==0.12.0
 
 ## cmd arguments
 click==7.1.2
@@ -14,10 +18,15 @@ click==7.1.2
 attrdict==2.0.1
 
 ## google storage
-google-cloud-storage==1.35.0
+google-cloud-storage==1.42.3
+google-cloud-storage==2.0.0
+
 
 ## gen3 requires pandas
-pandas==0.25.3
+# pandas==0.25.3
 
 ## gen3 PFB export
 fastavro==1.2.0
+
+## markdown table generator
+tabulate
