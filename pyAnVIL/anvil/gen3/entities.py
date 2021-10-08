@@ -16,10 +16,10 @@ def json_serial(obj):
 class Entities:
     """Represent gen3 objects."""
 
-    def __init__(self, path):
+    def __init__(self, avro_path, drs_output_path):
         """Simplify blob."""
-        self.path = path
-        self._conn = sqlite3.connect('/tmp/gen3-drs.sqlite')
+        self.avro_path = avro_path
+        self._conn = sqlite3.connect(drs_output_path)
         cur = self._conn.cursor()
         cur.executescript("""
         CREATE TABLE IF NOT EXISTS vertices (
@@ -39,6 +39,12 @@ class Entities:
         );
         """)
         self._conn.commit()
+        # optimize for single thread speed
+        self._conn.execute('PRAGMA synchronous = OFF')
+        self._conn.execute('PRAGMA journal_mode = OFF')
+        self._conn.commit()
+        self._conn.close()
+        self._conn = sqlite3.connect(drs_output_path, check_same_thread=False, isolation_level='DEFERRED')
 
     def put(self, key, submitter_id, name, data, cur):
         """Save an item."""
@@ -50,7 +56,10 @@ class Entities:
     def get(self, key=None, submitter_id=None):
         """Retrieve an item."""
         cur = self._conn.cursor()
-        data = cur.execute("SELECT json FROM vertices where key=? or submitter_id =?", (key, submitter_id)).fetchone()
+        if key:
+            data = cur.execute("SELECT json FROM vertices where key=?", (key, )).fetchone()
+        else:
+            data = cur.execute("SELECT json FROM vertices where submitter_id =?", (submitter_id, )).fetchone()
         if data:
             return json.loads(data[0])
         assert False, f"NOT FOUND {key} {submitter_id}"
@@ -59,11 +68,11 @@ class Entities:
         """Load sqlite db from file."""
         cur = self._conn.cursor()
         ids = {}
-        logging.getLogger(__name__).info(f'Loading {self.path}')
+        logging.getLogger(__name__).info(f'Loading {self.avro_path}')
 
-        loaded_already = cur.execute("SELECT count(*) FROM history WHERE key=?;", (self.path,)).fetchone()[0]
+        loaded_already = cur.execute("SELECT count(*) FROM history WHERE key=?;", (self.avro_path,)).fetchone()[0]
         if loaded_already == 1:
-            logging.getLogger(__name__).info(f'Already indexed {self.path}')
+            logging.getLogger(__name__).info(f'Already indexed {self.avro_path}')
             return
 
         # index_count = cur.execute("SELECT count(*) FROM sqlite_master WHERE type='index' and name='vertices_submitter_id';").fetchone()[0]
@@ -71,7 +80,7 @@ class Entities:
         #     logging.getLogger(__name__).info('Already indexed')
         #     return
 
-        with open(self.path, 'rb') as fo:
+        with open(self.avro_path, 'rb') as fo:
             for record in reader(fo):
                 if record['id'] not in ids:
                     self.put(record['id'], self._submitter_id(record), record['name'], record, cur)
@@ -136,7 +145,7 @@ class Entities:
         logging.getLogger(__name__).info('Updating history')
         cur.execute("""
             insert into history(key) values(?);
-        """, (self.path,))
+        """, (self.avro_path,))
         self._conn.commit()
 
     def _submitter_id(self, record):
