@@ -6,13 +6,27 @@ from anvil.terra.reconciler import Reconciler
 from collections import defaultdict
 import logging
 
+# where all workspaces are kept w/in terra
 DEFAULT_NAMESPACE = 'anvil-datastorage'
 
+# workspace patterns
+DEFAULT_CONSORTIUMS = (
+    ('CMG', 'AnVIL_CMG_.*'),
+    ('CCDG', 'AnVIL_CCDG_.*'),
+    ('GTEx', '^AnVIL_GTEx_V8_hg38$'),
+    ('Public', '^1000G-high-coverage-2019$'),
+    ('NHGRI', '^AnVIL_NHGRI'),
+    ('NIMH', '^AnVIL_NIMH'),
+)
 
-def reconcile(name, user_project, namespace, workspace_regex, avro_path=None):
+# where we expect to find work databases, etc.
+DEFAULT_OUTPUT_PATH = '/tmp'
+
+
+def reconcile(name, user_project, namespace, workspace_regex, avro_path=None, terra_output_path=None, drs_output_path=None):
     """Run a reconciler on a set of workspaces, ."""
     logger = logging.getLogger('anvil.util.reconciler')
-    reconciler = Reconciler(name, user_project, namespace, workspace_regex, avro_path)
+    reconciler = Reconciler(name, user_project, namespace, workspace_regex, avro_path, terra_output_path, drs_output_path)
     reconciler.save()
     reconciled_schemas = reconciler.reconcile_schemas()
     reconciled_schemas['name'] = name
@@ -36,13 +50,14 @@ def reconcile(name, user_project, namespace, workspace_regex, avro_path=None):
     yield reconciled_schemas
 
 
-def aggregate(namespace, user_project, consortium, avro_path=None):
+def aggregate(namespace, user_project, consortium, avro_path=None, terra_output_path=None, drs_output_path=None):
     """Run a series of reconciliations."""
     def counts_factory():
         return {'expected_sample_count': 0, 'actual_sample_count': 0, 'problems': []}
     accessions = defaultdict(counts_factory)
+    assert drs_output_path
     for name, workspace_regex in consortium:
-        for view in reconcile(name, user_project, namespace, workspace_regex, avro_path):
+        for view in reconcile(name, user_project, namespace, workspace_regex, avro_path, terra_output_path, drs_output_path):
             if 'qualified_accession' in view:
                 accessions[view['qualified_accession']]['expected_sample_count'] = view['dbgap_sample_count']
                 accessions[view['qualified_accession']]['actual_sample_count'] += [n for n in view['nodes'] if n['type'] == 'Samples'][0]['count']
