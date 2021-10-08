@@ -54,7 +54,7 @@ class Subject(object):
         for p in ['gender', 'sex']:
             if p in self.attributes.attributes:
                 gender = self.attributes.attributes[p].lower()
-                if gender in ['null', 'na', 'not reported', 'notreported']:
+                if gender in ['null', 'na', 'not reported', 'notreported', '--']:
                     return None
                 return gender.lower()
         if self.workspace_name not in gender_already_reported:
@@ -124,7 +124,8 @@ class CCDGSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -152,7 +153,8 @@ class CMGSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -180,7 +182,8 @@ class GTExSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -207,7 +210,8 @@ class ThousandGenomesSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -225,7 +229,8 @@ class eMERGESUbject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -243,7 +248,8 @@ class NHGRISubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -261,7 +267,8 @@ class NIMHSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -279,7 +286,8 @@ class PAGESubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):

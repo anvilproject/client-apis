@@ -1,8 +1,10 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import join, make_identifier
-# from anvil.transformers.fhir.patient import Patient
+from anvil.transformers.fhir import make_id
+from anvil.transformers.fhir.organization import Organization
 from urllib.parse import urlsplit, urlunsplit
+
+from anvil.transformers.fhir.patient import Patient
 
 
 def strip_port(url):
@@ -146,24 +148,16 @@ class DocumentReference:
     resource_type = "DocumentReference"
 
     @staticmethod
-    def identifier(blob):
-        """Make identifier."""
-        sample_id_slug = make_identifier(blob.sample.id)
-        return make_identifier(join(sample_id_slug, blob.attributes.property_name))
+    def slug(blob):
+        """Make id."""
+        return make_id(blob.sample.workspace_name, blob.attributes.name)
 
     @staticmethod
     def build_entity(blob, subject):
         """Render entity."""
         study_id = blob.sample.workspace_name
-        subject_id = subject.id
-        subject_id_slug = make_identifier('P', subject_id)
-
-        genomic_file_id = DocumentReference.identifier(blob)
-        # logging.getLogger(__name__).debug(f"\n\n\n\n\n{blob.attributes}\n\n\n\n\n")
-        # AttrDict({'size': 17734638122, 'etag': 'CJaG//fR9+kCEAE=', 'crc32c': 'eqDkoQ==',
-        # 'time_created': '2020-06-10T16:13:14.288000+00:00',
-        # 'name': 'gs://fc-secure-004e5c03-d24d-4f7f-a26b-9fdc64b0ca3c/AnVIL_CMG_Broad_Muscle_KNC_WGS_Mar2020/RP-1687/WGS/192CP_ZS_1/v1/192CP_ZS_1.cram',
-        # 'property_name': 'cram_path'})
+        subject_slug = Patient.slug(subject)
+        blob_slug = DocumentReference.slug(blob)
         # acl = None
         # size = blob.attributes.size
         # url_list = [blob.attributes.name]
@@ -174,26 +168,26 @@ class DocumentReference:
 
         entity = {
             "resourceType": DocumentReference.resource_type,
-            "id": genomic_file_id,
+            "id": blob_slug,
             "identifier": [
                 {
                     "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
-                    "value": genomic_file_id,
+                    "value": blob.attributes.name,
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": genomic_file_id,
+                    "value": blob_slug,
                 },
             ],
             "status": "current",
             "custodian": {
-                "reference": f"Organization/{study_id.lower()}"
+                "reference": f"Organization/{Organization.slug(subject)}"
             }
         }
 
-        if subject_id_slug:
+        if subject_slug:
             entity["subject"] = {
-                "reference": f"Patient/{subject_id_slug}"
+                "reference": f"Patient/{subject_slug}"
             }
 
         content = {}

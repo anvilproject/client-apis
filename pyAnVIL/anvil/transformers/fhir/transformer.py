@@ -65,7 +65,7 @@ class FhirTransformer(Transformer):
                     b = DocumentReference.build_entity(b, subject)
                     outputs.append(b)
                     yield b
-            yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
+            yield SpecimenTask.build_entity(inputs=[sample], outputs=outputs, subject=subject)
         sample.entity = types.MethodType(entity, sample)
         yield sample
 

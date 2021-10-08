@@ -16,7 +16,7 @@ import json
 class Reconciler():
     """Retrieve google bucket meta data, dbGap information and gen3 meta associated with terra workspace."""
 
-    def __init__(self, name, user_project, namespaces, project_pattern, avro_path):
+    def __init__(self, name, user_project, namespaces, project_pattern, avro_path, terra_output_path, drs_output_path):
         """Initialize properties, set id to namespaces/project_pattern."""
         self.name = name
         self._user_project = user_project
@@ -26,12 +26,17 @@ class Reconciler():
         self._logger = logging.getLogger(__name__)
         self.id = f"{namespaces}/{project_pattern}"
         self.avro_path = avro_path
+        self.terra_output_path = terra_output_path
+        self.drs_output_path = drs_output_path
 
     @property
     def workspaces(self):
         """Terra workspaces that match namespace & project_pattern."""
         if not self._workspaces:
-            self._workspaces = [workspace_factory(w, user_project=self._user_project, avro_path=self.avro_path) for w in get_projects(self.namespaces, self.project_pattern)]
+            self._workspaces = [
+                workspace_factory(w, user_project=self._user_project, avro_path=self.avro_path, drs_output_path=self.drs_output_path)
+                for w in get_projects(self.namespaces, self.project_pattern)
+            ]
             for w in self._workspaces:
                 w.attributes['reconciler_name'] = self.name
 
@@ -69,11 +74,14 @@ class Reconciler():
                 consensus_schema = w.schemas
                 break
 
-        reconciled_schemas = {
-            'conformant': {
+        conformant = {'entities': [], 'workspaces': []}
+        if len(sorted_workspaces) > 0:
+            conformant = {
                 'entities': sorted_workspaces[0][0].split(","),
                 'workspaces': sorted_workspaces[0][1]
-            },
+            }
+        reconciled_schemas = {
+            'conformant': conformant,
             'incompatible': [{'entities': rs[0], 'workspaces': rs[1]} for rs in sorted_workspaces[1:]],
             'schema_conflict_sample': [],
             'schema_conflict_subject': [],
@@ -173,7 +181,7 @@ class Reconciler():
 
     def save(self):
         """Persist workspaces to db."""
-        entities = Entities(path='/tmp/terra.sqlite')
+        entities = Entities(terra_output_path=self.terra_output_path, user_project=self._user_project)
         names = []
         for w in self.workspaces:
             if w.name in names:
@@ -186,10 +194,12 @@ class Reconciler():
 class Entities:
     """Represent workspace objects."""
 
-    def __init__(self, path):
+    def __init__(self, terra_output_path, user_project):
         """Simplify blob."""
-        self.path = path
-        self._conn = sqlite3.connect(self.path)
+        # self.avro_path = avro_path
+        self.terra_output_path = terra_output_path
+        self._conn = sqlite3.connect(self.terra_output_path)
+        self.user_project = user_project
         cur = self._conn.cursor()
         cur.executescript("""
         CREATE TABLE IF NOT EXISTS vertices (
@@ -206,6 +216,12 @@ class Entities:
         );
         """)
         self._conn.commit()
+        # optimize for single thread speed
+        self._conn.execute('PRAGMA synchronous = OFF')
+        self._conn.execute('PRAGMA journal_mode = OFF')
+        self._conn.commit()
+        self._conn.close()
+        self._conn = sqlite3.connect(self.terra_output_path, check_same_thread=False, isolation_level='DEFERRED')
 
     def put(self, key, submitter_id, name, data, cur):
         """Save an item."""
@@ -242,31 +258,34 @@ class Entities:
     def save(self, workspace):
         """Load sqlite db from workspace."""
         cur = self._conn.cursor()
-        logging.getLogger(__name__).info(f'Loading {workspace.name}')
+        logging.getLogger(__name__).info(f'Starting save {workspace.name}')
         self.put(workspace.id, workspace.name, 'workspace', workspace, cur)
         for subject in workspace.subjects:
-            self.put(subject.id, subject.id, 'subject', subject, cur)
-            self.put_edge(subject.id, workspace.id, 'subject', 'workspace', cur)
+            subject_id = f"{workspace.name}/Subject/{subject.id}"
+            self.put(subject_id, subject.id, 'subject', subject, cur)
+            self.put_edge(subject_id, workspace.id, 'subject', 'workspace', cur)
             for sample in subject.samples:
-                self.put(sample.id, sample.id, 'sample', sample, cur)
-                self.put_edge(sample.id, subject.id, 'sample', 'subject', cur)
+                sample_id = f"{workspace.name}/Sample/{sample.id}"
+                self.put(sample_id, sample.id, 'sample', sample, cur)
+                self.put_edge(sample_id, subject_id, 'sample', 'subject', cur)
                 for blob_id, blob in sample.blobs.items():
                     self.put(blob_id, blob_id, 'blob', blob, cur)
-                    self.put_edge(blob_id, sample.id, 'blob', 'sample', cur)
+                    self.put_edge(blob_id, sample_id, 'blob', 'sample', cur)
                     if 'ga4gh_drs_uri' in blob:
                         drs = {'uri': blob['ga4gh_drs_uri']}
                         self.put(drs['uri'], sample.id, 'drs', drs, cur)
-                        self.put_edge(drs['uri'], sample.id, 'drs', 'sample', cur)
-
+                        self.put_edge(drs['uri'], sample_id, 'drs', 'sample', cur)
+        logging.getLogger(__name__).info(f'Ending save {workspace.name}')
         self._conn.commit()
 
     def index(self):
         """Index the vertices and edges."""
-        logging.getLogger(__name__).info('Indexing')
+        logging.getLogger(__name__).info('Indexing vertices & edges')
         cur = self._conn.cursor()
         cur.executescript("""
         CREATE  INDEX IF NOT EXISTS vertices_submitter_id ON vertices(submitter_id);
         CREATE UNIQUE INDEX IF NOT EXISTS edges_src_dst ON edges(src, dst, src_name, dst_name);
         CREATE  INDEX IF NOT EXISTS edges_dst ON edges(dst);
+        CREATE INDEX IF NOT EXISTS vertices_name ON vertices(name)
         """)
         self._conn.commit()

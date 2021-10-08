@@ -14,7 +14,7 @@ class ResearchStudyObservation:
     @staticmethod
     def build_entity(workspace):
         """Create FHIR entity."""
-        slug = make_identifier(f"{workspace.id}")
+        slug = make_identifier(workspace.id)
 
         entity = {
             "resourceType": "Observation",
@@ -31,7 +31,7 @@ class ResearchStudyObservation:
             },
             "focus": [
                 {
-                    "reference": f"ResearchStudy/{make_identifier(workspace.id.lower())}"
+                    "reference": f"ResearchStudy/{make_identifier(workspace.id)}"
                 }
             ],
             "component": [
@@ -79,12 +79,11 @@ class ResearchStudyObservation:
                             }
                         ]
                     },
-                    "valueInteger": sum(workspace.blob_sizes.values())
-                    # "valueQuantity": {
-                    #     "value": ((((sum(workspace.blob_sizes.values()) / 1024) / 1024) / 1024) / 1024),
-                    #     "system": "http://unitsofmeasure.org",
-                    #     "code": "TR"
-                    # }
+                    "valueQuantity": {
+                        "value": sum(workspace.blob_sizes.values()),
+                        "system": "http://unitsofmeasure.org",
+                        "code": "L"
+                    }
                 }
             ]
         }

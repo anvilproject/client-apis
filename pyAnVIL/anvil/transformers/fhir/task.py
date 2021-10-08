@@ -1,6 +1,9 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import make_identifier
+from anvil.transformers.fhir.research_study import ResearchStudy
+from anvil.transformers.fhir.specimen import Specimen
+from anvil.transformers.fhir import make_id
+from anvil.transformers.fhir.patient import Patient
 
 
 class Task:
@@ -22,7 +25,12 @@ class SpecimenTask:
     resource_type = "Task"
 
     @staticmethod
-    def build_entity(inputs, outputs):
+    def slug(specimen):
+        """Make id."""
+        return make_id("Task", specimen.id)
+
+    @staticmethod
+    def build_entity(inputs, outputs, subject):
         """Create fhir entity."""
         specimen = inputs[0]
         inputs = [
@@ -30,12 +38,12 @@ class SpecimenTask:
                 "type": {
                     "coding": [
                         {
-                            "code": specimen['resourceType']
+                            "code": Specimen.resource_type
                         }
                     ]
                 },
                 "valueReference": {
-                    "reference": f"{specimen['resourceType']}/{specimen['id']}"
+                    "reference": f"{Specimen.resource_type}/{Specimen.slug(specimen)}"
                 }
             }
         ]
@@ -56,12 +64,28 @@ class SpecimenTask:
 
         return {
             "resourceType": "Task",
-            "id": make_identifier("T", specimen['id']),
+            "id": SpecimenTask.slug(specimen),
+            "identifier": [
+                {
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{subject.workspace_name}",
+                    "value": f"{specimen.id}/Task/AnVILInjest",
+                },
+                {
+                    "system": "urn:ncpi:unique-string",
+                    "value": f"{subject.workspace_name}/Patient/{subject.id}/Specimen/{specimen.id}/Task/AnVILInjest",
+                },
+            ],
             "status": "accepted",
             "intent": "unknown",
             "input": inputs,
             "output": outputs,
+            "focus": {
+                "reference": f"{Specimen.resource_type}/{Specimen.slug(specimen)}"
+            },
+            "for": {
+                "reference": f"{Patient.resource_type}/{Patient.slug(subject)}"
+            },
             "owner": {
-                "reference": "Organization/thousandgenomes"
+                "reference": f"Organization/{ResearchStudy.slug(specimen)}"
             }
         }

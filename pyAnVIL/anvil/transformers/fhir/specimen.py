@@ -1,5 +1,6 @@
 """Represent fhir entity."""
-from anvil.transformers.fhir import CANONICAL, join, make_identifier
+from anvil.transformers.fhir import CANONICAL, make_id
+from anvil.transformers.fhir.patient import Patient
 
 # specimen_type QUESTION: https://www.hl7.org/fhir/v2/0487/index.html
 # specimen_type = {
@@ -28,26 +29,25 @@ class Specimen:
     resource_type = "Specimen"
 
     @staticmethod
-    def identifier(specimen):
-        """Create identifier."""
-        return make_identifier(specimen.workspace_name, specimen.id)
+    def slug(specimen):
+        """Make id."""
+        return make_id(specimen.workspace_name, specimen.id)
 
     @staticmethod
     def build_entity(specimen, subject):
         """Create fhir entity."""
-        study_id = specimen.workspace_name
+        # study_id = specimen.workspace_name
         # study_id_slug = make_identifier(study_id)
-        sample_id = specimen.id
-        sample_id_slug = make_identifier(sample_id)
+        specimen_slug = Specimen.slug(specimen)
+        patient_slug = Patient.slug(subject)
         event_age_days = None
         concentration_mg_per_ml = None
         composition = None
         volume_ul = None
-        subject_id_slug = make_identifier('P', subject.id)
 
         entity = {
             "resourceType": Specimen.resource_type,
-            "id": sample_id_slug,
+            "id": specimen_slug,
             "meta": {
                 "profile": [
                     "http://hl7.org/fhir/StructureDefinition/Specimen"
@@ -55,16 +55,16 @@ class Specimen:
             },
             "identifier": [
                 {
-                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
-                    "value": sample_id,
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{subject.workspace_name}",
+                    "value": specimen.id,
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": join(Specimen.resource_type, study_id, sample_id),
+                    "value": f"{subject.workspace_name}/Patient/{subject.id}/Specimen/{specimen.id}",
                 },
             ],
             "subject": {
-                "reference": f"Patient/{subject_id_slug}"
+                "reference": f"Patient/{patient_slug}"
             },
         }
 
@@ -107,5 +107,4 @@ class Specimen:
                 "unit": "uL",
                 "value": float(volume_ul),
             }
-
         return entity

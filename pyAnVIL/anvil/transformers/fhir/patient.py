@@ -1,6 +1,8 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import join, make_identifier
+from anvil.transformers.fhir import make_id
+from anvil.transformers.fhir.research_study import ResearchStudy
+from anvil.terra.subject import Subject
 
 
 class Patient:
@@ -10,11 +12,16 @@ class Patient:
     resource_type = "Patient"
 
     @staticmethod
+    def slug(subject):
+        """Make id."""
+        return make_id(subject.workspace_name, subject.id)
+
+    @staticmethod
     def build_entity(subject):
         """Create fhir entity."""
-        study_id = subject.workspace_name
-        subject_id = subject.id
-        subject_id_slug = make_identifier('P', subject_id)
+        assert issubclass(subject.__class__, Subject), f"{subject}"
+
+        subject_id_slug = Patient.slug(subject)
 
         # ethnicity = None
         # race = None
@@ -31,16 +38,16 @@ class Patient:
             },
             "identifier": [
                 {
-                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
-                    "value": subject_id,
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{subject.workspace_name}",
+                    "value": subject.id,
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": join(Patient.resource_type, study_id, subject_id),
+                    "value": f"{subject.workspace_name}/Patient/{subject.id}",
                 },
             ],
             "managingOrganization": {
-                "reference": f"Organization/{study_id.lower()}"
+                "reference": f"Organization/{ResearchStudy.slug(subject)}"
             }
         }
 
