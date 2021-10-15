@@ -64,8 +64,10 @@ class FhirTransformer(Transformer):
                 for b in _me.transform_blob(Blob(blob, sample)):
                     b = DocumentReference.build_entity(b, subject)
                     outputs.append(b)
-                    yield b
+            # task will inject context into DocumentReference
             yield SpecimenTask.build_entity(inputs=[sample], outputs=outputs, subject=subject)
+            for b in outputs:
+                yield b
         sample.entity = types.MethodType(entity, sample)
         yield sample
 

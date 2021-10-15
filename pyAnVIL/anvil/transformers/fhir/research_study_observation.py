@@ -1,6 +1,7 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import make_identifier
+from anvil.transformers.fhir import CANONICAL
+from anvil.transformers.fhir.research_study import ResearchStudy
 
 logged_already = []
 
@@ -14,7 +15,7 @@ class ResearchStudyObservation:
     @staticmethod
     def build_entity(workspace):
         """Create FHIR entity."""
-        slug = make_identifier(workspace.id)
+        slug = ResearchStudy.slug(workspace)
 
         entity = {
             "resourceType": "Observation",
@@ -23,7 +24,7 @@ class ResearchStudyObservation:
             "code": {
                 "coding": [
                     {
-                        "system": "https://www.ncbi.nlm.nih.gov/fhir",
+                        "system": f"{CANONICAL}",
                         "code": "Summary",
                         "display": "Variable Summary"
                     }
@@ -31,7 +32,7 @@ class ResearchStudyObservation:
             },
             "focus": [
                 {
-                    "reference": f"ResearchStudy/{make_identifier(workspace.id)}"
+                    "reference": f"ResearchStudy/{slug}"
                 }
             ],
             "component": [
@@ -50,7 +51,7 @@ class ResearchStudyObservation:
                     "code": {
                         "coding": [
                             {
-                                "system": "https://www.ncbi.nlm.nih.gov/fhir",
+                                "system": f"{CANONICAL}",
                                 "code": "SampleCount",
                                 "display": "Number of Samples"
                             }
@@ -62,7 +63,7 @@ class ResearchStudyObservation:
                     "code": {
                         "coding": [
                             {
-                                "system": "https://www.ncbi.nlm.nih.gov/fhir",
+                                "system": f"{CANONICAL}",
                                 "code": "Participant",
                                 "display": "Number of Participants"
                             }
@@ -74,6 +75,7 @@ class ResearchStudyObservation:
                     "code": {
                         "coding": [
                             {
+                                "system": f"{CANONICAL}",
                                 "code": "StorageSize",
                                 "display": "Size on Disk"
                             }

@@ -47,6 +47,16 @@ class SpecimenTask:
                 }
             }
         ]
+        # inject this task context into DocumentReferences
+        for blob in outputs:
+            blob['context'] = {
+                "related": [
+                    {
+                        "reference": f"Task/{SpecimenTask.slug(specimen)}"
+                    }
+                ]
+            }
+
         outputs = [
             {
                 "type": {
@@ -65,6 +75,11 @@ class SpecimenTask:
         return {
             "resourceType": "Task",
             "id": SpecimenTask.slug(specimen),
+            "meta": {
+                "profile": [
+                    "https://ncpi-fhir.github.io/ncpi-fhir-ig/StructureDefinition/ncpi-specimen-task"
+                ]
+            },
             "identifier": [
                 {
                     "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{subject.workspace_name}",

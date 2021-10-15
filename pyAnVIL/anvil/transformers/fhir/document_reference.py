@@ -169,6 +169,11 @@ class DocumentReference:
         entity = {
             "resourceType": DocumentReference.resource_type,
             "id": blob_slug,
+            "meta": {
+                "profile": [
+                    "https://ncpi-fhir.github.io/ncpi-fhir-ig/StructureDefinition/ncpi-research-document-reference"
+                ]
+            },
             "identifier": [
                 {
                     "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",

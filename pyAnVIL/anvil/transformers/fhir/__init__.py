@@ -33,4 +33,4 @@ def make_workspace_id(resource):
 
 
 # note coordinate with StructureDefintions /fhir/config.yaml::canonical
-CANONICAL = "https://ncpi-fhir.github.io"
+CANONICAL = "https://nih-ncpi.github.io/ncpi-fhir-ig"
