@@ -9,8 +9,8 @@ unset MISSING
 
 [ ! -z "$1" ] &&  echo "please provide data_store parameter" && exit
 
+[ -z "$TOKEN" ] &&  export TOKEN=$(gcloud auth application-default print-access-token)
 
-export TOKEN=$(gcloud auth application-default print-access-token)
 
 
 curl -H "Authorization:Bearer $TOKEN" -H "Content-Type: application/json; charset=utf-8" \

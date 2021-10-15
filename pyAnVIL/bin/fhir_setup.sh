@@ -3,6 +3,7 @@
 
 unset MISSING
 
+
 [ -z "$GOOGLE_PROJECT_NAME" ] && echo "missing: GOOGLE_PROJECT_NAME the name of the project that will host the FHIR service" && MISSING="Y"
 [ -z "$GOOGLE_DATASET" ] && echo "missing: GOOGLE_DATASET the dataset to host study_data" && MISSING="Y"
 [ -z "$IMPLEMENTATION_GUIDE_PATH" ] && echo "missing: IMPLEMENTATION_GUIDE_PATH path to IG json see https://github.com/ncpi-fhir/ncpi-fhir-ig fsh-generated/resources/" && MISSING="Y"
@@ -23,6 +24,8 @@ if [ -z "$GOOGLE_PROJECT" ]; then
     [ -z "$GOOGLE_PROJECT" ] && echo "Could not create GOOGLE_PROJECT" && exit 1
     # attach a billing to the project
     gcloud beta billing projects link $GOOGLE_PROJECT --billing-account=$GOOGLE_BILLING_ACCOUNT
+    # point as this project by default.
+    gcloud config set project $GOOGLE_PROJECT
     #  ‘Cloud Healthcare API’ click ‘Enable’ to add the API to the current project.
     gcloud services enable healthcare.googleapis.com
 fi
@@ -40,14 +43,20 @@ gcloud config set project $GOOGLE_PROJECT
 
 # get service account
 export GOOGLE_SERVICE_ACCOUNT=$(gcloud projects get-iam-policy $GOOGLE_PROJECT --format="value(bindings.members)" --flatten="bindings[]" | grep serviceAccount | sed s/serviceAccount:// | head -1)
+[ -z "$GOOGLE_SERVICE_ACCOUNT" ] &&  echo "Unable to set GOOGLE_SERVICE_ACCOUNT ??" && exit 1
 # assign bucket reader permissions so that it can be used to read the bucket.
-gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objectViewer
+gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objectViewer
+[ $? -ne 0 ] && echo "Unable to set roles/storage.objectViewer" && exit 1
+# gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objects.list
+# [ $? -ne 0 ] && echo "Unable to set roles/storage.objects.list" && exit 1
 echo Granted roles/storage.objectViewer to $GOOGLE_SERVICE_ACCOUNT on $GOOGLE_BUCKET
 
 
-# move IG into it
-gsutil -m cp -r $IMPLEMENTATION_GUIDE_PATH/*.json gs://$GOOGLE_PROJECT/IG
 
+# move IG into it
+fix_ig_for_google 
+gsutil -m cp -r $IMPLEMENTATION_GUIDE_PATH/*.json gs://$GOOGLE_BUCKET/IG
+echo "Copied IG to bucket"
 
 #  First create the dataset.
 # delete first? gcloud healthcare datasets delete $GOOGLE_DATASET --location=$GOOGLE_LOCATION

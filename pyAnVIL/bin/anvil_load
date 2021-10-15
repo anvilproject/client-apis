@@ -18,8 +18,9 @@ unset MISSING
 [ -z "$GOOGLE_BUCKET" ] && echo "missing: GOOGLE_BUCKET" && MISSING="Y"
 [ -z "$SPREADSHEET_UUID" ] && echo "missing: SPREADSHEET_UUID google spreadsheet uuid 'AnVIL_Data_Ingestion_Attributes_210225'" && MISSING="Y"
 [ -z "$CLIENT_SECRET" ] && echo "missing: CLIENT_SECRET required to read broad's spreadsheet See https://gspread.readthedocs.io/en/latest/oauth2.html#for-bots-using-service-account" && MISSING="Y"
-
+[ -z "$USER_PROJECT" ] && echo "missing: USER_PROJECT billing" && MISSING="Y"
 [ ! -z "$MISSING" ] &&  echo "please set required env variables. see fhir_setup.sh" && exit
+
 
 
 # first grab spreadsheet that contains study_accession, dataUseRestriction, etc.
@@ -28,15 +29,18 @@ data_ingestion_spreadsheet \
     --spreadsheet_key $SPREADSHEET_UUID \
     --json_keyfile_path $CLIENT_SECRET
 
-
-# map study_accession to data_store
-accession_to_datastore all \
-    --accession_mapping $OUTPUT_PATH/spreadsheet.json \
+# create data stores
+accession_to_datastore initialize \
     --output_path $OUTPUT_PATH/ \
-    --google_project $GOOGLE_PROJECT \
+    --accession_mapping $OUTPUT_PATH/spreadsheet.json \
     --google_location $GOOGLE_LOCATION \
     --google_dataset $GOOGLE_DATASET \
     --google_bucket $GOOGLE_BUCKET \
-    --user_project terra_test_bwalsh
-# TODO ^^ fix user_project
-echo "done"
+    --user_project $USER_PROJECT
+
+# load data stores
+accession_to_datastore load \
+    --output_path $OUTPUT_PATH/ \
+    --accession_mapping $OUTPUT_PATH/spreadsheet.json \
+    --google_bucket $GOOGLE_BUCKET \
+    --user_project $USER_PROJECT

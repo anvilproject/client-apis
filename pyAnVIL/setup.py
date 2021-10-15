@@ -192,13 +192,15 @@ setup(
     #     ],
     # },
     scripts="""
-        bin/accession_to_datastore
+        bin/add_label_to_datastore.sh
         bin/anvil_extract
         bin/anvil_load
         bin/anvil_transform
         bin/data_ingestion_spreadsheet
         bin/enable_implementation_guide.sh
+        bin/fhir_query
         bin/fhir_setup.sh
+        bin/fix_ig_for_google
         bin/load_study_data.sh
         bin/load_subject_data.sh
         bin/query.sh
