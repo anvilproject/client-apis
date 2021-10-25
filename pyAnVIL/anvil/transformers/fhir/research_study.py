@@ -1,12 +1,13 @@
 """Represent fhir entity."""
 
-from anvil.transformers.fhir import CANONICAL, join, make_identifier
+from anvil.transformers.fhir import CANONICAL, join
 from anvil.transformers.fhir.practitioner import Practitioner
 from anvil.transformers.fhir.organization import Organization
 
 import logging
 
 from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
+from anvil.transformers.fhir import make_workspace_id
 
 
 class ResearchStudy:
@@ -16,9 +17,15 @@ class ResearchStudy:
     resource_type = "ResearchStudy"
 
     @staticmethod
+    def slug(resource):
+        """Make id."""
+        return make_workspace_id(resource)
+
+    @staticmethod
     def build_entity(workspace):
         """Create fhir entity."""
-        study_id = workspace.id.lower()
+        study_id = ResearchStudy.slug(workspace)
+        workspace_name = workspace.attributes.workspace.name
         investigator_name = workspace.investigator
         if not investigator_name:
             logging.getLogger(__name__).warning(f'{study_id} missing investigator')
@@ -26,12 +33,12 @@ class ResearchStudy:
 
         diseaseOntologyIdText = 'Missing'
         if diseaseOntologyId and diseaseOntologyId not in disease_text:
-            logging.getLogger(__name__).error(f'{study_id} missing {diseaseOntologyId}')
+            logging.getLogger(__name__).error(f'{study_id} missing {diseaseOntologyId} see anvil.transformers.fhir.disease_normalizer.disease_text')
         else:
             diseaseOntologyIdText = disease_text.get(diseaseOntologyId, 'Missing')
 
-        workspace = workspace.attributes.workspace.attributes
-        institution = workspace.get('institute', None)
+        # workspace = workspace.attributes.workspace.attributes
+        institution = workspace.attributes.workspace.attributes.get('institute', None)
         if not institution:
             logging.getLogger(__name__).warning(f'{study_id} missing institute')
         study_name = study_id
@@ -55,7 +62,7 @@ class ResearchStudy:
 
         entity = {
             "resourceType": ResearchStudy.resource_type,
-            "id": make_identifier(study_id),
+            "id": study_id,
             "meta": {
                 "profile": [
                     "http://hl7.org/fhir/StructureDefinition/ResearchStudy"
@@ -64,7 +71,7 @@ class ResearchStudy:
             "identifier": [
                 {
                     "system": "https://anvil.terra.bio/#workspaces/anvil-datastorage/",
-                    "value": study_id,
+                    "value": workspace_name,
                 },
                 {
                     "system": "urn:ncpi:unique-string",
@@ -78,7 +85,7 @@ class ResearchStudy:
                         {
                             "url": "organization",
                             "valueReference": {
-                                "reference": f"Organization/{make_identifier(Organization.resource_type, institution)}"
+                                "reference": f"Organization/{Organization.slug(workspace)}"
                             },
                         }
                     ],
@@ -93,7 +100,7 @@ class ResearchStudy:
 
         if investigator_name:
             entity["principalInvestigator"] = {
-                "reference": f"Practitioner/{make_identifier(Practitioner.resource_type, investigator_name)}"
+                "reference": f"Practitioner/{Practitioner.slug(workspace)}"
             }
 
         if attribution:

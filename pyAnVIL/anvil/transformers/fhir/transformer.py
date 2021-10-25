@@ -8,6 +8,7 @@ from anvil.transformers.fhir.patient import Patient
 from anvil.transformers.fhir.practitioner import Practitioner
 from anvil.transformers.fhir.research_study import ResearchStudy
 from anvil.transformers.fhir.research_subject import ResearchSubject
+from anvil.transformers.fhir.research_study_observation import ResearchStudyObservation
 from anvil.transformers.fhir.specimen import Specimen
 from anvil.transformers.fhir.task import SpecimenTask
 from anvil.transformers.transformer import Transformer
@@ -31,6 +32,9 @@ class FhirTransformer(Transformer):
             organization = Organization.build_entity(self, f'Organization/{workspace.attributes.reconciler_name.lower()}')
             if organization:
                 yield organization
+            observation = ResearchStudyObservation.build_entity(self)
+            if observation:
+                yield observation
             yield ResearchStudy.build_entity(self)
         workspace.entity = types.MethodType(entity, workspace)
         yield workspace
@@ -60,8 +64,10 @@ class FhirTransformer(Transformer):
                 for b in _me.transform_blob(Blob(blob, sample)):
                     b = DocumentReference.build_entity(b, subject)
                     outputs.append(b)
-                    yield b
-            yield SpecimenTask.build_entity(inputs=[s], outputs=outputs)
+            # task will inject context into DocumentReference
+            yield SpecimenTask.build_entity(inputs=[sample], outputs=outputs, subject=subject)
+            for b in outputs:
+                yield b
         sample.entity = types.MethodType(entity, sample)
         yield sample
 

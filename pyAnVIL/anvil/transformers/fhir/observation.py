@@ -3,6 +3,8 @@
 from anvil.transformers.fhir import make_identifier
 import logging
 from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
+from anvil.transformers.fhir import CANONICAL
+from anvil.transformers.fhir.patient import Patient
 
 logged_already = []
 
@@ -10,14 +12,13 @@ logged_already = []
 class DiseaseObservation:
     """Create fhir entity."""
 
-    class_name = "research_study"
-    resource_type = "ResearchStudy"
-
     @staticmethod
     def build_entity(subject, disease):
         """Create FHIR entity."""
         assert disease, f'Should have disease {subject}'
         if disease.startswith("PS"):
+            disease = f"OMIM:{disease}"
+        if ":" not in disease:
             disease = f"OMIM:{disease}"
         workspace_diseaseOntologyId = disease  # subject.workspace_diseaseOntologyId
         diseaseOntologyText = disease_text.get(disease, None)
@@ -37,7 +38,7 @@ class DiseaseObservation:
             "id": slug,
             "meta": {
                 "profile": [
-                    "http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-phenotype"
+                    f"http://{CANONICAL}/StructureDefinition/ncpi-phenotype"
                 ]
             },
             "identifier": [
@@ -58,7 +59,7 @@ class DiseaseObservation:
                 "text": f"{diseaseOntologyText}"
             },
             "subject": {
-                "reference": f"Patient/{make_identifier('P', subject.id)}"
+                "reference": f"Patient/{Patient.slug(subject)}"
             },
             "valueCodeableConcept": {
                 "coding": [
@@ -87,7 +88,7 @@ class DiseaseObservation:
         if subject.age:
             entity['extension'].append(
                 {
-                    "url": "http://fhir.ncpi-project-forge.io/StructureDefinition/age-at-event",
+                    "url": f"http://{CANONICAL}/StructureDefinition/age-at-event",
                     "valueAge": {
                         "value": subject.age,
                         "unit": "y",

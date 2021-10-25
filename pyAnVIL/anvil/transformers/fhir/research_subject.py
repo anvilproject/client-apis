@@ -1,7 +1,7 @@
 """Represent fhir entity."""
 
-
-from anvil.transformers.fhir import make_identifier
+from anvil.transformers.fhir.patient import Patient
+from anvil.transformers.fhir.research_study import ResearchStudy
 
 
 class ResearchSubject:
@@ -16,15 +16,13 @@ class ResearchSubject:
     @staticmethod
     def build_entity(subject):
         """Create fhir entity."""
-        study_id = subject.workspace_name
-        study_id_slug = make_identifier(study_id.lower())
-        subject_id = subject.id
-        subject_id_slug = make_identifier('P', subject_id)
-        research_subject_status = "off-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html
+        study_slug = ResearchStudy.slug(subject)
+        patient_slug = Patient.slug(subject)
+        research_subject_status = "on-study"  # QUESTION: https://www.hl7.org/fhir/valueset-research-subject-status.html
 
         entity = {
             "resourceType": ResearchSubject.resource_type,
-            "id": subject_id_slug,
+            "id": patient_slug,
             "meta": {
                 "profile": [
                     "http://hl7.org/fhir/StructureDefinition/ResearchSubject"
@@ -32,20 +30,20 @@ class ResearchSubject:
             },
             "identifier": [
                 {
-                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{study_id}",
-                    "value": subject_id,
+                    "system": f"https://anvil.terra.bio/#workspaces/anvil-datastorage/{subject.workspace_name}",
+                    "value": subject.id,
                 },
                 {
                     "system": "urn:ncpi:unique-string",
-                    "value": make_identifier('P', subject_id),
+                    "value": f"{subject.workspace_name}/ResearchSubject/{subject.id}",
                 },
             ],
             "status": research_subject_status,
             "study": {
-                "reference": f"ResearchStudy/{study_id_slug}"
+                "reference": f"ResearchStudy/{study_slug}"
             },
             "individual": {
-                "reference": f"Patient/{subject_id_slug}"
+                "reference": f"Patient/{patient_slug}"
             },
         }
 

@@ -6,10 +6,13 @@ from attrdict import AttrDict
 from collections import defaultdict
 import os
 
-# AVRO_PATH = "/tmp/export_2020-11-05T23_26_49.avro"
-# assert os.path.isfile(AVRO_PATH), f"{AVRO_PATH} should exist. Please export PFB from https://gen3.theanvil.io/"
 
+# drs entries
 gen3_entities = None
+
+# controls logging and drs lookup
+sample_exceptions = []
+SKIP_DRS = "skip_drs"
 
 
 def _shorten_workspace(name):
@@ -21,19 +24,30 @@ def _shorten_workspace(name):
 
 def _append_drs(sample):
     """Add ga4gh_drs_uri to blob."""
+    global sample_exceptions
+    if SKIP_DRS in sample_exceptions:
+        return
     try:
         for key in sample.blobs.keys():
             filename = key.split('/')[-1]
             gen3_file = gen3_entities.get(submitter_id=filename)
             sample.blobs[key]['ga4gh_drs_uri'] = gen3_file['object']['ga4gh_drs_uri']   # f"https://gen3.theanvil.io/ga4gh/drs/v1/objects/{gen3_file['object']['object_id']}"
     except Exception as e:
-        logging.info(f"Append DRS: {sample.id} {e}")
+        if sample.workspace_name not in sample_exceptions:
+            logging.warn(f"DRS not found {sample.workspace_name} {sample.id} (supressing further errors for this workspace) {e}")
+        sample_exceptions.append(sample.workspace_name)
 
 
 class Sample(object):
     """Represent terra sample."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    @staticmethod
+    def skip_drs():
+        """Disable DRS expensive lookup."""
+        global sample_exceptions
+        sample_exceptions.append(SKIP_DRS)
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
         """Pass all args to AttrDict."""
         global gen3_entities
         self._logger = logging.getLogger(__name__)
@@ -42,18 +56,26 @@ class Sample(object):
         self.missing_sequence = False
         self.schema = workspace.sample_schema
         self.workspace_name = workspace.name
-        self.blobs = self._find_blobs(blobs, sequencing)
         self.missing_blob_path = False
         self.avro_path = avro_path
+        self.drs_output_path = drs_output_path
+        self.blobs = self._find_blobs(blobs, sequencing)
 
-        if not gen3_entities:
-            assert os.path.isfile(avro_path), f"{avro_path} should exist. Please export PFB from https://gen3.theanvil.io/"
-            gen3_entities = Entities(avro_path)
-            gen3_entities.load()
-        _append_drs(self)
+        if not gen3_entities and avro_path:
+            if os.path.isfile(avro_path):
+                gen3_entities = Entities(avro_path, drs_output_path)
+                gen3_entities.load()
+            else:
+                if 'avro_path' not in sample_exceptions:
+                    self._logger.warn(f"{avro_path} should exist. Please export PFB from https://gen3.theanvil.io/")
+                    sample_exceptions.append('avro_path')
+        if gen3_entities:
+            self._logger.debug("_append_drs")
+            _append_drs(self)
 
     def _find_blobs(self, blobs, sequencing):
         """Find all blobs associated with sample."""
+        self._logger.debug("_find_blobs")
         blob_names = [(property_name, blob_name) for property_name, blob_name in self.attributes.attributes.items() if isinstance(blob_name, str) and blob_name.startswith('gs://')]
         my_blobs = []
         for property_name, blob_name in blob_names:
@@ -103,17 +125,22 @@ class Sample(object):
 class CCDGSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
 
     @property
     def id(self):
         """Deduce id."""
         if 'project' not in self.attributes.attributes:
-            return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
+            # return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
+            return self.attributes.name
         # format the gen3 uses
-        return f"{self.attributes.attributes['project']}_{self.attributes.attributes['collaborator_sample_id']}"
+        if 'collaborator_sample_id' not in self.attributes.attributes:
+            # return f"{self.attributes.attributes['project']}_{self.attributes.attributes['sample']}"
+            return self.attributes.attributes['sample']
+        # return f"{self.attributes.attributes['project']}_{self.attributes.attributes['collaborator_sample_id']}"
+        return self.attributes.attributes['collaborator_sample_id']
 
     @property
     def subject_id(self):
@@ -147,9 +174,9 @@ class CCDGSample(Sample):
 class CMGSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
 
     def _find_blobs(self, blobs, sequencing):
         """Find all blobs associated with sample."""
@@ -224,20 +251,22 @@ class CMGSample(Sample):
     @property
     def id(self):
         """Deduce id."""
-        return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
+        # return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
+        return self.attributes.name
 
 
 class GTExSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
 
     @property
     def id(self):
         """Deduce id."""
-        return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
+        # return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def subject_id(self):
@@ -263,14 +292,15 @@ class GTExSample(Sample):
 class ThousandGenomesSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
 
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Sa/{self.attributes.name}"
+        # return f"{self.workspace_name}/Sa/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def subject_id(self):
@@ -296,9 +326,9 @@ class ThousandGenomesSample(Sample):
 class eMERGESample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
 
     @property
     def id(self):
@@ -326,6 +356,116 @@ class eMERGESample(Sample):
         return False
 
 
+class NHGRISample(Sample):
+    """Extend Sample class."""
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return self.attributes.name
+
+    @property
+    def subject_id(self):
+        """Deduce id."""
+        return self.attributes.attributes.participant.entityName
+
+    @property
+    def inconsistent_entityName(self):
+        """Flag entityName inconsistencies."""
+        return False
+
+    @property
+    def misspelled_subject(self):
+        """Flag misspellings."""
+        return False
+
+    @property
+    def inconsistent_subject(self):
+        """Flag misspellings."""
+        return False
+
+
+class NIMHSample(Sample):
+    """Extend Sample class."""
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return self.attributes.name
+
+    @property
+    def subject_id(self):
+        """Deduce id."""
+        try:
+            return self.attributes.attributes.participant.entityName
+        except Exception:
+            return self.attributes.attributes.subject_id
+
+    @property
+    def inconsistent_entityName(self):
+        """Flag entityName inconsistencies."""
+        return 'participant' not in self.attributes.attributes
+
+    @property
+    def misspelled_subject(self):
+        """Flag misspellings."""
+        return False
+
+    @property
+    def inconsistent_subject(self):
+        """Flag misspellings."""
+        return False
+
+
+class PAGESample(Sample):
+    """Extend Sample class."""
+
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        return self.attributes.name
+
+    @property
+    def subject_id(self):
+        """Deduce id."""
+        try:
+            return self.attributes.attributes.participant_id
+        except Exception:
+            pass
+        try:
+            return self.attributes.attributes.subject_id
+        except Exception:
+            pass
+        raise Exception(f"can't find participant_id or subject_id  {self.attributes}")
+
+    @property
+    def inconsistent_entityName(self):
+        """Flag entityName inconsistencies."""
+        return 'participant' not in self.attributes.attributes
+
+    @property
+    def misspelled_subject(self):
+        """Flag misspellings."""
+        return False
+
+    @property
+    def inconsistent_subject(self):
+        """Flag misspellings."""
+        return False
+
+
 def sample_factory(*args, **kwargs):
     """Return a specialized Subject class instance."""
     if 'CCDG' in kwargs['workspace'].name.upper():
@@ -338,4 +478,10 @@ def sample_factory(*args, **kwargs):
         return ThousandGenomesSample(*args, **kwargs)
     if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
         return eMERGESample(*args, **kwargs)
-    raise Exception(f'Not implemented {args} {kwargs}')
+    if 'NHGRI' in kwargs['workspace'].name.upper():
+        return NHGRISample(*args, **kwargs)
+    if 'NIMH' in kwargs['workspace'].name.upper():
+        return NIMHSample(*args, **kwargs)
+    if 'PAGE' in kwargs['workspace'].name.upper():
+        return PAGESample(*args, **kwargs)
+    raise Exception(f'Not implemented {kwargs["workspace"].name.upper()}')

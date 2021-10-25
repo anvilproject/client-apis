@@ -13,10 +13,36 @@ from anvil.terra.subject import subject_factory
 from anvil.terra.sample import sample_factory
 
 
+@memoize
+def _blobs(bucket_name, user_project):
+    """Retrieve all blobs in terra bucket associated with workspace, dict keyed by object url.
+
+    Checks workspace.bucketName and workspace.project_files
+    :type project: str or None
+    :param project: the project which the client acts on behalf of. Will be
+                    passed when creating a topic.  If not passed,
+                    falls back to the default inferred from the environment.
+    """
+    # Instantiates a google client, & get all blobs in bucket
+    storage_client = storage.Client(user_project)
+    logging.getLogger(__name__).info(f"bucket {bucket_name} not in cache, fetching from google.")
+    bucket = storage_client.bucket(bucket_name, user_project=user_project)
+    # get subset of data
+    _blobs = {}
+    try:
+        for b in bucket.list_blobs(fields='items(size, etag, crc32c, name, timeCreated),nextPageToken'):
+            name = f"gs://{bucket_name}/{b.name}"
+            # cache.put(name, {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
+            _blobs[name] = AttrDict({'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
+    except Exception as e:
+        print(f"{bucket_name} {e}")
+    return _blobs
+
+
 class Workspace():
     """Represent terra workspace."""
 
-    def __init__(self, *args, user_project=None, avro_path=None):
+    def __init__(self, *args, user_project=None, avro_path=None, drs_output_path=None):
         """Pass all args to AttrDict, set id for cacheing."""
         self.attributes = AttrDict(*args)
         assert user_project, "Must have user_project"
@@ -31,6 +57,7 @@ class Workspace():
         self._missing_project_files = None
         self.missing_sequence = False
         self.avro_path = avro_path
+        self.drs_output_path = drs_output_path
 
     @property
     def subjects(self):
@@ -44,13 +71,18 @@ class Workspace():
         """Return raw samples from terra indexed by subject_id."""
         if not self._samples:
             self._samples = defaultdict(list)
-            blobs = self.blobs()
+            blobs = _blobs(self.attributes.workspace['bucketName'], self._user_project)
+            logging.getLogger(__name__).debug(f"bucket {self.attributes.workspace['bucketName']} billing {self._user_project} retrieved.")
             sequencing = self._get_entities('sequencing')
+            logging.getLogger(__name__).debug(f"retrieved sequencing in {self.id}.")
+            # TODO - start optimize me
             for s in self._get_entities('sample'):
-                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing, avro_path=self.avro_path)
+                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing, avro_path=self.avro_path, drs_output_path=self.drs_output_path)
                 self._samples[s.subject_id].append(s)
                 if s.missing_sequence:
                     self.missing_sequence = s.missing_sequence
+            # TODO - end optimize me
+            logging.getLogger(__name__).debug(f"created samples in {self.id}.")
         return self._samples
 
     @property
@@ -98,34 +130,6 @@ class Workspace():
                 for k in self._missing_project_files:
                     del project_files[k]
             self._project_files = AttrDict(project_files)
-
-    @memoize
-    def blobs(self):
-        """Retrieve all blobs in terra bucket associated with workspace, dict keyed by object url.
-
-        Checks workspace.bucketName and workspace.project_files
-        :type project: str or None
-        :param project: the project which the client acts on behalf of. Will be
-                        passed when creating a topic.  If not passed,
-                        falls back to the default inferred from the environment.
-        """
-        if not self._blobs:
-            workspace = self.attributes.workspace
-            # Instantiates a google client, & get all blobs in bucket
-            storage_client = storage.Client(project=self._user_project)
-            bucket = storage_client.bucket(workspace['bucketName'], user_project=self._user_project)
-            # get subset of data
-            _blobs = {}
-            try:
-                for b in bucket.list_blobs(fields='items(size, etag, crc32c, name, timeCreated),nextPageToken'):
-                    name = f"gs://{workspace['bucketName']}/{b.name}"
-                    # cache.put(name, {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
-                    _blobs[name] = AttrDict({'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
-                self._blobs = _blobs
-            except Exception as e:
-                print(f"{self.id} {workspace['bucketName']} {e}")
-                self._blobs = _blobs
-        return self._blobs
 
     @property
     def missing_samples(self):
@@ -241,7 +245,7 @@ class Workspace():
     @property
     def sample_schema(self):
         """Return schema for workspace sample."""
-        if 'sample' not in self._schemas:
+        if not self._schemas or 'sample' not in self._schemas:
             logging.debug(f"{self.id} - no schema? {self._schemas}")
             return None
         return self._schemas['sample']
@@ -274,7 +278,7 @@ class Workspace():
         return AttrDict({
             'inconsistent_entityName': self.inconsistent_entityName is not None,
             'inconsistent_subject': self.inconsistent_subject is not None,
-            'missing_blobs': self.missing_blobs is not None or len(self.blobs().keys()) == 0,
+            'missing_blobs': self.missing_blobs is not None,
             'missing_samples': self.missing_samples is not None or len(self.samples) == 0,
             'missing_project_files': self.missing_project_files is not None,
             'missing_subjects': self.missing_subjects,

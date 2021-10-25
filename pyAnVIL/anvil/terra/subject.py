@@ -3,6 +3,9 @@
 import logging
 from attrdict import AttrDict
 
+gender_already_reported = []
+age_already_reported = []
+
 
 class Subject(object):
     """Represent terra subject."""
@@ -51,10 +54,12 @@ class Subject(object):
         for p in ['gender', 'sex']:
             if p in self.attributes.attributes:
                 gender = self.attributes.attributes[p].lower()
-                if gender in ['null', 'na', 'not reported', 'notreported']:
+                if gender in ['null', 'na', 'not reported', 'notreported', '--']:
                     return None
                 return gender.lower()
-        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing gender parameter")
+        if self.workspace_name not in gender_already_reported:
+            logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing gender parameter, supressing this warning for this workspace")
+            gender_already_reported.append(self.workspace_name)
         return None
 
     @property
@@ -119,7 +124,8 @@ class CCDGSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -131,7 +137,9 @@ class CCDGSubject(Subject):
                     logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric '{age}'")
                     return None
                 return int(age)
-        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age parameter")
+        if self.workspace_name not in age_already_reported:
+            logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing age parameter, supressing this warning for this workspace")
+            age_already_reported.append(self.workspace_name)
         return None
 
 
@@ -145,7 +153,8 @@ class CMGSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -158,7 +167,9 @@ class CMGSubject(Subject):
                         logging.getLogger(__name__).warn(f"{self.workspace_name} {self.id} {p} not numeric '{age}'")
                     return None
                 return int(age)
-        logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age parameter")
+        if self.workspace_name not in age_already_reported:
+            logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing age parameter, supressing this warning for this workspace")
+            age_already_reported.append(self.workspace_name)
 
 
 class GTExSubject(Subject):
@@ -171,13 +182,16 @@ class GTExSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
         """Deduce age."""
         if 'age' not in self.attributes.attributes:
-            logging.getLogger(__name__).info(f"{self.workspace_name} {self.id} missing age")
+            if self.workspace_name not in age_already_reported:
+                logging.getLogger(__name__).warning(f"{self.workspace_name} {self.id} missing age parameter, supressing thiswarning for this workspace")
+                age_already_reported.append(self.workspace_name)
             return None
         age = self.attributes.attributes['age']
         if not str(age).isnumeric():
@@ -196,7 +210,8 @@ class ThousandGenomesSubject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -214,7 +229,65 @@ class eMERGESUbject(Subject):
     @property
     def id(self):
         """Deduce id."""
-        return f"{self.workspace_name}/Su/{self.attributes.name}"
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
+
+    @property
+    def age(self):
+        """Deduce age."""
+        return None
+
+
+class NHGRISubject(Subject):
+    """Extend Subject class."""
+
+    def __init__(self, *args, workspace=None, samples=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, samples=samples)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
+
+    @property
+    def age(self):
+        """Deduce age."""
+        return None
+
+
+class NIMHSubject(Subject):
+    """Extend Subject class."""
+
+    def __init__(self, *args, workspace=None, samples=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, samples=samples)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
+
+    @property
+    def age(self):
+        """Deduce age."""
+        return None
+
+
+class PAGESubject(Subject):
+    """Extend Subject class."""
+
+    def __init__(self, *args, workspace=None, samples=None):
+        """Call super."""
+        super().__init__(*args, workspace=workspace, samples=samples)
+
+    @property
+    def id(self):
+        """Deduce id."""
+        # return f"{self.workspace_name}/Su/{self.attributes.name}"
+        return self.attributes.name
 
     @property
     def age(self):
@@ -234,4 +307,10 @@ def subject_factory(*args, **kwargs):
         return ThousandGenomesSubject(*args, **kwargs)
     if 'ANVIL_EMERGE' in kwargs['workspace'].name.upper():
         return eMERGESUbject(*args, **kwargs)
-    raise Exception('Not implemented')
+    if 'NHGRI' in kwargs['workspace'].name.upper():
+        return NHGRISubject(*args, **kwargs)
+    if 'NIMH' in kwargs['workspace'].name.upper():
+        return NIMHSubject(*args, **kwargs)
+    if 'PAGE' in kwargs['workspace'].name.upper():
+        return PAGESubject(*args, **kwargs)
+    raise Exception(f'Not implemented {kwargs["workspace"].name.upper()}')

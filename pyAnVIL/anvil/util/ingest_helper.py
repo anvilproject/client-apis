@@ -83,6 +83,8 @@ class IngestHelper():
                             if blob.name not in project_buckets[bucket_name]:
                                 result[entity] = f"{uri} does not exist in project_buckets {bucket_name}"
                                 break
+                for bucket_name in project_buckets:
+                    print(f"{bucket_name} has {len(project_buckets[bucket_name])} objects")
             except Exception as e:
                 print(f"{workspace_name} {uri} {e}")
                 result[entity] = str(e)

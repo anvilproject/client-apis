@@ -1,5 +1,7 @@
 """Represent fhir entity."""
 
+from anvil.transformers.fhir import make_workspace_id
+
 
 class Organization:
     """Create fhir entity."""
@@ -8,10 +10,15 @@ class Organization:
     resource_type = "Organization"
 
     @staticmethod
+    def slug(resource):
+        """Make id."""
+        return make_workspace_id(resource)
+
+    @staticmethod
     def build_entity(workspace, parent=None):
         """Create fhir entity."""
         study_id = workspace.id
-        id = study_id.lower()  # make_identifier(Organization.resource_type, study_id)
+        id = Organization.slug(workspace)
         # institution = workspace.institute
         # if not institution:
         #     logging.getLogger(__name__).warning(f'workspace {study_id} missing institute')
