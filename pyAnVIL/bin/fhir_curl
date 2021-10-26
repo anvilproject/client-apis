@@ -118,7 +118,7 @@ def _get_token_help():
 @click.option('--project', default=os.environ.get('GOOGLE_PROJECT', None), show_default=True, help='env var. GOOGLE_PROJECT')
 @click.option('--location', default=os.environ.get('GOOGLE_LOCATION', None), show_default=True, help='env var. GOOGLE_LOCATION')
 @click.option('--dataset', default=os.environ.get('GOOGLE_DATASET', None), show_default=True, help='env var. GOOGLE_DATASET')
-@click.option('--token', default=_get_token(), help=f'Google token. TOKEN [default: {_get_token_help()}]')
+@click.option('--token', default=_get_token(), help=f'env var. TOKEN [default: {_get_token_help()}]')
 @click.option('--data_stores', default=_get_datastores(), show_default=True, help=f'Google data_stores. {_get_datastores_help()}')
 @click.option('--data_store', default='dispatch', show_default=True, help="Name of data store, 'dispatch' will send to all data stores.")
 @click.argument('path')
