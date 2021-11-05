@@ -161,13 +161,13 @@ The following environment variable can be set in order to configure library func
 - PyPi
 
 ```
-# refresh from data ingestion tracker spread sheet, update pypi
+# update pypi
 
 export TWINE_USERNAME=  #  the username to use for authentication to the repository.
 export TWINE_PASSWORD=  # the password to use for authentication to the repository.
 
 rm -r dist/
-python3  setup.py data_ingestion_tracker sdist bdist_wheel
+python3  setup.py sdist bdist_wheel
 twine upload dist/*
 ```
 
