@@ -632,7 +632,7 @@ disease_text = {
     'OMIM:PS173900': 'POLYCYSTIC KIDNEY DISEASE 1 WITH OR WITHOUT POLYCYSTIC LIVER DISEASE; PKD1',
     'OMIM:PS308230': 'IMMUNODEFICIENCY WITH HYPER-IgM, TYPE 3; HIGM3',
     'OMIM:PS610805': 'CONGENITAL ANOMALIES OF KIDNEY AND URINARY TRACT 2; CAKUT2',
-    'OMM:235400': 'HEMOLYTIC UREMIC SYNDROME, ATYPICAL, SUSCEPTIBILITY TO, 1; AHUS1',
+    'OMIM:235400': 'HEMOLYTIC UREMIC SYNDROME, ATYPICAL, SUSCEPTIBILITY TO, 1; AHUS1',
     'OMIM:105650': 'DIAMOND-BLACKFAN ANEMIA 1; DBA1',
     'OMIM:126600': 'DOYNE HONEYCOMB RETINAL DYSTROPHY; DHRD',
     'OMIM:133700': 'EXOSTOSES, MULTIPLE, TYPE I; EXT1',
@@ -671,22 +671,34 @@ disease_text = {
     'OMIM:616079': 'RETINAL DYSTROPHY WITH INNER RETINAL DYSFUNCTION AND GANGLION CELL ABNORMALITIES; RDGCA',
     'OMIM:618173': 'RETINITIS PIGMENTOSA 83; RP83',
     'OMIM:618613': 'RETINITIS PIGMENTOSA 86; RP86',
-    'OMIM:618826': 'RETINITIS PIGMENTOSA 88; RP88'
+    'OMIM:618826': 'RETINITIS PIGMENTOSA 88; RP88',
+    'ORPHA:71211': 'Neuromyelitis optica spectrum disorder'
 }
+
+# useful links:
+#  https://docs.airr-community.org/en/latest/_sources/ontovoc/introduction_ontovoc.rst.txt
+#  https://github.com/monarch-initiative/omim/blob/main/data/dipper/curie_map.yaml
 
 disease_system = {
-    "DOID": "http://purl.obolibrary.org/obo/doid.owl",
-    "HP": "http://purl.obolibrary.org/obo/hp.owl",
-    "OMIM": "http://purl.obolibrary.org/obo/omim.owl"
+    "DOID": "http://purl.obolibrary.org/obo/DOID_",
+    "HP": "http://purl.obolibrary.org/obo/HP_",
+    "OMIM": "http://omim.org/entry/",
+    "ORPHA": "http://www.orpha.net/ORDO/Orphanet_",
+    "NCIT": "http://purl.obolibrary.org/obo/NCIT_",
+    "UMLS": "http://linkedlifedata.com/resource/umls/id/",
+    "MESH": "http://identifiers.org/mesh/"
 }
 
+#
+# utilities to populate lookups
+#
 
 def omim_title(mimNumber):
     """Retrieve preferredTitle for OMIM."""
     mimNumber = mimNumber.split(':')[-1]
     headers = {
         "Accept": "application/json",
-        "ApiKey": os.environ["API_KEY"],
+        "ApiKey": os.environ["OMIM_API_KEY"],
     }
     if mimNumber.startswith('PS'):
         response = requests.get(f"https://api.omim.org/api/entry/search?search=phenotypic_series_number:{mimNumber}", headers=headers)
@@ -705,3 +717,43 @@ def omim_title(mimNumber):
         assert 'omim' in omim, f"Response does not have 'omim' key. {omim}"
         assert len(omim['omim']['entryList']) > 0, f"Response entryList length is 0. {omim}"
         return omim['omim']['entryList'][0]['entry']['titles']['preferredTitle']
+
+
+def disease_ontology_xref(doid):
+    """Retrieve all xrefs for a DOID:XXXX."""
+    url = f"https://www.disease-ontology.org/api/metadata/{doid}"
+    response = requests.get(url)
+    disease = response.json()
+    return disease.get('xrefs', None)
+
+def omim_xref(mimNumber):
+    """Retrieve all xrefs for a OMIM:XXXX."""
+    mimNumber = mimNumber.split(':')[-1]
+    headers = {
+        "Accept": "application/json",
+        "ApiKey": os.environ["OMIM_API_KEY"],
+    }
+    if mimNumber.startswith('PS'):
+        response = requests.get(f"https://api.omim.org/api/entry/search?search=phenotypic_series_number:{mimNumber}&include=externalLinks", headers=headers)
+        omim = response.json()
+        assert 'omim' in omim, f"Response does not have 'omim' key. {omim}"
+    else:
+        response = requests.get(f"https://api.omim.org/api/entry?mimNumber={mimNumber}&include=externalLinks", headers=headers)
+        omim = response.json()
+        assert 'omim' in omim, f"Response does not have 'omim' key. {omim}"
+    return omim
+
+# disease_ontology_xrefs = {}
+# for key in disease_text:
+#     if 'DOID' not in key:
+#         continue
+#     xrefs = disease_ontology_xref(key)
+#     if not xrefs:
+#         continue
+#     disease_ontology_xrefs[key] = xrefs
+# {'DOID:0050589': ['EFO:0003767', 'KEGG:05321', 'MESH:D015212', 'NCI:C3138', 'OMIM:PS266600', 'SNOMEDCT_US_2021_03_01:155759008', 'UMLS_CUI:C0021390'], 'DOID:9744': ['EFO:0001359', 'GARD:10268', 'ICD10CM:E10', 'KEGG:04940', 'MESH:D003922', 'NCI:C2986', 'OMIM:222100', 'SNOMEDCT_US_2021_03_01:46635009', 'UMLS_CUI:C0011854'], 'DOID:1287': ['ICD9CM:429.2', 'MESH:D002318', 'NCI:C2931', 'SNOMEDCT_US_2021_03_01:266275004', 'UMLS_CUI:C0007222'], 'DOID:3393': ['EFO:0001645', 'ICD10CM:I20-I25', 'ICD10CM:I25', 'ICD10CM:I25.10', 'ICD9CM:410-414.99', 'ICD9CM:414.0', 'ICD9CM:414.9', 'MESH:D003324', 'MESH:D003327', 'MESH:D017202', 'NCI:C35505', 'NCI:C50625', 'OMIM:300464', 'OMIM:607339', 'OMIM:608316', 'OMIM:608318', 'OMIM:608320', 'OMIM:610947', 'OMIM:611139', 'OMIM:612030', 'OMIM:614293', 'SNOMEDCT_US_2021_03_01:194852007', 'SNOMEDCT_US_2021_03_01:233822007', 'SNOMEDCT_US_2021_03_01:41702007', 'SNOMEDCT_US_2021_03_01:53741008', 'UMLS_CUI:C0010054', 'UMLS_CUI:C0010068', 'UMLS_CUI:C0151744', 'UMLS_CUI:C0264694'], 'DOID:0060224': ['ICD9CM:427.31', 'MESH:D001281', 'NCI:C50466', 'SNOMEDCT_US_2021_03_01:266306001', 'UMLS_CUI:C0004238'], 'DOID:0014667': ['ICD10CM:E88.9', 'ICD9CM:277.9', 'MESH:D008659', 'NCI:C3235', 'SNOMEDCT_US_2021_03_01:75934005', 'UMLS_CUI:C0025517'], 'DOID:10652': ['EFO:0000249', 'GARD:10254', 'ICD10CM:G30', 'ICD9CM:331.0', 'KEGG:05010', 'MESH:D000544', 'NCI:C2866', 'SNOMEDCT_US_2021_03_01:73768007', 'UMLS_CUI:C0002395'], 'DOID:0060041': ['GARD:10248', 'MESH:D000067877'], 'DOID:2841': ['EFO:0000270', 'GARD:10246', 'ICD10CM:J45', 'ICD9CM:493', 'KEGG:05310', 'MESH:D001249', 'NCI:C28397', 'OMIM:600807', 'SNOMEDCT_US_2021_03_01:187687003', 'UMLS_CUI:C0004096'], 'DOID:5844': ['EFO:0000612', 'ICD10CM:I21', 'MESH:D009203', 'NCI:C27996', 'OMIM:608557', 'SNOMEDCT_US_2021_03_01:66514008', 'UMLS_CUI:C0027051'], 'DOID:1826': ['EFO:0000474', 'ICD10CM:G40.909', 'ICD9CM:345.9', 'MESH:D004827', 'NCI:C3020', 'SNOMEDCT_US_2021_03_01:267698007', 'UMLS_CUI:C0014544'], 'DOID:630': ['MESH:D030342', 'NCI:C3101', 'SNOMEDCT_US_2021_03_01:32895009', 'UMLS_CUI:C0019247'], 'DOID:5419': ['EFO:0000692', 'ICD10CM:F20', 'ICD9CM:295', 'MESH:D012559', 'NCI:C3362', 'OMIM:181500', 'SNOMEDCT_US_2021_03_01:58214004', 'UMLS_CUI:C0036341'], 'DOID:12377': ['GARD:7674', 'ICD10CM:G12.9', 'ICD9CM:335.1', 'MESH:D009134', 'NCI:C85075', 'SNOMEDCT_US_2021_03_01:5262007', 'UMLS_CUI:C0026847']}
+
+#
+# wget http://purl.obolibrary.org/obo/mondo/mondo-with-equivalents.json -O  /tmp/mondo-with-equivalents.json
+# jq -rc '.graphs[] | .nodes[] | select(.meta.xrefs != null) |   [.id, .meta.definition.val, (.meta.xrefs[] | .val)]  '   /tmp/mondo-with-equivalents.json  > $OUTPUT_PATH/mondo-xrefs.json
+#

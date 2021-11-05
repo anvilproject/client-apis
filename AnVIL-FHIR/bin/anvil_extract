@@ -68,7 +68,7 @@ def cleaner(output_path):
 @click.option('--namespace', default=DEFAULT_NAMESPACE, help=f'Terra namespace default={DEFAULT_NAMESPACE}')
 @click.option('--consortiums', type=(str, str), default=DEFAULT_CONSORTIUMS, multiple=True, help=f'<Name Regexp> e.g "CCDG AnVIL_CCDG.*" default {DEFAULT_CONSORTIUMS}')
 @click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--pfb_path', required=True, help='pfb path (gen3 avro extract)')
+@click.option('--pfb_path', help='pfb path (gen3 avro extract)')
 def extractor(user_project, namespace, consortiums, output_path, pfb_path):
     """Harvest all workspaces, return list of workspace_name. Create detailed sqlite graph and summary dashboard."""
     logging.getLogger(__name__).info("Starting aggregation for all specified AnVIL workspaces this will take several minutes.")

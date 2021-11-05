@@ -7,8 +7,6 @@ import click
 import logging
 import re
 import json
-import glob
-from collections import defaultdict
 
 from anvil.util.reconciler import DEFAULT_OUTPUT_PATH
 from anvil.terra.reconciler import Entities
@@ -82,12 +80,8 @@ def transformer(output_path, consortiums, user_project):
                     resourceType = entity['resourceType']
                     dir_path = f"{output_path}/{reconciler_name}/{name}"
                     public_protected = 'protected'
-                    if resourceType in ['ResearchStudy', 'Organization', 'Practitioner', 'PractitionerRole']:
+                    if resourceType in ['ResearchStudy', 'Organization', 'Practitioner']:
                         public_protected = 'public'
-                    if resourceType in ['Organization']:
-                        if entity['id'] == 'anvil':
-                            dir_path = f"{output_path}/static"
-                            resourceType = f"{resourceType}-{entity['id']}"
                     file_path = f"{dir_path}/{public_protected}/{resourceType}.json"
                     if resourceType == 'Observation' and 'focus' in entity:
                         focus_reference = entity['focus'][0]['reference']
@@ -107,34 +101,6 @@ def transformer(output_path, consortiums, user_project):
 
     write_fhir()
 
-
-@cli.command('organization_hierarchy')
-@click.option('--output_path', default=os.environ.get('OUTPUT_PATH', None), help=f'Output path. default={os.environ.get("OUTPUT_PATH", None)}')
-@click.option('--user_project', default=os.environ.get('GOOGLE_BILLING_ACCOUNT', None), help=f'Google billing project. default={os.environ.get("GOOGLE_BILLING_ACCOUNT", None)}')
-def organization_hierarchy(output_path, user_project):
-    """Create organization hierarchy."""
-    # path = f'{output_path}/**/Organization.json'
-    # print(path)
-    # consortiums = defaultdict(list)
-    # for name in glob.glob(path, recursive=True):
-    #     o = json.load(open(name, 'r'))
-    #     consortiums[o['partOf']['reference']].append(o)
-    # for consortium in consortiums:
-    #     print(consortium)
-    #     for organization in consortiums[consortium]:
-    #         print(f"\t{organization['id']}")
-    terra_output_path = f"{output_path}/terra.sqlite"
-    entities = Entities(terra_output_path=terra_output_path, user_project=user_project)
-    workspace_names = [workspace.name for workspace in entities.get_by_name('workspace')]
-    workspaces = [workspace for workspace in entities.get_by_name('workspace')]
-    institutes = {} 
-    for workspace in workspaces:
-        workspace.attributes.reconciler_name.lower()
-        institutes.append(workspace.institute)
-        print(f"{workspace.name}\n\t{workspace.attributes.reconciler_name} {workspace.investigator} {workspace.institute}")
-
-
-    import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
     cli()

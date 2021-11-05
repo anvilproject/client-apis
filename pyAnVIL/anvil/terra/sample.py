@@ -70,7 +70,6 @@ class Sample(object):
                     self._logger.warn(f"{avro_path} should exist. Please export PFB from https://gen3.theanvil.io/")
                     sample_exceptions.append('avro_path')
         if gen3_entities:
-            self._logger.debug("_append_drs")
             _append_drs(self)
 
     def _find_blobs(self, blobs, sequencing):
@@ -252,7 +251,7 @@ class CMGSample(Sample):
     def id(self):
         """Deduce id."""
         # return f"{_shorten_workspace(self.workspace_name)}/Sa/{self.attributes.name}"
-        return self.attributes.name
+        return self.attributes['name']
 
 
 class GTExSample(Sample):

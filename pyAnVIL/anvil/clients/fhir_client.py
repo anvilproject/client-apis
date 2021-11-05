@@ -8,8 +8,6 @@ from fhirclient import client
 from fhirclient.models.meta import Meta
 from fhirclient.models.bundle import Bundle
 
-from anvil.fhir.smart_auth import GoogleFHIRAuth
-
 logger = logging.getLogger(__name__)
 
 
@@ -40,12 +38,18 @@ class FHIRClient(client.FHIRClient):
     """
 
     def __init__(self, *args, **kwargs):
-        """Pass args to super, adds GoogleFHIRAuth authenticator, prepares connection."""
+        """Pass args to super, add authenticator, prepares connection."""
+        # grab auth if passed
+        auth = None
+        if 'auth' in kwargs:
+            auth = kwargs['auth']
+            del kwargs['auth']
         super(FHIRClient, self).__init__(*args, **kwargs)
         client_major_version = int(client.__version__.split('.')[0])
         assert client_major_version >= 4, f"requires version >= 4.0.0 current version {client.__version__} `pip install -e git+https://github.com/smart-on-fhir/client-py#egg=fhirclient`"
-        self.server.auth = GoogleFHIRAuth()
-        self.server.session.hooks['response'].append(self.server.auth.handle_401)
+        if auth:
+            self.server.auth = auth
+            self.server.session.hooks['response'].append(self.server.auth.handle_401)
         self.prepare()
         assert self.ready, "server should be ready"
 
@@ -63,20 +67,20 @@ class DispatchingFHIRClient(client.FHIRClient):
         Instance of client, with injected authorization method
 
     Examples: ::
-        from anvil.fhir.client import DispatchingFHIRClient
+        from anvil.clients.fhir_client import DispatchingFHIRClient
         from fhirclient.models.researchstudy import ResearchStudy
         from collections import defaultdict
         from pprint import pprint
 
-        settings = {
-            'app_id': 'my_web_app',
-            'api_bases': [
-                'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir',
-                'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir',
-            ]
-        }
-        smart = DispatchingFHIRClient(settings=settings)
-
+settings = {
+    'app_id': 'my_web_app',
+    'api_bases': [
+        'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir',
+        'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir',
+    ]
+}
+smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
+        
         # search for all ResearchStudy, index by source
         studies = defaultdict(list)
         for s in ResearchStudy.where(struct={'_count':'1000'}).perform_resources(smart.server):
@@ -96,19 +100,22 @@ class DispatchingFHIRClient(client.FHIRClient):
         api_base = _settings['api_bases'].pop()
         _settings['api_base'] = api_base
         kwargs['settings'] = _settings
+        
+        # grab auth if passed
+        auth = None
+        if 'auth' in kwargs:
+            auth = kwargs['auth']
+            del kwargs['auth']
 
-        # grab a token if passed
-        access_token = None
-        if 'access_token' in kwargs:
-            access_token = kwargs['access_token']
-            del kwargs['access_token']
 
         # normal setup with our authenticator
         super(DispatchingFHIRClient, self).__init__(*args, **kwargs)
         client_major_version = int(client.__version__.split('.')[0])
         assert client_major_version >= 4, f"requires version >= 4.0.0 current version {client.__version__} `pip install -e git+https://github.com/smart-on-fhir/client-py#egg=fhirclient`"
-        self.server.auth = GoogleFHIRAuth(access_token=access_token)
-        self.server.session.hooks['response'].append(self.server.auth.handle_401)
+
+        if auth:
+            self.server.auth = auth
+            self.server.session.hooks['response'].append(self.server.auth.handle_401)
         self.prepare()
         assert self.ready, "server should be ready"
 
@@ -129,12 +136,14 @@ class DispatchingFHIRClient(client.FHIRClient):
         from fhirclient.models.fhirsearch import FHIRSearch
         if not hasattr(FHIRSearch, '_anvil_patch'):
             FHIRSearch._anvil_patch = True
-            logger.debug("******** Needs patching ********")
             original_perform = FHIRSearch.perform
-            me = self
 
             def _perform(self, server):
                 """Dispatch query to api_bases."""
+                # FHIRSearch can be used by multiple classes, don't dispatch unless one of ours 
+                if not server.client.__class__.__name__ == 'DispatchingFHIRClient':
+                    logger.debug(f"* * * * * * * original_perform {server.client.__class__.__name__}")
+                    return original_perform(self, server)
 
                 def _worker(self, server, _results):
                     """Dispatches request to underlying class, return an entry indexed by base uri.
@@ -178,7 +187,7 @@ class DispatchingFHIRClient(client.FHIRClient):
                 logger.debug("starting threads")
                 workers = []
                 results = []
-                for _client in me._clients:
+                for _client in server.client._clients:
                     workers.append(
                         threading.Thread(target=_worker, args=(self, _client.server, results, ))
                     )
@@ -219,6 +228,12 @@ class DispatchingFHIRClient(client.FHIRClient):
                                 if not entry.resource.meta.source:
                                     entry.resource.meta.source = bundle.meta.source
                                 resources.append(entry.resource)
-                logger.debug("_perform_resources done.")
                 return resources
             FHIRSearch.perform_resources = _perform_resources
+            logger.debug("Patched FHIRSearch")
+
+
+    @property
+    def clients(self):
+        """Expose our list of clients for caller to add to."""
+        return self._clients

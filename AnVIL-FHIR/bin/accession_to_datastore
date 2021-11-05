@@ -10,21 +10,13 @@ from subprocess import Popen, PIPE
 import os
 
 from anvil.terra.reconciler import Entities
+from anvil.dbgap.api import get_study
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(filename)s %(levelname)-8s %(message)s')
-
-
-@click.group()
-@click.pass_context
-def cli(ctx):
-    """Set up context, main entrypoint."""
-    # ensure that ctx.obj exists and is a dict
-    # in case we want to eventually chain these commands together into a pipeline
-    ctx.ensure_object(dict)
-
+logger = logging.getLogger(__name__)
 
 def load_spreadsheet(accession_mapping, output_path, user_project, data_store_filter):
-    """Load spreadsheet."""
+    """Load spreadsheet, fix weird data."""
     accessions = json.load(open(accession_mapping, "r"))
     # >> dict_keys(['workspace_name', 'study_accession', 'dataUseRestriction'])
     # create hash with lower-case workspace name as key
@@ -41,7 +33,7 @@ def load_spreadsheet(accession_mapping, output_path, user_project, data_store_fi
     for w in workspaces:
         path = f"{output_path}/{w['reconciler_name']}/{w['workspace_name']}"
         if not isdir(path):
-            logging.getLogger(__name__).warning(f"no directory found, likely transform had issues. see {output_path}/qa-report.md skipping. {path}")
+            logger.debug(f"no directory found, likely transform had issues. see {output_path}/qa-report.md skipping. {path}")
         else:
             w['path'] = path
     workspaces = {w['workspace_name'].lower(): w for w in workspaces if 'path' in w}
@@ -50,7 +42,7 @@ def load_spreadsheet(accession_mapping, output_path, user_project, data_store_fi
     for workspace_name_lower in workspaces.keys():
         w = workspaces[workspace_name_lower]
         if workspace_name_lower not in accessions:
-            logging.getLogger(__name__).warning(f"no accession found, likely spreadsheet out of date. assigning to pending. {w['workspace_name']}")
+            logger.debug(f"no accession found, likely spreadsheet out of date. assigning to pending. {w['workspace_name']}")
             w['accession'] = 'registration pending'
             w['dataUseRestriction'] = None
         else:
@@ -65,12 +57,12 @@ def load_spreadsheet(accession_mapping, output_path, user_project, data_store_fi
         # rename weird enums from spreadsheet
         if '--' in accession:
             accession = 'public'
-            logging.getLogger(__name__).info(f"{w['workspace_name']} in public")
+            logger.debug(f"{w['workspace_name']} in public")
         if 'registration pending' in accession:
             accession = 'pending'
         if 'available through EGA' in accession:
             accession = 'pending'
-            logging.getLogger(__name__).info(f"{w['workspace_name']} in pending (EGA is not dbGAP)")
+            logger.debug(f"{w['workspace_name']} in pending (EGA is not dbGAP)")
         if accession in ['public', 'pending']:
             dataUseRestriction = ''
         if dataUseRestriction in ['not applicable', None]:
@@ -79,7 +71,7 @@ def load_spreadsheet(accession_mapping, output_path, user_project, data_store_fi
             dataUseRestriction = f'-{dataUseRestriction}'
         elif not accession == 'public':
             accession = 'pending'
-            logging.getLogger(__name__).info(f"{w['workspace_name']} in pending (No dataUseRestriction)")
+            logger.debug(f"{w['workspace_name']} in pending (No dataUseRestriction)")
         data_stores[f"{accession}{dataUseRestriction}"].append(w['path'])
     if data_store_filter:
         to_pop = []
@@ -91,6 +83,111 @@ def load_spreadsheet(accession_mapping, output_path, user_project, data_store_fi
     return data_stores
 
 
+@click.group()
+@click.pass_context
+def cli(ctx):
+    """Set up context, main entrypoint."""
+    # ensure that ctx.obj exists and is a dict
+    # in case we want to eventually chain these commands together into a pipeline
+    ctx.ensure_object(dict)
+
+
+
+@cli.command('dashboard')
+@click.option('--output_path', required=True, help='Where to read output from transform.')
+@click.option('--accession_mapping', required=True, help='Where to read json file study_accession,etc.')
+@click.option('--google_bucket', required=True, help='The google bucket that will host the IG and transformed workspaces json')
+@click.option('--user_project', required=True, help='The google user_project')
+@click.option('--data_store_filter', required=False, default=None, help='Only load this data_store')
+def dashboard(accession_mapping, output_path, user_project, data_store_filter, google_bucket):
+    """Associate phsIds from spreadsheet with data dashboard"""
+    # open sources
+    data_stores = load_spreadsheet(accession_mapping, output_path, user_project, data_store_filter)
+    data_dashboard = json.load(open(f"{output_path}/data_dashboard.json", "r"))
+    data_dashboard_project_ids = [p['project_id'] for p in data_dashboard['projects']]
+    data_stores_project_ids = {}
+    for phsId, paths in data_stores.items():
+        for path in paths:
+            # grab the project id out of the path, grab the dbGap phsId out of the accession
+            phsId = phsId.split('-')[0]
+            if phsId.startswith('phs'):
+                data_stores_project_ids[path.split('/')[-1]] = phsId
+    # write qualified_accession to dashboard 
+    # summarize dbgap info
+    data_dashboard['dbgap'] = {}
+    for project_id in data_dashboard_project_ids:
+        view = next((p for p in data_dashboard['projects'] if p['project_id'] == project_id), None)
+        if project_id not in data_stores_project_ids:
+            logger.debug(f"No accession for {project_id}")
+            view['problems'].append('missing_accession')
+            continue
+        phsId = data_stores_project_ids[project_id]
+        study_tuple = get_study(phsId)
+        if not study_tuple:
+            view['problems'].append('accession_not_found_in_dbGap')
+            continue
+        qualified_accession, study = study_tuple
+        view['qualified_accession'] = qualified_accession
+
+        dbGap_summary = {'qualified_accession': qualified_accession, 'problems': [], 'dbgap_sample_count': 0, 'workspaces': []}
+        try:
+            dbGap_summary['dbgap_sample_count'] = len(study['DbGap']['Study']['SampleList']['Sample'])
+        except Exception:
+            logger.debug(f"dbGAP's Study missing sample list {project_id} accession: {phsId} qualified_accession: {qualified_accession}")
+            dbGap_summary['problems'].append('dbGap_missing_samples')
+        data_dashboard['dbgap'][qualified_accession] = dbGap_summary
+    
+    for qualified_accession in data_dashboard['dbgap']:
+        views = [p for p in data_dashboard['projects'] if p.get('qualified_accession', None) == qualified_accession]
+        sample_count = 0
+        for v in views:
+           terra_sample_count = next((n['count'] for n in v['nodes'] if n['type'] == 'Samples'), 0)
+           sample_count += terra_sample_count
+           data_dashboard['dbgap'][qualified_accession]['workspaces'].append({'project_id': v['project_id'], 'sample_count': terra_sample_count})
+        data_dashboard['dbgap'][qualified_accession]['terra_sample_count'] = sample_count
+    
+    # write results back out    
+    json.dump(data_dashboard, open(f"{output_path}/data_dashboard.json", "w"), separators=(',', ':'))
+    
+    # write tsv report
+    import pandas as pd
+    records = []
+    for qualified_accession, v in data_dashboard['dbgap'].items():
+        for workspace in v['workspaces']:
+            records.append([qualified_accession, v['dbgap_sample_count'], v['terra_sample_count'], workspace['project_id'], workspace['sample_count'], ','.join(v['problems'])])
+    df = pd.DataFrame.from_records(records, columns=['qualified_accession', 'dbgap_sample_count', 'terra_sample_count', 'workspace', 'workspace_sample_count', 'comment'])
+    df.loc[df['dbgap_sample_count'].duplicated(), 'dbgap_sample_count'] = ''
+    df.loc[df['terra_sample_count'].duplicated(), 'terra_sample_count'] = ''
+    df.loc[df['qualified_accession'].duplicated(), 'qualified_accession'] = ''
+    # df.loc[df['comment'].duplicated(), 'comment'] = ''
+    df.to_csv(f'{output_path}/db_gap.tsv', sep="\t")
+    logger.info(f"Wrote report to {output_path}/db_gap.tsv")
+
+@cli.command('config')
+@click.option('--output_path', required=True, help='Where to read output from transform.')
+@click.option('--accession_mapping', required=True, help='Where to read json file study_accession,etc.')
+@click.option('--google_bucket', required=True, help='The google bucket that will host the IG and transformed workspaces json')
+@click.option('--user_project', required=True, help='The google user_project')
+@click.option('--data_store_filter', required=False, default=None, help='Only load this data_store')
+def config(accession_mapping, output_path, user_project, data_store_filter, google_bucket):
+    """Adjust ResearchStudy.partOf with complete URL."""
+    data_stores = load_spreadsheet(accession_mapping, output_path, user_project, data_store_filter)
+    logger.info("Adjusting ReseachStudy partOf hierarchy.")
+    for data_store, directories in data_stores.items():
+        for directory in directories:
+            # set ResearchStudy.partOf with real URL
+            # create linkage b/t public->protected
+            #TODO read from arguments, not directly from os.environ
+            public_base_url = f"https://healthcare.googleapis.com/v1beta1/projects/{os.environ['GOOGLE_PROJECT']}/locations/{os.environ['GOOGLE_LOCATION']}/datasets/{os.environ['GOOGLE_DATASET']}/fhirStores/public/fhir"
+            protected_base_url = f"https://healthcare.googleapis.com/v1beta1/projects/{os.environ['GOOGLE_PROJECT']}/locations/{os.environ['GOOGLE_LOCATION']}/datasets/{os.environ['GOOGLE_DATASET']}/fhirStores/{data_store}/fhir"
+            research_study = json.load(open(f"{directory}/public/ResearchStudy.json", "r"))
+            research_study['partOf'] = [
+                {"reference": f"{public_base_url}/ResearchStudy/AnVIL"},
+                {"reference": f"{protected_base_url}/ResearchStudy/{research_study['id']}"},
+            ]
+            json.dump(research_study, open(f"{directory}/public/ResearchStudy.json", "w"))
+
+
 @cli.command('load')
 @click.option('--output_path', required=True, help='Where to read output from transform.')
 @click.option('--accession_mapping', required=True, help='Where to read json file study_accession,etc.')
@@ -98,74 +195,32 @@ def load_spreadsheet(accession_mapping, output_path, user_project, data_store_fi
 @click.option('--user_project', required=True, help='The google user_project')
 @click.option('--data_store_filter', required=False, default=None, help='Only load this data_store')
 def load_data(output_path, accession_mapping, google_bucket, user_project, data_store_filter):
-    """Load spreadsheet."""
+    """Loads data (public and protected) into target datastore; load study data for all into public."""
     data_stores = load_spreadsheet(accession_mapping, output_path, user_project, data_store_filter)
     # load data into target data_stores
-    logging.getLogger(__name__).info("Loading study & subject data into each data_store...")
+    logger.info("Loading study & subject data into each data_store...")
     for data_store, directories in data_stores.items():
         for directory in directories:
-
-            # set partOf
-            # create linkage b/t public->protected
-            public_base_url = f"https://healthcare.googleapis.com/v1beta1/projects/{os.environ['GOOGLE_PROJECT']}/locations/{os.environ['GOOGLE_LOCATION']}/datasets/{os.environ['GOOGLE_DATASET']}/fhirStores/public/fhir"
-            protected_base_url = f"https://healthcare.googleapis.com/v1beta1/projects/{os.environ['GOOGLE_PROJECT']}/locations/{os.environ['GOOGLE_LOCATION']}/datasets/{os.environ['GOOGLE_DATASET']}/fhirStores/{data_store}/fhir"
-            research_study = json.load(open(f"{directory}/ResearchStudy.json", "r"))
-            research_study['partOf'] = [
-                {"reference": f"{public_base_url}/ResearchStudy/AnVIL"},
-                {"reference": f"{protected_base_url}/ResearchStudy/{research_study['id']}"},
-            ]
-            json.dump(research_study, open(f"{directory}/ResearchStudy.json", "w"))
-
+            # 
             path = f"{directory}".replace(output_path, "").replace("//", "/")
             uri = f"gs://{google_bucket}{path}"
-            # copy data to bucket
-            cmd = ['gsutil', '-m', 'cp', '-r', f'{directory}', uri]
+            # load all
+            cmd = ["load_all_data.sh", data_store, uri, directory]
             p = Popen(cmd, stdout=PIPE, stderr=PIPE)
             stdout, stderr = p.communicate()
             stdout = stdout.decode("utf-8").rstrip()
             stderr = stderr.decode("utf-8").rstrip()
             rc = p.returncode
             if rc == 0:
-                logging.getLogger(__name__).info(f"Copied data into bucket={uri} from {directory}")
+                logger.info(f"Loaded study/subject data into data_store={data_store} from {path}")
             else:
-                logging.getLogger(__name__).warning(f"Failed to copy data to bucket={uri} from {directory}")
-                logging.getLogger(__name__).warning(stdout)
-                logging.getLogger(__name__).warning(stderr)
+                logger.warning(f"Failed to study/subject data into data_store={data_store} from {path}")
+                logger.warning(stdout)
+                logger.warning(stderr)
                 raise Exception(f"{cmd} returned {rc}")
-
-            cmd = ["load_study_data.sh", data_store, uri]
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            stdout, stderr = p.communicate()
-            stdout = stdout.decode("utf-8").rstrip()
-            stderr = stderr.decode("utf-8").rstrip()
-            rc = p.returncode
-            if rc == 0:
-                logging.getLogger(__name__).info(f"Loaded study data into data_store={data_store} from {path}")
-            else:
-                logging.getLogger(__name__).warning(f"Failed to study data into data_store={data_store} from {path}")
-                logging.getLogger(__name__).warning(stdout)
-                logging.getLogger(__name__).warning(stderr)
-                raise Exception(f"{cmd} returned {rc}")
-
-            cmd = ["load_subject_data.sh", data_store, uri]
-            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
-            stdout, stderr = p.communicate()
-            stdout = stdout.decode("utf-8").rstrip()
-            stderr = stderr.decode("utf-8").rstrip()
-            rc = p.returncode
-            if rc == 0:
-                logging.getLogger(__name__).info(f"Loaded subject data into data_store={data_store} from {path}")
-            else:
-                if "resolves to zero GCS objects" in stderr:
-                    logging.getLogger(__name__).info(f"FYI {data_store} <{stderr}> Continuing...")
-                else:
-                    logging.getLogger(__name__).warning(f"Failed to load subject data into data_store={data_store} from {path}")
-                    logging.getLogger(__name__).warning(stdout)
-                    logging.getLogger(__name__).warning(stderr)
-                    raise Exception(f"{cmd} returned {rc}")
 
     # load study data into public
-    logging.getLogger(__name__).info("Loading controlled study data (only!) into public data_store...")
+    logger.info("Loading controlled study data (only!) into public data_store...")
     for data_store, directories in data_stores.items():
         if data_store == 'public':
             # we've already loaded this, so skip
@@ -174,18 +229,18 @@ def load_data(output_path, accession_mapping, google_bucket, user_project, data_
         for directory in directories:
             path = f"{directory}".replace(output_path, "").replace("//", "/")
             uri = f"gs://{google_bucket}{path}"
-            cmd = ["load_project_data.sh", data_store, uri]
+            cmd = ["load_public_data.sh", data_store, uri]
             p = Popen(cmd, stdout=PIPE, stderr=PIPE)
             stdout, stderr = p.communicate()
             stdout = stdout.decode("utf-8").rstrip()
             stderr = stderr.decode("utf-8").rstrip()
             rc = p.returncode
             if rc == 0:
-                logging.getLogger(__name__).info(f"Loaded study data into data_store={data_store} from {path}")
+                logger.info(f"Loaded study data into data_store={data_store} from {path}")
             else:
-                logging.getLogger(__name__).warning(f"Failed to study data into data_store={data_store} from {path}")
-                logging.getLogger(__name__).warning(stdout)
-                logging.getLogger(__name__).warning(stderr)
+                logger.warning(f"Failed to study data into data_store={data_store} from {path}")
+                logger.warning(stdout)
+                logger.warning(stderr)
                 raise Exception(f"{cmd} returned {rc}")
 
 
@@ -203,7 +258,7 @@ def create_data_stores(output_path, accession_mapping, google_location, google_d
     data_stores = load_spreadsheet(accession_mapping, output_path, user_project, data_store_filter)
 
     # create data_stores
-    logging.getLogger(__name__).info("Starting to create data_store per accession...")
+    logger.info("Starting to create data_store per accession...")
     for data_store in data_stores.keys():
         cmd = ["gcloud", "beta", "healthcare", "fhir-stores", "create", data_store, f"--dataset={google_dataset}", f"--location={google_location}", "--version=R4", "--enable-update-create"]
         p = Popen(cmd, stdout=PIPE, stderr=PIPE)
@@ -212,35 +267,36 @@ def create_data_stores(output_path, accession_mapping, google_location, google_d
         stderr = stderr.decode("utf-8").rstrip()
         rc = p.returncode
         if rc == 0:
-            logging.getLogger(__name__).info(f"created data_store={data_store}")
+            logger.info(f"created data_store={data_store}")
         else:
             if "ALREADY_EXISTS" in stderr:
-                logging.getLogger(__name__).info(f"FYI {data_store} <{stderr}> Continuing...")
+                logger.info(f"FYI {data_store} <{stderr}> Continuing...")
             else:
-                logging.getLogger(__name__).warning(stdout)
-                logging.getLogger(__name__).warning(stderr)
+                logger.warning(stdout)
+                logger.warning(stderr)
                 raise Exception(f"{cmd} returned {rc}")
-    logging.getLogger(__name__).info("Created all data_stores")
+    logger.info("Created all data_stores")
 
     # load data_stores with IG
-    logging.getLogger(__name__).info("Starting to load ImplementationGuide to each data_store...")
+    logger.info("Starting to load ImplementationGuide to each data_store...")
     for data_store in data_stores.keys():
-        cmd = ["gcloud", "beta", "healthcare", "fhir-stores", "import", "gcs", data_store, f"--dataset={google_dataset}", f"--location={google_location}", f"--gcs-uri=gs://{google_bucket}/IG/*.json", "--content-structure=resource-pretty"]
+        cmd = ["gcloud", "beta", "healthcare", "fhir-stores", "import", "gcs", data_store, f"--dataset={google_dataset}", f"--location={google_location}", f"--gcs-uri=gs://{google_bucket}/IG/*.json", "--content-structure=resource-pretty", "--async"]
         p = Popen(cmd, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
         stdout = stdout.decode("utf-8").rstrip()
         stderr = stderr.decode("utf-8").rstrip()
         rc = p.returncode
         if rc == 0:
-            logging.getLogger(__name__).info(f"Loaded IG into data_store={data_store}")
+            logger.info(f"Loaded IG into data_store={data_store}")
         else:
-            logging.getLogger(__name__).warning(stdout)
-            logging.getLogger(__name__).warning(stderr)
+            logger.warning(stdout)
+            logger.warning(stderr)
             raise Exception(f"{cmd} returned {rc}")
-    logging.getLogger(__name__).info("Completed loaded IG into all data_stores")
+    logger.info("Completed loaded IG into all data_stores")
 
-    logging.getLogger(__name__).info("Enabling ImplementationGuide in each data_store...")
-    for data_store in data_stores.keys():
+    # turn on IG
+    logger.info("Enabling ImplementationGuide in each data_store...")
+    for data_store in data_stores.keys():        
         cmd = ["enable_implementation_guide.sh", data_store]
         p = Popen(cmd, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
@@ -248,15 +304,15 @@ def create_data_stores(output_path, accession_mapping, google_location, google_d
         stderr = stderr.decode("utf-8").rstrip()
         rc = p.returncode
         if rc == 0:
-            logging.getLogger(__name__).info(f"Enabled IG in data_store={data_store}")
+            logger.info(f"Enabled IG in data_store={data_store}")
         else:
-            logging.getLogger(__name__).warning(stdout)
-            logging.getLogger(__name__).warning(stderr)
+            logger.warning(stdout)
+            logger.warning(stderr)
             raise Exception(f"{cmd} returned {rc}")
-    logging.getLogger(__name__).info("Completed enabling IG in all data_stores")
+    logger.info("Completed enabling IG in all data_stores")
 
     # # tag data store with label
-    # logging.getLogger(__name__).info("Tagging all data stores")
+    # logger.info("Tagging all data stores")
     # for data_store, directories in data_stores.items():
     #     paths = {"labels": {
     #         f"{d}".replace(output_path,"").replace("//","/").lower().split("/")[-1]: "-" for d in directories
@@ -270,11 +326,11 @@ def create_data_stores(output_path, accession_mapping, google_location, google_d
     #     rc = p.returncode
 
     #     if rc == 0 and "error" not in stdout:
-    #         logging.getLogger(__name__).info(f"Tagged data_store={data_store}")
+    #         logger.info(f"Tagged data_store={data_store}")
     #     else:
-    #         logging.getLogger(__name__).warning(f"Failed tag data_store={data_store}")
-    #         logging.getLogger(__name__).warning(stdout)
-    #         logging.getLogger(__name__).warning(stderr)
+    #         logger.warning(f"Failed tag data_store={data_store}")
+    #         logger.warning(stdout)
+    #         logger.warning(stderr)
     #         raise Exception(f"{cmd} returned {rc}")
     #     if data_store == "public":
     #         continue
@@ -286,18 +342,18 @@ def create_data_stores(output_path, accession_mapping, google_location, google_d
     #     stderr = stderr.decode("utf-8").rstrip()
     #     rc = p.returncode
     #     if rc == 0:
-    #         logging.getLogger(__name__).info(f"Tagged data_store={data_store}")
+    #         logger.info(f"Tagged data_store={data_store}")
     #     else:
-    #         logging.getLogger(__name__).warning(f"Failed to tag data_store={data_store}")
-    #         logging.getLogger(__name__).warning(stdout)
-    #         logging.getLogger(__name__).warning(stderr)
+    #         logger.warning(f"Failed to tag data_store={data_store}")
+    #         logger.warning(stdout)
+    #         logger.warning(stderr)
     #         raise Exception(f"{cmd} returned {rc}")
 
-    logging.getLogger(__name__).info("Completed loading study & project in all data_stores")
+    logger.info("Completed loading study & project in all data_stores")
 
 
 if __name__ == '__main__':
     try:
         cli(obj={})
     except Exception as e:
-        logging.getLogger(__name__).exception(e)
+        logger.exception(e)

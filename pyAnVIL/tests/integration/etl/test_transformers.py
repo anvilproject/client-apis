@@ -16,9 +16,9 @@ logging.getLogger('anvil.test_transformers').setLevel(logging.DEBUG)
 logger = logging.getLogger('anvil.test_transformers')
 
 
-def test_transformer(user_project, namespaces, project_pattern='AnVIL_CMG_Broad_Muscle_KNC_WGS'):
+def test_transformer(user_project, namespaces, avro_path, terra_output_path, drs_output_path, project_pattern='AnVIL_CMG_Broad_Muscle_KNC_WGS'):
     """Ensure terra."""
-    reconciler = Reconciler('CCDG', user_project, namespaces, project_pattern)
+    reconciler = Reconciler('CMG', user_project, namespaces, project_pattern, avro_path, terra_output_path, drs_output_path)
     assert reconciler, "MUST create reconciler"
     assert len(reconciler.workspaces) == 1, "MUST have at least expected number of workspaces"
     for workspace in reconciler.workspaces:
@@ -27,13 +27,11 @@ def test_transformer(user_project, namespaces, project_pattern='AnVIL_CMG_Broad_
         assert len(items) > 0, "Should produce at least one item."
         assert len([w for w in items if isinstance(w, Workspace)]), "Should have an instance of Workspace"
         assert len([s for s in items if isinstance(s, Subject)]), "Should have an instance of Subject"
-        assert len([s for s in items if isinstance(s, Sample)]), "Should have an instance of Sample"
-        assert len([b for b in items if isinstance(b, Blob)]), "Should have an instance of Blob"
 
 
-def test_emitter(user_project, namespaces, project_pattern='AnVIL_CMG_Broad_Muscle_KNC_WGS'):
+def test_emitter(user_project, namespaces, avro_path, terra_output_path, drs_output_path, project_pattern='AnVIL_CMG_Broad_Muscle_KNC_WGS'):
     """Ensure terra."""
-    reconciler = Reconciler('CCDG', user_project, namespaces, project_pattern)
+    reconciler = Reconciler('CMG', user_project, namespaces, project_pattern, avro_path, terra_output_path, drs_output_path)
 
     classes = [Workspace, Subject, Sample, Blob]
     emitters = {c.__name__: open(f"/tmp/{c.__name__}.json", "w") for c in classes}

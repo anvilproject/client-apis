@@ -35,11 +35,11 @@ class Gen3TerraAuth(AuthBase):
     Examples: ::
 
         # authenticate with terra
-        from anvil.gen3_auth import Gen3TerraAuth
+        from anvil.clients.gen3_auth import Gen3TerraAuth
         from gen3.submission import Gen3Submission
 
-        auth = Gen3TerraAuth()
         gen3_endpoint = "https://gen3.theanvil.io"
+        auth = Gen3TerraAuth(endpoint=gen3_endpoint)
         submission_client = Gen3Submission(gen3_endpoint, auth)
         query = '{project(first:0) {code,  subjects {submitter_id}, programs {name}  }}'
         results = submission_client.query(query)
@@ -53,12 +53,13 @@ class Gen3TerraAuth(AuthBase):
 
     """
 
-    def __init__(self, terra_auth_url=TERRA_TOKEN_URL, user_email=None):
+    def __init__(self, endpoint, terra_auth_url=TERRA_TOKEN_URL, user_email=None):
         """Initialize properties."""
         self._access_token = None
         self._terra_auth_url = terra_auth_url
         assert self._terra_auth_url, "MUST have _terra_auth_url"
         self._user_email = user_email
+        self.endpoint = endpoint
         self._logger = logging.getLogger(__name__)
 
     def __call__(self, request):

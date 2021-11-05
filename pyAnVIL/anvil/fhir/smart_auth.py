@@ -20,6 +20,8 @@ class GoogleFHIRAuth(auth.FHIRAuth):
     Requires:
         `pip install -e git+https://github.com/smart-on-fhir/client-py#egg=fhirclient`
 
+    :param access_token: Optional access token, if none provided `gcloud auth print-access-token` is used
+
     Examples:
         from fhirclient import client
         from anvil.fhir.smart_auth import GoogleFHIRAuth
@@ -28,7 +30,8 @@ class GoogleFHIRAuth(auth.FHIRAuth):
             'api_base': 'https://healthcare.googleapis.com/v1/projects/gcp-testing-308520/locations/us-east4/datasets/testset/fhirStores/fhirstore/fhir'
         }
         smart = client.FHIRClient(settings=settings)
-        smart.server.auth = GoogleFHIRAuth()
+        # optionally pass token
+        smart.server.auth = GoogleFHIRAuth(access_token=''ya29.abcd...')
         smart.prepare()
         assert smart.ready, "server should be ready"
         # search for all ResearchStudy
@@ -40,10 +43,11 @@ class GoogleFHIRAuth(auth.FHIRAuth):
 
     auth_type = 'bearer'
 
-    def __init__(self, state=None):
+    def __init__(self, state=None, access_token=None):
         """Initialize access_token, call super."""
-        self.access_token = None
-        self.access_token = self._get_auth_value()
+        self.access_token = access_token
+        if not self.access_token:
+            self.access_token = self._get_auth_value()
         super(GoogleFHIRAuth, self).__init__(state=state)
 
     @property

@@ -2,7 +2,7 @@
 
 import pytest
 
-from anvil.gen3_auth import Gen3TerraAuth
+from anvil.clients.gen3_auth import Gen3TerraAuth
 from gen3.submission import Gen3Submission
 
 import logging
@@ -13,7 +13,7 @@ logger = logging.getLogger('anvil.test_gen3_auth')
 @pytest.fixture
 def submission_client(terra_auth_url, user_email, gen3_endpoint):
     """Query terra_auth_url for access token and ensure inserted onto all gen3 requests."""
-    auth = Gen3TerraAuth(terra_auth_url=terra_auth_url, user_email=user_email)
+    auth = Gen3TerraAuth(endpoint=gen3_endpoint, terra_auth_url=terra_auth_url, user_email=user_email)
     return Gen3Submission(gen3_endpoint, auth)
 
 
@@ -44,7 +44,8 @@ def test_get_projects(submission_client):
         # >>> {'links': ['/v0/submission/CF/GTEx']}
 
 
-def test_query(submission_client):
+def test_query(caplog, submission_client):
+    caplog.set_level(logging.DEBUG)
     """Submit simple graphql query."""
     query = '{project(first:0) {code,  subjects {submitter_id}, programs {name}  }}'
     results = submission_client.query(query)

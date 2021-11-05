@@ -33,6 +33,8 @@ def get_projects(namespaces=None, project_pattern=None):
         dict: keys ['accessLevel', 'public', 'workspace', 'workspaceSubmissionStats']
 
     """
+    logger.debug(f"get_entities {namespaces} {project_pattern}")
+
     workspaces = FAPI.list_workspaces()
     workspaces = workspaces.json()
 
@@ -52,11 +54,17 @@ def get_projects(namespaces=None, project_pattern=None):
 @memoize
 def get_entities(namespace='anvil-datastorage', workspace=None, entity_name=None):
     """Return all entities in a workspace."""
-    entities = [AttrDict(e) for e in FAPI.get_entities(namespace, workspace, entity_name).json()]
+    logger.debug(f"get_entities {namespace} {workspace} {entity_name}")
+    try:
+        entities = [AttrDict(e) for e in FAPI.get_entities(namespace, workspace, entity_name).json()]
+    except Exception as e:
+        logger.error(f"{workspace} {entity_name} {e}")
+        raise e
     return entities
 
 
 @memoize
 def get_schema(namespace, workspace):
     """Fetch all entity types."""
+    logger.debug(f"get_schema {namespace} {workspace}")
     return FAPI.list_entity_types(namespace=namespace, workspace=workspace).json()

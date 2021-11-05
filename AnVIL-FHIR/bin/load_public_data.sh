@@ -12,13 +12,18 @@ unset MISSING
 [ -z "$2" ] &&  echo "please provide project data gs:// directory url parameter" && exit
 
 
-# load patient level data
-declare -a resourceTypes=("Patient" "ResearchSubject" "Specimen" "Observation" "DocumentReference" "Task")
-for resourceType in "${resourceTypes[@]}"
-do
-echo $1:$resourceType
+# load study level data
+# declare -a resourceTypes=("Practitioner" "Organization" "ResearchStudy" "ResearchStudyObservation")
+# for resourceType in "${resourceTypes[@]}"
+# do
+# echo $1:$resourceType
+# gcloud healthcare fhir-stores import gcs $1 \
+#     --location=$GOOGLE_LOCATION --dataset=$GOOGLE_DATASET \
+#     --gcs-uri=$2/$resourceType.json \
+#     --content-structure=resource-pretty --async
+# done
+
 gcloud healthcare fhir-stores import gcs $1 \
     --location=$GOOGLE_LOCATION --dataset=$GOOGLE_DATASET \
-    --gcs-uri=$2/$resourceType.json \
+    --gcs-uri=$2/public/*.json \
     --content-structure=resource --async
-done

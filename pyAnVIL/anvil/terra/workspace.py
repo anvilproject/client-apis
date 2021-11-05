@@ -4,7 +4,7 @@ import logging
 from attrdict import AttrDict
 from google.cloud import storage
 from collections import defaultdict
-from anvil.util.cache import memoize  # cache
+from anvil.util.cache import cache
 from urllib.parse import urlparse
 from datetime import datetime
 
@@ -13,8 +13,7 @@ from anvil.terra.subject import subject_factory
 from anvil.terra.sample import sample_factory
 
 
-@memoize
-def _blobs(bucket_name, user_project):
+def _blobs(bucket_name, user_project, workspace_id):
     """Retrieve all blobs in terra bucket associated with workspace, dict keyed by object url.
 
     Checks workspace.bucketName and workspace.project_files
@@ -25,17 +24,20 @@ def _blobs(bucket_name, user_project):
     """
     # Instantiates a google client, & get all blobs in bucket
     storage_client = storage.Client(user_project)
-    logging.getLogger(__name__).info(f"bucket {bucket_name} not in cache, fetching from google.")
-    bucket = storage_client.bucket(bucket_name, user_project=user_project)
-    # get subset of data
-    _blobs = {}
-    try:
-        for b in bucket.list_blobs(fields='items(size, etag, crc32c, name, timeCreated),nextPageToken'):
-            name = f"gs://{bucket_name}/{b.name}"
-            # cache.put(name, {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
-            _blobs[name] = AttrDict({'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
-    except Exception as e:
-        print(f"{bucket_name} {e}")
+    _blobs = cache.get(bucket_name)
+    if not _blobs:
+        logging.getLogger(__name__).info(f"bucket {bucket_name} not in cache, fetching from google.")
+        bucket = storage_client.bucket(bucket_name, user_project=user_project)
+        # get subset of data
+        _blobs = {}
+        try:
+            for b in bucket.list_blobs(fields='items(size, etag, crc32c, name, timeCreated),nextPageToken'):
+                name = f"gs://{bucket_name}/{b.name}"
+                # cache.put(name, {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
+                _blobs[name] = AttrDict({'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name})
+            cache.put(bucket_name, _blobs)
+        except Exception as e:
+            logging.getLogger(__name__).error(f"{workspace_id} {bucket_name} {e}")
     return _blobs
 
 
@@ -58,6 +60,7 @@ class Workspace():
         self.missing_sequence = False
         self.avro_path = avro_path
         self.drs_output_path = drs_output_path
+        self._already_logged = []
 
     @property
     def subjects(self):
@@ -71,7 +74,7 @@ class Workspace():
         """Return raw samples from terra indexed by subject_id."""
         if not self._samples:
             self._samples = defaultdict(list)
-            blobs = _blobs(self.attributes.workspace['bucketName'], self._user_project)
+            blobs = _blobs(self.attributes.workspace['bucketName'], self._user_project, self.id)
             logging.getLogger(__name__).debug(f"bucket {self.attributes.workspace['bucketName']} billing {self._user_project} retrieved.")
             sequencing = self._get_entities('sequencing')
             logging.getLogger(__name__).debug(f"retrieved sequencing in {self.id}.")
@@ -115,9 +118,9 @@ class Workspace():
         if len(project_files_keys) > 0:
             project_buckets = set([urlparse(f).netloc for f in project_files.values()])
             project_blobs = {}
-            for project_bucket in project_buckets:
-                project_blobs = {**project_blobs, **_bucket_contents(self._user_project, project_bucket)}
-            project_blobs = AttrDict(project_blobs)
+            # for project_bucket in project_buckets:
+            #     project_blobs = {**project_blobs, **_bucket_contents(self._user_project, project_bucket)}
+            # project_blobs = AttrDict(project_blobs)
             for k, v in project_files.items():
                 b = project_blobs.get(v, None)
                 if not b:
@@ -245,8 +248,17 @@ class Workspace():
     @property
     def sample_schema(self):
         """Return schema for workspace sample."""
-        if not self._schemas or 'sample' not in self._schemas:
-            logging.debug(f"{self.id} - no schema? {self._schemas}")
+        if not hasattr(self, '_already_logged'):
+            self._already_logged = []
+        if not self._schemas:
+            if 'missing-schema' not in self._already_logged:
+                logging.error(f"{self.id} - missing schema.")
+                self._already_logged.append('missing-schema')
+            return None
+        if 'sample' not in self._schemas :
+            if 'missing-sample-schema' not in self._already_logged:
+                logging.error(f"{self.id} - no sample in schema? {self._schemas}")
+                self._already_logged.append('missing-sample-schema')
             return None
         return self._schemas['sample']
 
@@ -320,9 +332,11 @@ class Workspace():
     @property
     def investigator(self):
         """Deduce investigator name."""
-        _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
-        if _investigator == 'NA':
-            return None
+        _investigator = self.attributes.workspace.attributes.get('study_pi', None)
+        if not _investigator:
+            _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
+            if _investigator == 'NA':
+                _investigator = self.attributes.workspace.attributes.get('library:datasetCustodian', None)                
         return _investigator
 
     @property
@@ -356,16 +370,16 @@ def _project_files(w):
     return {k: v for k, v in w['attributes'].items() if isinstance(v, str) and v.startswith('gs://')}
 
 
-@memoize
-def _bucket_contents(user_project, bucket_name):
-    """Fetch bucket contents."""
-    storage_client = storage.Client(project=user_project)
-    project_blobs = {}
-    project_bucket = storage_client.bucket(bucket_name, user_project=user_project)
-    for b in list(project_bucket.list_blobs()):
-        name = f"gs://{project_bucket.name}/{b.name}"
-        project_blobs[name] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name}
-    return project_blobs
+# @memoize
+# def _bucket_contents(user_project, bucket_name):
+#     """Fetch bucket contents."""
+#     storage_client = storage.Client(project=user_project)
+#     project_blobs = {}
+#     project_bucket = storage_client.bucket(bucket_name, user_project=user_project)
+#     for b in list(project_bucket.list_blobs()):
+#         name = f"gs://{project_bucket.name}/{b.name}"
+#         project_blobs[name] = {'size': b.size, 'etag': b.etag, 'crc32c': b.crc32c, 'time_created': b.time_created, 'name': name}
+#     return project_blobs
 
 
 class CMGWorkspace(Workspace):
@@ -374,14 +388,6 @@ class CMGWorkspace(Workspace):
     def __init__(self, *args, **kwargs):
         """Call super."""
         super().__init__(*args, **kwargs)
-
-    @property
-    def investigator(self):
-        """Deduce investigator name."""
-        _investigator = self.attributes.workspace.attributes.get('study_pi', None)
-        if not _investigator:
-            _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
-        return _investigator
 
     @property
     def accession(self):

@@ -38,8 +38,8 @@ class ResearchStudy:
             diseaseOntologyIdText = disease_text.get(diseaseOntologyId, 'Missing')
 
         # workspace = workspace.attributes.workspace.attributes
-        institution = workspace.attributes.workspace.attributes.get('institute', None)
-        if not institution:
+        institute = workspace.institute
+        if not institute:
             logging.getLogger(__name__).warning(f'{study_id} missing institute')
         study_name = study_id
         attribution = study_id
@@ -47,13 +47,13 @@ class ResearchStudy:
         key = study_id
         condition = None
         if diseaseOntologyId:
-            prefix = diseaseOntologyId.split(':')[0]
+            prefix, code = diseaseOntologyId.split(':')            
             condition = [
                 {
                     "coding": [
                         {
                             "system": disease_system[prefix],
-                            "code": diseaseOntologyId,
+                            "code": code,
                             "display": diseaseOntologyIdText,
                         }
                     ]

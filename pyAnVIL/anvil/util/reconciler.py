@@ -5,6 +5,7 @@ from anvil.dbgap.api import get_study
 from anvil.terra.reconciler import Reconciler
 from collections import defaultdict
 import logging
+import os
 
 # where all workspaces are kept w/in terra
 DEFAULT_NAMESPACE = 'anvil-datastorage'
@@ -20,7 +21,7 @@ DEFAULT_CONSORTIUMS = (
 )
 
 # where we expect to find work databases, etc.
-DEFAULT_OUTPUT_PATH = '/tmp'
+DEFAULT_OUTPUT_PATH = os.environ.get('OUTPUT_PATH', '/tmp')
 
 
 def reconcile(name, user_project, namespace, workspace_regex, avro_path=None, terra_output_path=None, drs_output_path=None):

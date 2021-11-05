@@ -44,6 +44,8 @@ class Cache():
         # optimize for single thread speed
         self._conn.execute('PRAGMA synchronous = OFF')
         self._conn.execute('PRAGMA journal_mode = OFF')
+        # double cache size
+        self._conn.execute('PRAGMA cache_size = -6000')
         self._conn.commit()
         self._conn.close()
         self._conn = sqlite3.connect(path, check_same_thread=False, isolation_level='DEFERRED')
@@ -91,7 +93,11 @@ def memoize(func):
                     _id = args[0].id
         key = func.__name__ + ":" + _id + "/" + "/".join(args[1:]) + "/" + str(kwargs)
         data = cache.get(key)
+        # empty list is OK
+        if isinstance(data, list) and len(data) == 0:
+            return data
         if not data:
+            logging.getLogger(__name__).debug(f"running {key} {data}")
             data = func(*args, **kwargs)
             cache.put(key, data)
         return data
