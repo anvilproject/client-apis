@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+
+"""Transform the data to FHIR."""
+
+import os
+import click
+import logging
+import re
+import json
+
+from anvil.util.reconciler import DEFAULT_OUTPUT_PATH
+from anvil.terra.reconciler import Entities
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(filename)s %(levelname)-8s %(message)s')
+
+
+@click.group()
+@click.pass_context
+def cli(ctx):
+    """Set up context, main entrypoint."""
+    # ensure that ctx.obj exists and is a dict
+    # in case we want to eventually chain these commands together into a pipeline
+    ctx.ensure_object(dict)
+
+
+@cli.command('transform')
+
+@click.option('--output_path', default=os.environ.get('OUTPUT_PATH', None), help=f'Output path. default={os.environ.get("OUTPUT_PATH", None)}')
+@click.option('--user_project', default=os.environ.get('GOOGLE_BILLING_ACCOUNT', None), help=f'Google billing project. default={os.environ.get("GOOGLE_BILLING_ACCOUNT", None)}')
+@click.option('--consortiums', type=(str, str), default=None, multiple=True, help='<Name Regexp> e.g "CCDG AnVIL_CCDG.*" default None')
+def transformer(output_path, consortiums, user_project):
+    """Write harvested workspaces to FHIR."""
+    from anvil.transformers.fhir.transformer import FhirTransformer
+    from anvil.terra.sample import Sample
+    # turn off drs lookup
+    Sample.skip_drs()
+    assert output_path, "Please set output_path."
+    assert user_project, "Please set user_project."
+
+    def write_fhir():
+        """Write all fhir objects."""
+        terra_output_path = f"{output_path}/terra.sqlite"
+        entities = Entities(terra_output_path=terra_output_path, user_project=user_project)
+        workspace_names = [workspace.name for workspace in entities.get_by_name('workspace')]
+        for name in workspace_names:
+            if consortiums:
+                matches = [re.match(c[1], name, re.IGNORECASE) for c in consortiums]
+                if (len([m for m in matches if m is not None]) == 0):
+                    continue
+
+            emitters = {}
+            entity = entities.get(name)
+            workspace = entity['vertex']
+            logging.info(f"Transforming {name}")
+            if 'subject' not in entity['edges']:
+                logging.error(f"{name} missing subject edges")
+                continue
+            workspace._subjects = entity['edges']['subject']
+            warned_missing_samples = False
+            for subject in workspace.subjects:
+                subject_id = f"{workspace.name}/Subject/{subject.id}"
+                entity = entities.get(subject_id)
+                if 'sample' not in entity['edges']:
+                    if not warned_missing_samples:
+                        logging.warning(f"{subject.id} missing sample edges")
+                    warned_missing_samples = True
+                    continue
+                subject.samples = entity['edges']['sample']
+                for sample in subject.samples:
+                    sample_id = f"{workspace.name}/Sample/{sample.id}"
+                    entity = entities.get(sample_id)
+                    _blobs = entity['edges'].get('blob', None)
+                    if _blobs:
+                        sample.blobs = {b['property_name']: b for b in _blobs}
+            transformer = FhirTransformer(workspace=workspace)
+            # namespace = workspace.attributes.workspace.namespace
+            reconciler_name = workspace.attributes.reconciler_name
+            for item in transformer.transform():
+                for entity in item.entity():
+                    resourceType = entity['resourceType']
+                    dir_path = f"{output_path}/{reconciler_name}/{name}"
+                    public_protected = 'protected'
+                    if resourceType in ['ResearchStudy', 'Organization', 'Practitioner']:
+                        public_protected = 'public'
+                    file_path = f"{dir_path}/{public_protected}/{resourceType}.json"
+                    if resourceType == 'Observation' and 'focus' in entity:
+                        focus_reference = entity['focus'][0]['reference']
+                        if resourceType == 'Observation' and 'ResearchStudy' in focus_reference:
+                            file_path = f"{dir_path}/public/ResearchStudyObservation.json"
+                    emitter = emitters.get(file_path, None)
+                    if emitter is None:
+                        os.makedirs(f"{dir_path}/public", exist_ok=True)
+                        os.makedirs(f"{dir_path}/protected", exist_ok=True)
+                        emitter = open(file_path, "w")
+                        logging.info(f"Writing {file_path}")
+                        emitters[file_path] = emitter
+                    json.dump(entity, emitter, separators=(',', ':'))
+                    emitter.write('\n')
+            for stream in emitters.values():
+                stream.close()
+
+    write_fhir()
+
+
+if __name__ == '__main__':
+    cli()
