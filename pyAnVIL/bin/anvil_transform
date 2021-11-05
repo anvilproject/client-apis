@@ -7,6 +7,8 @@ import click
 import logging
 import re
 import json
+import glob
+from collections import defaultdict
 
 from anvil.util.reconciler import DEFAULT_OUTPUT_PATH
 from anvil.terra.reconciler import Entities
@@ -24,14 +26,18 @@ def cli(ctx):
 
 
 @cli.command('transform')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
+
+@click.option('--output_path', default=os.environ.get('OUTPUT_PATH', None), help=f'Output path. default={os.environ.get("OUTPUT_PATH", None)}')
+@click.option('--user_project', default=os.environ.get('GOOGLE_BILLING_ACCOUNT', None), help=f'Google billing project. default={os.environ.get("GOOGLE_BILLING_ACCOUNT", None)}')
 @click.option('--consortiums', type=(str, str), default=None, multiple=True, help='<Name Regexp> e.g "CCDG AnVIL_CCDG.*" default None')
-@click.option('--user_project', default=os.environ.get('GOOGLE_PROJECT', None), help=f'Google billing project. default={os.environ.get("GOOGLE_PROJECT", None)}')
 def transformer(output_path, consortiums, user_project):
     """Write harvested workspaces to FHIR."""
     from anvil.transformers.fhir.transformer import FhirTransformer
     from anvil.terra.sample import Sample
+    # turn off drs lookup
     Sample.skip_drs()
+    assert output_path, "Please set output_path."
+    assert user_project, "Please set user_project."
 
     def write_fhir():
         """Write all fhir objects."""
@@ -75,14 +81,22 @@ def transformer(output_path, consortiums, user_project):
                 for entity in item.entity():
                     resourceType = entity['resourceType']
                     dir_path = f"{output_path}/{reconciler_name}/{name}"
-                    file_path = f"{dir_path}/{resourceType}.json"
+                    public_protected = 'protected'
+                    if resourceType in ['ResearchStudy', 'Organization', 'Practitioner', 'PractitionerRole']:
+                        public_protected = 'public'
+                    if resourceType in ['Organization']:
+                        if entity['id'] == 'anvil':
+                            dir_path = f"{output_path}/static"
+                            resourceType = f"{resourceType}-{entity['id']}"
+                    file_path = f"{dir_path}/{public_protected}/{resourceType}.json"
                     if resourceType == 'Observation' and 'focus' in entity:
                         focus_reference = entity['focus'][0]['reference']
                         if resourceType == 'Observation' and 'ResearchStudy' in focus_reference:
-                            file_path = f"{dir_path}/ResearchStudyObservation.json"
+                            file_path = f"{dir_path}/public/ResearchStudyObservation.json"
                     emitter = emitters.get(file_path, None)
                     if emitter is None:
-                        os.makedirs(dir_path, exist_ok=True)
+                        os.makedirs(f"{dir_path}/public", exist_ok=True)
+                        os.makedirs(f"{dir_path}/protected", exist_ok=True)
                         emitter = open(file_path, "w")
                         logging.info(f"Writing {file_path}")
                         emitters[file_path] = emitter
@@ -93,6 +107,34 @@ def transformer(output_path, consortiums, user_project):
 
     write_fhir()
 
+
+@cli.command('organization_hierarchy')
+@click.option('--output_path', default=os.environ.get('OUTPUT_PATH', None), help=f'Output path. default={os.environ.get("OUTPUT_PATH", None)}')
+@click.option('--user_project', default=os.environ.get('GOOGLE_BILLING_ACCOUNT', None), help=f'Google billing project. default={os.environ.get("GOOGLE_BILLING_ACCOUNT", None)}')
+def organization_hierarchy(output_path, user_project):
+    """Create organization hierarchy."""
+    # path = f'{output_path}/**/Organization.json'
+    # print(path)
+    # consortiums = defaultdict(list)
+    # for name in glob.glob(path, recursive=True):
+    #     o = json.load(open(name, 'r'))
+    #     consortiums[o['partOf']['reference']].append(o)
+    # for consortium in consortiums:
+    #     print(consortium)
+    #     for organization in consortiums[consortium]:
+    #         print(f"\t{organization['id']}")
+    terra_output_path = f"{output_path}/terra.sqlite"
+    entities = Entities(terra_output_path=terra_output_path, user_project=user_project)
+    workspace_names = [workspace.name for workspace in entities.get_by_name('workspace')]
+    workspaces = [workspace for workspace in entities.get_by_name('workspace')]
+    institutes = {} 
+    for workspace in workspaces:
+        workspace.attributes.reconciler_name.lower()
+        institutes.append(workspace.institute)
+        print(f"{workspace.name}\n\t{workspace.attributes.reconciler_name} {workspace.investigator} {workspace.institute}")
+
+
+    import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
     cli()

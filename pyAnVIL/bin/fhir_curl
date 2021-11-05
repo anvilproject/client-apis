@@ -97,7 +97,7 @@ def _get_datastores():
 
 
 def _get_datastores_help():
-    datastores = _get_datastores
+    datastores = _get_datastores()
     if datastores:
         return ""
     return """export GOOGLE_DATASTORES=$(gcloud beta healthcare fhir-stores list --dataset=$GOOGLE_DATASET --location=$GOOGLE_LOCATION --format="table[no-heading](ID)" | tr '\n' ',')"""
@@ -119,11 +119,11 @@ def _get_token_help():
 @click.option('--location', default=os.environ.get('GOOGLE_LOCATION', None), show_default=True, help='env var. GOOGLE_LOCATION')
 @click.option('--dataset', default=os.environ.get('GOOGLE_DATASET', None), show_default=True, help='env var. GOOGLE_DATASET')
 @click.option('--token', default=_get_token(), help=f'env var. TOKEN [default: {_get_token_help()}]')
-@click.option('--data_stores', default=_get_datastores(), show_default=True, help=f'Google data_stores. {_get_datastores_help()}')
-@click.option('--data_store', default='dispatch', show_default=True, help="Name of data store, 'dispatch' will send to all data stores.")
+@click.option('--data_stores', default=_get_datastores(), show_default=True, help=f'env var. GOOGLE_DATASTORES. [default: {_get_datastores_help()}]')
+@click.option('--data_store', default='dispatch', show_default=True, help="Name of target data store, 'dispatch' will send to all data stores.")
 @click.argument('path')
 def dispatch(project, location, dataset, token, data_stores, data_store, path):
-    """Manufacture URLs, dispatch to threads."""
+    """Utility to manufacture FHIR URLs, dispatch path via threads."""
     _dispatch(project, location, dataset, data_stores, data_store, path, token)
 
 
