@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.10rc5',  # Required
+    version='0.0.10rc9',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -130,7 +130,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'gen3==4.2.0',
+        # 'gen3==4.2.0',
         'firecloud==0.16.29',
         'xmltodict==0.12.0',
         'Click==7.1.2',
@@ -192,18 +192,9 @@ setup(
     #     ],
     # },
     scripts="""
-        bin/add_label_to_datastore.sh
+        bin/fhir_curl
         bin/anvil_extract
-        bin/anvil_load
         bin/anvil_transform
-        bin/data_ingestion_spreadsheet
-        bin/enable_implementation_guide.sh
-        bin/fhir_query
-        bin/fhir_setup.sh
-        bin/fix_ig_for_google
-        bin/load_study_data.sh
-        bin/load_subject_data.sh
-        bin/query.sh
     """.split(),
     include_package_data=True,
 
