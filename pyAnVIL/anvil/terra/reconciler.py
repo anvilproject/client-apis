@@ -258,7 +258,7 @@ class Entities:
     def save(self, workspace):
         """Load sqlite db from workspace."""
         cur = self._conn.cursor()
-        logging.getLogger(__name__).info(f'Starting save {workspace.name}')
+        logging.getLogger(__name__).debug(f'Starting save {workspace.name}')
         self.put(workspace.id, workspace.name, 'workspace', workspace, cur)
         for subject in workspace.subjects:
             subject_id = f"{workspace.name}/Subject/{subject.id}"
@@ -275,7 +275,7 @@ class Entities:
                         drs = {'uri': blob['ga4gh_drs_uri']}
                         self.put(drs['uri'], sample.id, 'drs', drs, cur)
                         self.put_edge(drs['uri'], sample_id, 'drs', 'sample', cur)
-        logging.getLogger(__name__).info(f'Ending save {workspace.name}')
+        logging.getLogger(__name__).info(f'Saved {workspace.name}')
         self._conn.commit()
 
     def index(self):

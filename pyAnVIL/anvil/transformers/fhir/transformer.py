@@ -29,9 +29,24 @@ class FhirTransformer(Transformer):
             practitioner = Practitioner.build_entity(self)
             if practitioner:
                 yield practitioner
-            organization = Organization.build_entity(self, f'Organization/{workspace.attributes.reconciler_name.lower()}')
+
+            organization = Organization.build_anvil_org()
             if organization:
                 yield organization
+            organization = Organization.build_practitioner_org(self)
+            if organization:
+                yield organization
+            organization = Organization.build_entity(self)
+            if organization:
+                yield organization
+            organization = Organization.build_consortium_org(self)
+            if organization:
+                yield organization
+
+            practitioner_role = Practitioner.build_practitioner_role(self)
+            if practitioner_role:
+                yield practitioner_role            
+
             observation = ResearchStudyObservation.build_entity(self)
             if observation:
                 yield observation

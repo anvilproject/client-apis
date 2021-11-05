@@ -259,6 +259,7 @@ class NHGRISubject(Subject):
 
 class NIMHSubject(Subject):
     """Extend Subject class."""
+    # TODO - test AnVIL_NIMH_Broad_WGSPD1_McCarroll_Pato_GRU_WGS
 
     def __init__(self, *args, workspace=None, samples=None):
         """Call super."""

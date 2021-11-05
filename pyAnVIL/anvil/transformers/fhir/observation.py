@@ -5,6 +5,7 @@ import logging
 from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
 from anvil.transformers.fhir import CANONICAL
 from anvil.transformers.fhir.patient import Patient
+from anvil.transformers.fhir import make_id
 
 logged_already = []
 
@@ -13,8 +14,15 @@ class DiseaseObservation:
     """Create fhir entity."""
 
     @staticmethod
+    def slug(subject, disease):
+        """Make id."""        
+        return make_id(Patient.slug(subject), f"SNOMED:373573001/{disease}")
+
+
+    @staticmethod
     def build_entity(subject, disease):
         """Create FHIR entity."""
+
         assert disease, f'Should have disease {subject}'
         if disease.startswith("PS"):
             disease = f"OMIM:{disease}"
@@ -23,6 +31,9 @@ class DiseaseObservation:
         workspace_diseaseOntologyId = disease  # subject.workspace_diseaseOntologyId
         diseaseOntologyText = disease_text.get(disease, None)
         diseaseOntologySystem = disease_system.get(disease.split(':')[0], None)
+        workspace_diseaseOntologyId = disease.split(':')[1]
+        slug = DiseaseObservation.slug(subject, workspace_diseaseOntologyId)
+
         if workspace_diseaseOntologyId and not diseaseOntologyText:
             if workspace_diseaseOntologyId not in logged_already:
                 logging.getLogger(__name__).error(f'Need text "{workspace_diseaseOntologyId}"')
@@ -31,7 +42,6 @@ class DiseaseObservation:
             if workspace_diseaseOntologyId not in logged_already:
                 logging.getLogger(__name__).error(f"Should have system. {subject} {disease}")
             diseaseOntologySystem = "MISSING"
-        slug = make_identifier(f"Observation|{subject.id}|{workspace_diseaseOntologyId}")
 
         entity = {
             "resourceType": "Observation",
