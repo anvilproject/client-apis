@@ -1,7 +1,7 @@
 """Provide test fixtures."""
 
 import pytest
-from anvil.gen3_auth import TERRA_TOKEN_URL
+from anvil.clients.gen3_auth import TERRA_TOKEN_URL
 
 
 def pytest_addoption(parser):
@@ -24,7 +24,12 @@ def pytest_addoption(parser):
     parser.addoption(
         "--project_pattern", action="store", default=None, help="regexp filter applied to workspace name"
     )
-
+    parser.addoption(
+        "--output_path", action="store", default="/tmp", help="Where to find cache"
+    )
+    parser.addoption(
+        "--avro_path", action="store", default=None, help="Where to find avro"
+    )
 
 @pytest.fixture
 def terra_auth_url(request):
@@ -60,3 +65,28 @@ def namespaces(request):
 def project_pattern(request):
     """Return command line options as fixture."""
     return request.config.getoption("--project_pattern")
+
+@pytest.fixture
+def output_path(request):
+    """Return command line options as fixture."""
+    return request.config.getoption("--output_path")
+
+@pytest.fixture
+def avro_path(request):
+    """Return command line options as fixture."""
+    return request.config.getoption("--avro_path")
+
+@pytest.fixture
+def dashboard_output_path(output_path):
+    """Return command line options as fixture."""
+    return f"{output_path}/data_dashboard.json"
+
+@pytest.fixture
+def terra_output_path(output_path):
+    """Return command line options as fixture."""
+    return f"{output_path}/terra.sqlite"
+
+@pytest.fixture
+def drs_output_path(output_path):
+    """Return command line options as fixture."""
+    return f"{output_path}/gen3-drs.sqlite"
