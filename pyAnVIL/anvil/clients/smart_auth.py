@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 REGISTERED = []
 
+
 class FHIRAuthError(Exception):
     """Reports any problem retrieving access token from gcloud."""
 
@@ -232,8 +233,13 @@ class KidsFirstFHIRAuth(auth.FHIRAuth):
         if headers is None:
             headers = {}
         headers['cookie'] = self.cookie
-
+        logger.debug(headers)
         return headers
+
+    def handle_callback(self, url, server):
+        """Return the launch context."""
+        logger.debug('handle_callback')
+        raise Exception(f"{self} cannot handle callback URL")
 
     def reauthorize(self, server):
         """Perform reauthorization.
@@ -258,8 +264,11 @@ class KidsFirstFHIRAuth(auth.FHIRAuth):
             request (object): The failed request object
 
         """
+        for keyword in ['authorize', 'login']:
+            if keyword in response.url:
+                raise Exception("The token is no longer valid, please re-harvest from KidsFirst browser.")
         if not response.status_code == 401 and not response.status_code == 403:
-            return response        
+            return response
         raise Exception("The user represented by this cookie does not have access.")
 
     @property
