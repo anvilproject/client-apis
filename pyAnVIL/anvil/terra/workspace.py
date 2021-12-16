@@ -5,7 +5,7 @@ from attrdict import AttrDict
 from google.cloud import storage
 from collections import defaultdict
 from anvil.util.cache import cache
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 from datetime import datetime
 
 from anvil.terra.api import get_entities, get_schema
@@ -44,7 +44,7 @@ def _blobs(bucket_name, user_project, workspace_id):
 class Workspace():
     """Represent terra workspace."""
 
-    def __init__(self, *args, user_project=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, user_project=None, drs_file_path=None):
         """Pass all args to AttrDict, set id for cacheing."""
         self.attributes = AttrDict(*args)
         assert user_project, "Must have user_project"
@@ -58,8 +58,7 @@ class Workspace():
         self._project_files = None
         self._missing_project_files = None
         self.missing_sequence = False
-        self.avro_path = avro_path
-        self.drs_output_path = drs_output_path
+        self.drs_file_path = drs_file_path
         self._already_logged = []
 
     @property
@@ -80,7 +79,7 @@ class Workspace():
             logging.getLogger(__name__).debug(f"retrieved sequencing in {self.id}.")
             # TODO - start optimize me
             for s in self._get_entities('sample'):
-                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing, avro_path=self.avro_path, drs_output_path=self.drs_output_path)
+                s = sample_factory(s, workspace=self, blobs=blobs, sequencing=sequencing, drs_file_path=self.drs_file_path)
                 self._samples[s.subject_id].append(s)
                 if s.missing_sequence:
                     self.missing_sequence = s.missing_sequence
@@ -116,7 +115,7 @@ class Workspace():
         project_files = _project_files(self.attributes.workspace)
         project_files_keys = project_files.keys()
         if len(project_files_keys) > 0:
-            project_buckets = set([urlparse(f).netloc for f in project_files.values()])
+            # project_buckets = set([urlparse(f).netloc for f in project_files.values()])
             project_blobs = {}
             # for project_bucket in project_buckets:
             #     project_blobs = {**project_blobs, **_bucket_contents(self._user_project, project_bucket)}
@@ -255,7 +254,7 @@ class Workspace():
                 logging.error(f"{self.id} - missing schema.")
                 self._already_logged.append('missing-schema')
             return None
-        if 'sample' not in self._schemas :
+        if 'sample' not in self._schemas:
             if 'missing-sample-schema' not in self._already_logged:
                 logging.error(f"{self.id} - no sample in schema? {self._schemas}")
                 self._already_logged.append('missing-sample-schema')
@@ -336,7 +335,7 @@ class Workspace():
         if not _investigator:
             _investigator = self.attributes.workspace.attributes.get("library:datasetOwner", None)
             if _investigator == 'NA':
-                _investigator = self.attributes.workspace.attributes.get('library:datasetCustodian', None)                
+                _investigator = self.attributes.workspace.attributes.get('library:datasetCustodian', None)
         return _investigator
 
     @property

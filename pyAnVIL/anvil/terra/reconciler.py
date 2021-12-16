@@ -16,7 +16,7 @@ import json
 class Reconciler():
     """Retrieve google bucket meta data, dbGap information and gen3 meta associated with terra workspace."""
 
-    def __init__(self, name, user_project, namespaces, project_pattern, avro_path, terra_output_path, drs_output_path):
+    def __init__(self, name, user_project, namespaces, project_pattern, drs_file_path, terra_output_path):
         """Initialize properties, set id to namespaces/project_pattern."""
         self.name = name
         self._user_project = user_project
@@ -25,16 +25,15 @@ class Reconciler():
         self._workspaces = None
         self._logger = logging.getLogger(__name__)
         self.id = f"{namespaces}/{project_pattern}"
-        self.avro_path = avro_path
+        self.drs_file_path = drs_file_path
         self.terra_output_path = terra_output_path
-        self.drs_output_path = drs_output_path
 
     @property
     def workspaces(self):
         """Terra workspaces that match namespace & project_pattern."""
         if not self._workspaces:
             self._workspaces = [
-                workspace_factory(w, user_project=self._user_project, avro_path=self.avro_path, drs_output_path=self.drs_output_path)
+                workspace_factory(w, user_project=self._user_project, drs_file_path=self.drs_file_path)
                 for w in get_projects(self.namespaces, self.project_pattern)
             ]
             for w in self._workspaces:
