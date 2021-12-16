@@ -1,14 +1,14 @@
 """Client for reconciling terra subject."""
 
 import logging
-from anvil.gen3.entities import Entities
+from anvil.gen3.drs_files import DRSFiles
 from attrdict import AttrDict
 from collections import defaultdict
 import os
 
 
 # drs entries
-gen3_entities = None
+drs_files = None
 
 # controls logging and drs lookup
 sample_exceptions = []
@@ -30,12 +30,15 @@ def _append_drs(sample):
     try:
         for key in sample.blobs.keys():
             filename = key.split('/')[-1]
-            gen3_file = gen3_entities.get(submitter_id=filename)
-            sample.blobs[key]['ga4gh_drs_uri'] = gen3_file['object']['ga4gh_drs_uri']   # f"https://gen3.theanvil.io/ga4gh/drs/v1/objects/{gen3_file['object']['object_id']}"
+            drs_file = drs_files.find_by_file_name(filename)
+            assert drs_file, "Should have a gen3 sequencing record."
+            sample.blobs[key]['ga4gh_drs_uri'] = drs_file['ga4gh_drs_uri']
+            sample.blobs[key]['md5sum'] = drs_file['md5sum']
+            assert sample.blobs[key]['ga4gh_drs_uri'], "Should have a ga4gh_drs_uri"
     except Exception as e:
         if sample.workspace_name not in sample_exceptions:
             logging.warn(f"DRS not found {sample.workspace_name} {sample.id} (supressing further errors for this workspace) {e}")
-        sample_exceptions.append(sample.workspace_name)
+            sample_exceptions.append(sample.workspace_name)
 
 
 class Sample(object):
@@ -47,9 +50,9 @@ class Sample(object):
         global sample_exceptions
         sample_exceptions.append(SKIP_DRS)
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Pass all args to AttrDict."""
-        global gen3_entities
+        global drs_files
         self._logger = logging.getLogger(__name__)
         self.attributes = AttrDict(*args)
         self.missing_blobs = True
@@ -57,19 +60,17 @@ class Sample(object):
         self.schema = workspace.sample_schema
         self.workspace_name = workspace.name
         self.missing_blob_path = False
-        self.avro_path = avro_path
-        self.drs_output_path = drs_output_path
+        self.drs_file_path = drs_file_path
         self.blobs = self._find_blobs(blobs, sequencing)
 
-        if not gen3_entities and avro_path:
-            if os.path.isfile(avro_path):
-                gen3_entities = Entities(avro_path, drs_output_path)
-                gen3_entities.load()
+        if not drs_files and drs_file_path:
+            if os.path.isfile(drs_file_path):
+                drs_files = DRSFiles(drs_file_path)
             else:
-                if 'avro_path' not in sample_exceptions:
-                    self._logger.warn(f"{avro_path} should exist. Please export PFB from https://gen3.theanvil.io/")
-                    sample_exceptions.append('avro_path')
-        if gen3_entities:
+                if 'drs_file_path' not in sample_exceptions:
+                    self._logger.warn(f"{drs_file_path} should exist. Please export anvil_extract drs-file")
+                    sample_exceptions.append('drs_file_path')
+        if drs_files:
             _append_drs(self)
 
     def _find_blobs(self, blobs, sequencing):
@@ -124,9 +125,9 @@ class Sample(object):
 class CCDGSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
@@ -173,9 +174,9 @@ class CCDGSample(Sample):
 class CMGSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     def _find_blobs(self, blobs, sequencing):
         """Find all blobs associated with sample."""
@@ -257,9 +258,9 @@ class CMGSample(Sample):
 class GTExSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
@@ -291,9 +292,9 @@ class GTExSample(Sample):
 class ThousandGenomesSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
@@ -325,9 +326,9 @@ class ThousandGenomesSample(Sample):
 class eMERGESample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
@@ -358,9 +359,9 @@ class eMERGESample(Sample):
 class NHGRISample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
@@ -391,9 +392,9 @@ class NHGRISample(Sample):
 class NIMHSample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None, drs_output_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path, drs_output_path=drs_output_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
@@ -427,9 +428,9 @@ class NIMHSample(Sample):
 class PAGESample(Sample):
     """Extend Sample class."""
 
-    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, avro_path=None):
+    def __init__(self, *args, workspace=None, blobs=None, sequencing=None, drs_file_path=None):
         """Call super."""
-        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, avro_path=avro_path)
+        super().__init__(*args, workspace=workspace, blobs=blobs, sequencing=sequencing, drs_file_path=drs_file_path)
 
     @property
     def id(self):
