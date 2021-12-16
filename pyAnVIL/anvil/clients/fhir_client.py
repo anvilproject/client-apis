@@ -72,15 +72,15 @@ class DispatchingFHIRClient(client.FHIRClient):
         from collections import defaultdict
         from pprint import pprint
 
-settings = {
-    'app_id': 'my_web_app',
-    'api_bases': [
-        'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir',
-        'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir',
-    ]
-}
-smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
-        
+        settings = {
+            'app_id': 'my_web_app',
+            'api_bases': [
+                'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir',
+                'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-11-329119/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir',
+            ]
+        }
+        smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
+
         # search for all ResearchStudy, index by source
         studies = defaultdict(list)
         for s in ResearchStudy.where(struct={'_count':'1000'}).perform_resources(smart.server):
@@ -100,13 +100,18 @@ smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
         api_base = _settings['api_bases'].pop()
         _settings['api_base'] = api_base
         kwargs['settings'] = _settings
-        
+
+        # grab retrieve_all if passed
+        self._retrieve_all = False
+        if 'retrieve_all' in kwargs['settings']:
+            self._retrieve_all = kwargs['settings']['retrieve_all']
+            del kwargs['settings']['retrieve_all']
+
         # grab auth if passed
         auth = None
         if 'auth' in kwargs:
             auth = kwargs['auth']
             del kwargs['auth']
-
 
         # normal setup with our authenticator
         super(DispatchingFHIRClient, self).__init__(*args, **kwargs)
@@ -137,10 +142,11 @@ smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
         if not hasattr(FHIRSearch, '_anvil_patch'):
             FHIRSearch._anvil_patch = True
             original_perform = FHIRSearch.perform
+            me = self
 
             def _perform(self, server):
                 """Dispatch query to api_bases."""
-                # FHIRSearch can be used by multiple classes, don't dispatch unless one of ours 
+                # FHIRSearch can be used by multiple classes, don't dispatch unless one of ours
                 if not server.client.__class__.__name__ == 'DispatchingFHIRClient':
                     logger.debug(f"* * * * * * * original_perform {server.client.__class__.__name__}")
                     return original_perform(self, server)
@@ -165,6 +171,8 @@ smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
                         if not result.meta.source:
                             result.meta.source = server.base_uri
                         _results.append(result)
+                        if not me._retrieve_all:
+                            break
 
                         # follow `next` link for pagination
                         if hasattr(result, 'link'):
@@ -225,13 +233,23 @@ smart = DispatchingFHIRClient(settings=settings, auth=GoogleFHIRAuth())
                             for entry in bundle.entry:
                                 if not entry.resource.meta:
                                     entry.resource.meta = Meta()
+
                                 if not entry.resource.meta.source:
                                     entry.resource.meta.source = bundle.meta.source
+
+                                # add tag for fullURL, allows caller
+                                # to disambiguate resources returned from different base URL
+                                # TODO Expecting property "tag" on <class 'fhirclient.models.meta.Meta'> to be <class 'fhirclient.models.coding.Coding'>, but is <class 'dict'>
+                                # if not entry.resource.meta.tag:
+                                #     entry.resource.meta.tag = []
+                                # entry.resource.meta.tag.append({
+                                #     "system" : "https://nih-ncpi.github.io/ncpi-fhir-ig/#fullUrl",
+                                #     "code" : entry.fullUrl
+                                # })
                                 resources.append(entry.resource)
                 return resources
             FHIRSearch.perform_resources = _perform_resources
             logger.debug("Patched FHIRSearch")
-
 
     @property
     def clients(self):
