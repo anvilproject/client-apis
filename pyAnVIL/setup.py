@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.11',  # Required
+    version='0.0.11rc6',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -130,7 +130,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        # 'gen3==4.2.0',
+        'gen3==4.2.0',
         'firecloud==0.16.29',
         'xmltodict==0.12.0',
         'Click==7.1.2',
@@ -138,8 +138,7 @@ setup(
         'google-cloud-storage==1.42.3',
         'google-cloud-core==2.0.0',
         'fastavro==1.2.0',
-        'tabulate'
-        # 'fhirclient @ git+https://github.com/smart-on-fhir/client-py#egg=fhirclient'
+        'tabulate',
     ],
 
     # List additional groups of dependencies here (e.g. development
