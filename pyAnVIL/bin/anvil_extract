@@ -2,8 +2,10 @@
 
 """Reconcile and aggregate results."""
 
+import sqlite3
+from gen3.auth import Gen3Auth
+from gen3.submission import Gen3Submission
 import os
-from re import T
 import shutil
 import logging
 import json
@@ -13,6 +15,8 @@ import click
 from anvil.util.reconciler import DEFAULT_CONSORTIUMS, DEFAULT_OUTPUT_PATH, DEFAULT_NAMESPACE, aggregate
 from anvil.terra.reconciler import Entities
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(filename)s %(levelname)-8s %(message)s')
+
+DEFAULT_GEN3_CREDENTIALS_PATH = os.path.expanduser('~/.gen3/credentials.json')
 
 
 @click.group()
@@ -57,10 +61,116 @@ def cleaner(output_path):
     delete_file(f'{output_path}/pyanvil-cache.sqlite')
     delete_file(f'{output_path}/qa-report.md')
     delete_file(f'{output_path}/terra_summary.json')
+    delete_file(f'{output_path}/drs_file.sqlite')
     # TODO refactor cache to configure path
     delete_file('/tmp/pyanvil-cache.sqlite')
     for consortium in DEFAULT_CONSORTIUMS:
         delete_dir(f'{output_path}/{consortium[0]}')
+
+
+@cli.command('drs-extract')
+@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
+@click.option('--gen3_credentials_path', default=DEFAULT_GEN3_CREDENTIALS_PATH, help=f'gen3 native credentials={DEFAULT_GEN3_CREDENTIALS_PATH}')
+def drs_extractor(gen3_credentials_path, output_path):
+    """Retrieve DRS url for all gen3 projects."""
+    gen3_endpoint = "https://gen3.theanvil.io"
+    # Install n API Key downloaded from the
+    # commons' "Profile" page at ~/.gen3/credentials.json
+    auth = Gen3Auth(endpoint=gen3_endpoint, refresh_file=gen3_credentials_path)
+    submission_client = Gen3Submission(gen3_endpoint, auth)
+    logger = logging.getLogger(__name__)
+    query = """
+    {
+    subject(first:~PAGE_SIZE~, offset:~OFFSET~) {
+        project_id
+        anvil_project_id
+        participant_id
+        submitter_id
+        id
+        dbgap_subject_id
+        samples {
+        sample_type
+        submitter_id
+        dbgap_sample_id
+        sequencings {
+            id
+            submitter_id
+            analyte_type
+            file_name
+            md5sum
+            ga4gh_drs_uri
+        }
+        }
+    }
+    }
+    """
+    offset = 0
+    page_size = 500
+    sqlite_path = f'{output_path}/drs_file.sqlite'
+    _conn = sqlite3.connect(sqlite_path)
+    cur = _conn.cursor()
+    cur.executescript("""
+    CREATE TABLE IF NOT EXISTS drs_file (
+        md5sum text,
+        sequencing_id text PRIMARY KEY,
+        file_name text,
+        ga4gh_drs_uri text,
+        sample_submitter_id text,
+        subject_submitter_id text,
+        subject_id text,
+        project_id text,
+        anvil_project_id text
+    );
+    """)
+    _conn.commit()
+    # optimize for single thread speed
+    _conn.execute('PRAGMA synchronous = OFF')
+    _conn.execute('PRAGMA journal_mode = OFF')
+    _conn.commit()
+    _conn.close()
+    _conn = sqlite3.connect(sqlite_path, check_same_thread=False, isolation_level='DEFERRED')
+    cur = _conn.cursor()
+    logger.info('Starting')
+    while True:
+        q = query.replace('~OFFSET~', str(offset)).replace('~PAGE_SIZE~', str(page_size))
+        logger.debug(str(q))
+        results = submission_client.query(q, max_tries=3)
+
+        logger.info(f"query page offset:{offset}, rows:{len(results['data']['subject'])}")
+        for subject in results['data']['subject']:
+            for sample in subject['samples']:
+                for sequencing in sample['sequencings']:
+                    try:
+                        cur.execute(
+                            "INSERT into drs_file values (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                            (
+                                sequencing['md5sum'],
+                                sequencing['id'],
+                                sequencing['file_name'],
+                                sequencing['ga4gh_drs_uri'],
+                                sample['submitter_id'],
+                                subject['submitter_id'],
+                                subject['id'],
+                                subject['project_id'],
+                                subject['anvil_project_id'],
+                            )
+                        )
+                    except Exception as e:
+                        print(subject)
+                        print(e)
+        _conn.commit()
+        if len(results['data']['subject']) == 0:
+            break
+        offset += len(results['data']['subject'])
+    _conn.commit()
+
+    logger.info('Indexing')
+    cur.executescript("""
+    CREATE INDEX IF NOT EXISTS drs_file_md5sum ON drs_file(md5sum);
+    CREATE  INDEX IF NOT EXISTS drs_file_file_name ON drs_file(file_name);
+    """)
+    _conn.commit()
+    logger.info('Done')
 
 
 @cli.command('extract')
@@ -68,23 +178,21 @@ def cleaner(output_path):
 @click.option('--namespace', default=DEFAULT_NAMESPACE, help=f'Terra namespace default={DEFAULT_NAMESPACE}')
 @click.option('--consortiums', type=(str, str), default=DEFAULT_CONSORTIUMS, multiple=True, help=f'<Name Regexp> e.g "CCDG AnVIL_CCDG.*" default {DEFAULT_CONSORTIUMS}')
 @click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--pfb_path', required=True, help='pfb path (gen3 avro extract)')
-def extractor(user_project, namespace, consortiums, output_path, pfb_path):
+def extractor(user_project, namespace, consortiums, output_path):
     """Harvest all workspaces, return list of workspace_name. Create detailed sqlite graph and summary dashboard."""
     logging.getLogger(__name__).info("Starting aggregation for all specified AnVIL workspaces this will take several minutes.")
-    logging.getLogger(__name__).info(f"Reading from consortiums {consortiums}; pfb_path {pfb_path}")
+    logging.getLogger(__name__).info(f"Reading from consortiums {consortiums}")
     logging.getLogger(__name__).info(f"Writing to output_path {output_path}")
     assert user_project, "Please provide --user_project (or set GOOGLE_PROJECT)"
     dashboard_output_path = f"{output_path}/data_dashboard.json"
     terra_output_path = f"{output_path}/terra.sqlite"
-    drs_output_path = f"{output_path}/gen3-drs.sqlite"
+    drs_file_path = f"{output_path}/drs_file.sqlite"
 
     with open(dashboard_output_path, 'w') as outs:
         views = [v for v in aggregate(namespace=DEFAULT_NAMESPACE,
-                 user_project=user_project,
-                 consortium=consortiums, avro_path=pfb_path,
-                 terra_output_path=terra_output_path,
-                 drs_output_path=drs_output_path)]
+                                      user_project=user_project,
+                                      consortium=consortiums, drs_file_path=drs_file_path,
+                                      terra_output_path=terra_output_path)]
         json.dump({
             'projects': [v for v in views if 'problems' in v],
             'consortiums': [v for v in views if 'problems' not in v]
