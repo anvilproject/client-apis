@@ -4,6 +4,7 @@ import pytest
 
 from anvil.clients.gen3_auth import Gen3TerraAuth
 from gen3.submission import Gen3Submission
+from gen3.auth import Gen3Auth
 
 import logging
 logging.getLogger('anvil.test_gen3_auth').setLevel(logging.DEBUG)
@@ -14,6 +15,15 @@ logger = logging.getLogger('anvil.test_gen3_auth')
 def submission_client(terra_auth_url, user_email, gen3_endpoint):
     """Query terra_auth_url for access token and ensure inserted onto all gen3 requests."""
     auth = Gen3TerraAuth(endpoint=gen3_endpoint, terra_auth_url=terra_auth_url, user_email=user_email)
+    return Gen3Submission(gen3_endpoint, auth)
+
+
+@pytest.fixture
+def native_submission_client(gen3_endpoint):
+    """Query terra_auth_url for access token and ensure inserted onto all gen3 requests."""
+    # Install n API Key downloaded from the
+    # commons' "Profile" page at ~/.gen3/credentials.json
+    auth = Gen3Auth(endpoint=gen3_endpoint)
     return Gen3Submission(gen3_endpoint, auth)
 
 
@@ -104,3 +114,17 @@ def test_get_dictionary_all(submission_client):
     logger.debug(dictionary_all.keys())
     for k in ['core_metadata_collection', 'data_release', 'discovery', 'family', 'metaschema', 'program', 'project', 'root', 'sample', 'sequencing', 'subject']:
         assert k in dictionary_all, f'dictionary MUST contain {k}'
+
+
+def test_project_access(native_submission_client, submission_client):
+    """Native token and token proxied by terra should return same project list."""
+    query = """{
+        project(first: 1000) {
+            code
+        }
+    }"""
+    proxy_token_results = submission_client.query(query)
+    logger.debug(f"graphql {proxy_token_results}")
+    native_results = native_submission_client.query(query)
+    logger.debug(f"graphql {native_results}")
+    assert set([p['code'] for p in proxy_token_results['data']['project']]) == set([p['code'] for p in native_results['data']['project']]), "MUST return same set of projects"

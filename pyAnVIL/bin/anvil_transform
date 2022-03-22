@@ -127,14 +127,12 @@ def organization_hierarchy(output_path, user_project):
     entities = Entities(terra_output_path=terra_output_path, user_project=user_project)
     workspace_names = [workspace.name for workspace in entities.get_by_name('workspace')]
     workspaces = [workspace for workspace in entities.get_by_name('workspace')]
-    institutes = {} 
+    institutes = [] 
     for workspace in workspaces:
         workspace.attributes.reconciler_name.lower()
         institutes.append(workspace.institute)
         print(f"{workspace.name}\n\t{workspace.attributes.reconciler_name} {workspace.investigator} {workspace.institute}")
-
-
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
 
 if __name__ == '__main__':
     cli()

@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.11rc6',  # Required
+    version='0.0.12rc1',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -138,7 +138,9 @@ setup(
         'google-cloud-storage==1.42.3',
         'google-cloud-core==2.0.0',
         'fastavro==1.2.0',
-        'tabulate',
+        'tabulate==0.8.9',
+        'gspread==5.2.0',
+        'oauth2client==4.1.3'
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -194,6 +196,9 @@ setup(
         bin/fhir_curl
         bin/anvil_extract
         bin/anvil_transform
+        bin/fhir_env
+        bin/fhir_setup
+        bin/fhir_load        
     """.split(),
     include_package_data=True,
 

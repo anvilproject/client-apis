@@ -28,7 +28,8 @@ def _worker(input_queue, stop_event):
             continue
 
         def fetch(url):
-            headers = {"Authorization": f"Bearer {TOKEN}"}
+            headers = {"Authorization": f"Bearer {_get_token()}"}
+            print((url, headers))
             response = requests.get(url, headers=headers)
             try:
                 response.raise_for_status()
@@ -57,7 +58,7 @@ def _dispatch(project, location, dataset, all_data_stores, requested_data_store,
     if requested_data_store.lower() == 'dispatch':
         data_stores = all_data_stores
     else:
-        assert requested_data_store in all_data_stores
+        # assert requested_data_store in all_data_stores, f"{requested_data_store} not in {all_data_stores}"
         data_stores = [requested_data_store]
 
     base_urls = [f"https://healthcare.googleapis.com/v1beta1/projects/{project}/locations/{location}/datasets/{dataset}/fhirStores/{ds.strip()}/fhir" for ds in data_stores if len(ds.strip()) > 0]

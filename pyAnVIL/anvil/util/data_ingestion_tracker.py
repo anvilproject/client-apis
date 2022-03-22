@@ -1,33 +1,41 @@
+#!/usr/bin/env python3
+
 """Extract AnVIL Data Ingestion Tracker spreadsheet."""
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import json
+import logging
+import requests
+from io import StringIO
+import csv
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(filename)s %(levelname)-8s %(message)s')
+logger = logging.getLogger(__name__)
+
+URL = 'https://raw.githubusercontent.com/anvilproject/anvil-portal/main/plugins/utils/dashboard-source-anvil.tsv'
 
 
-def download_projects(spreadsheet_key, json_keyfile_path):
-    """Read projects from master spreadsheet."""
-    # use creds to create a client to interact with the Google Drive API
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_keyfile_path, scope)
-    client = gspread.authorize(credentials)
-    sheet = client.open_by_key(spreadsheet_key)
-    index = 0
-    try:
-        for index, worksheet in enumerate(sheet.worksheets()):
-            if 'Dave Using' in worksheet.title:
-                break
-    except Exception as e:
-        raise Exception(f"Cannot read spreadsheet key={spreadsheet_key}") from e
-    #  Extract all the rows
-    list_of_lists = sheet.get_worksheet(index).get_all_values()
+def download_projects():
+    """Read projects from master spreadsheet. Call `projects = [project for project in download_projects()]`"""
+
+    response = requests.get(URL)
+    response.raise_for_status()
+
+    list_of_lists = []
+    with StringIO(response.text) as fd:
+        rd = csv.reader(fd, delimiter="\t", quotechar='"')
+        for row in rd:
+            list_of_lists.append(row)
+
+    logger.debug(f"fetched {len(list_of_lists)} rows")
+
     # table headers
     keys = list_of_lists.pop(0)
 
     def normalize_value(v):
         """Fix the value."""
-        if v == 'None':
-            return None
-        if v == '':
+        if isinstance(v, str):
+            v = v.strip()
+        if v in ['None', '', 'NA', '--', 'Unspecified', None]:
             return None
         if 'no' == str(v).lower():
             return False
@@ -41,3 +49,17 @@ def download_projects(spreadsheet_key, json_keyfile_path):
         project = {keys[i]: normalize_value(v) for i, v in enumerate(lst)}
         if project['name']:
             yield {keys[i]: normalize_value(v) for i, v in enumerate(lst)}
+
+
+def data_ingestion_tracker(output_path):
+    """Read spreadsheet, write to json file."""
+    abbreviated_projects = [
+        {'workspace_name': p['name'],
+         'study_accession': p['phsId'],
+         'dataUseRestriction': p['library:dataUseRestriction'],
+         'indication': p['library:indication']} for p in list(download_projects())]
+    with open(output_path, 'w') as fp:
+        json.dump(abbreviated_projects, fp)
+    logger.info(f"Read {len(abbreviated_projects)} projects from {URL}. Wrote to {output_path}")
+
+
