@@ -12,12 +12,17 @@ Pre-requisites:
 - Google Id provisioned in both Terra and Gen3:
   - One time Account Linking:
     - Pre-requisite: google account provisioned in both Gen3 and Terra.
+
     - Log into https://gen3.theanvil.io/
     - Log into https://anvil.terra.bio
     - In Terra, navigate to your profile
       - Under "IDENTITY & EXTERNAL SERVERS", log into `NHGRI AnVIL Data Commons Framework Services`, the system should present you with a Gen3 Oauth flow.
       - Note the google project used for billing
         ![](docs/_static/terra-profile.png)
+    - “unlink” my NHGRI AnVIL Data Commons Framework Services  from https://anvil.terra.bio/#profile 
+    - open a new window to gen3.theanvil.io and login using my google id 
+    - return to the terra profile screen and “renew” the identity 
+
 - Per instance, terra API setup:
   - Use the google account and billing project to setup credentials for the [terra api](https://github.com/broadinstitute/fiss).
     ```
@@ -106,28 +111,78 @@ import fhirclient.models.researchstudy as rs
 For more information on usage see [smart-on-fhir/client-py](https://github.com/smart-on-fhir/client-py)
 
 
-### Terra utilities
+### Data Normalization / FHIR
+
+
+* Extract and normalize data 
 
 ```
-   from anvil.terra.api import get_projects
-   projects = get_projects(namespaces=['anvil-datastorage'], project_pattern='AnVIL_CCDG.*')
-   [p['workspace']['name'] for p in projects]
-   >>> ['AnVIL_CCDG_WashU_CVD_EOCAD_BioMe_WGS',
-        'AnVIL_CCDG_Broad_CVD_EOCAD_TaiChi_WGS',
-        'AnVIL_CCDG_Broad_AI_IBD_Brant_DS-IBD_WGS', ...]
+# create a working directory for our data
+mkdir  -p ./DATA
+
+# clean all work files and databases
+anvil_extract clean --output_path ./DATA
+
+# extract all from gen3
+anvil_extract drs-extract --output_path ./DATA  --expected_row_count 175000
+
+# extract all from terra
+anvil_extract extract --user_project $GOOGLE_BILLING_ACCOUNT --output_path ./DATA
+
+# create a summary report of data extracted, see "./DATA/qa-report.md"
+anvil_extract report --output_path ./DATA
+
 ```
 
-### Data Dashboard
+* Transform to FHIR
 
-[notebook example](docs/_static/0.0.2.ipynb)
+```
+anvil_transform transform   --output_path ./DATA --user_project $GOOGLE_BILLING_ACCOUNT
 
-## Configuration
+```
 
-The following environment variable can be set in order to configure library functionality
+* Setup Environment
 
-| environment        | example    | default                   | description                                      |
-| ------------------ | ---------- | ------------------------- | ------------------------------------------------ |
-| PYANVIL_CACHE_PATH | db.sqlite3 | /tmp/pyanvil-cache.sqlite | Configure where you want the pyAnVIL cache to be |
+Set environmental variables by calling `fhir_env`  Provide a project name and region.  Note: please ensure the healthcare API is available in that region. https://cloud.google.com/healthcare-api/docs/concepts/regions
+
+The script will set reasonable values for other environmental variables.  You may override them on the command line.
+
+> usage: fhir_env GOOGLE_PROJECT_NAME GOOGLE_LOCATION [GOOGLE_DATASET] [GOOGLE_DATASTORE] [BILLING_ACCOUNT] [GOOGLE_APPLICATION_CREDENTIALS] [SPREADSHEET_UUID] [OUTPUT_PATH]
+
+
+```
+$ source fhir_env fhir-test-14  us-west2
+***** env variables *****
+GOOGLE_PROJECT_NAME fhir-test-14 The root for the API, billing, buckets, etc.
+GOOGLE_BILLING_ACCOUNT XXXXX-XXXXX-XXXXXX Google Cloud Billing Accounts allow you to configure payment and track spending in GCP.
+GOOGLE_LOCATION us-west1 The physical location of the data
+GOOGLE_DATASET anvil-test Datasets are top-level containers that are used to organize and control access to your stores.
+GOOGLE_DATASTORE test A FHIR store is a data store in the Cloud Healthcare API that holds FHIR resources.
+GOOGLE_APPLICATION_CREDENTIALS ./XXXX.json Your google identity - used to retrieve the terra maintained spreadsheet and issue FHIR commands.
+SPREADSHEET_UUID 17VAXsRSOz9Y2K6RhYwSt2RJMxyeLtJq09M2O2kiSbRo The spreadsheet key
+OUTPUT_PATH ./DATA A directory on your local system, used to store work files.
+GOOGLE_BUCKET fhir-test A bucket that will contain you ImplementationGuide and FHIR resources
+```
+
+
+
+### Resources
+
+Create FHIR endpoints, buckets, etc. by calling `fhir_setup`.  No additional parameters are necessary.
+
+```
+# TODO - grant access to terra service account
+$ source fhir_setup
+
+```
+
+### Load data
+
+Load FHIR endpoints by calling `fhir_load`.  No additional parameters are necessary.
+
+
+
+
 
 ## Contributing
 
@@ -152,7 +207,7 @@ The following environment variable can be set in order to configure library func
 
   ```
      # see https://github.com/broadinstitute/firecloud-tools/tree/master/scripts/register_service_account
-     docker run --rm -it -v "$HOME"/.config:/.config -v /Users/walsbr/client-apis/pyAnVIL/client_secret.json:/svc.json broadinstitute/firecloud-tools python /scripts/register_service_account/register_service_account.py -j /svc.json -e  brian@bwalsh.com
+     docker run --rm -it -v "$HOME"/.config:/.config -v /Users/walsbr/client-apis/pyAnVIL/GOOGLE_APPLICATION_CREDENTIALS.json:/svc.json broadinstitute/firecloud-tools python /scripts/register_service_account/register_service_account.py -j /svc.json -e  brian@bwalsh.com
      The service account pyanvil@api-project-807881269549.bwalsh.com.iam.gserviceaccount.com is now registered with FireCloud. You can share workspaces with this address, or use it to call APIs.
   ```
 

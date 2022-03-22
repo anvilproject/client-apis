@@ -29,6 +29,7 @@ def _worker(input_queue, stop_event):
 
         def fetch(url):
             headers = {"Authorization": f"Bearer {TOKEN}"}
+            print(url, file=sys.stderr)
             response = requests.get(url, headers=headers)
             try:
                 response.raise_for_status()
@@ -46,7 +47,6 @@ def _worker(input_queue, stop_event):
 
         _next = url
         while _next:
-            print(f"~~~ {_next}", file=sys.stderr)
             (_json, _next) = fetch(_next)
             print(json.dumps(_json, separators=(',', ':')))
 

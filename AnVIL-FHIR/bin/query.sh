@@ -36,12 +36,12 @@ fi
 if [ ! -z "$data_store" ]; then
     # search one datastore
     url=https://healthcare.googleapis.com/v1beta1/projects/$GOOGLE_PROJECT/locations/$GOOGLE_LOCATION/datasets/$GOOGLE_DATASET/fhirStores/$data_store/fhir
-    fhir_query --token=$TOKEN --url=$url$url_path
+    python3 /Users/walsbr/client-apis/AnVIL-FHIR/bin/fhir_query --token=$TOKEN --url=$url$url_path
 else
     #  search all data stores
     for data_store in "${GOOGLE_DATASTORES[@]}"
     do
         url=https://healthcare.googleapis.com/v1beta1/projects/$GOOGLE_PROJECT/locations/$GOOGLE_LOCATION/datasets/$GOOGLE_DATASET/fhirStores/$data_store/fhir
-        fhir_query --token=$TOKEN --url=$url$url_path
+        python3 /Users/walsbr/client-apis/AnVIL-FHIR/bin/fhir_query --token=$TOKEN --url=$url$url_path
     done    
 fi
