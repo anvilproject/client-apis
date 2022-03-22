@@ -4,7 +4,6 @@ from os import stat
 from anvil.transformers.fhir import make_workspace_id, make_identifier
 import logging
 
-INSTITUTES = []
 
 class Organization:
     """Create fhir entity."""
@@ -75,9 +74,6 @@ class Organization:
         if not institute:
             logging.getLogger(__name__).warning(f'workspace {workspace.id} missing institute')
         id = make_identifier(institute)
-        if id in INSTITUTES:
-            return None
-        INSTITUTES.append(id)            
         entity = {
             "resourceType": Organization.resource_type,
             "id": f"{id}",
@@ -103,9 +99,6 @@ class Organization:
     def build_consortium_org(workspace):
         """Create fhir entity."""
         id = workspace.attributes.reconciler_name.lower()
-        if id in INSTITUTES:
-            return None
-        INSTITUTES.append(id)            
         entity = {
             "resourceType": Organization.resource_type,
             "id": f"{id}",
@@ -131,9 +124,7 @@ class Organization:
     def build_anvil_org():
         """Create fhir entity."""
         id = 'anvil'
-        if id in INSTITUTES:
-            return None
-        INSTITUTES.append(id)            
+       
         entity = {
             "resourceType": Organization.resource_type,
             "id": f"{id}",

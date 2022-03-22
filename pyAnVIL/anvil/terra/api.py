@@ -37,12 +37,20 @@ def get_projects(namespaces=None, project_pattern=None):
 
     workspaces = FAPI.list_workspaces()
     workspaces = workspaces.json()
+    logger.debug(f'all workspaces len {len(workspaces)}')
+    logger.debug(f"all namespaces {set(sorted([w['workspace']['namespace'] for w in workspaces]))}")
 
     if namespaces:
         workspaces = [AttrDict(w) for w in workspaces if w['workspace']['namespace'] in namespaces]
 
+    logger.debug(f'after namespace >{namespaces}<', len(workspaces))
+    logger.debug(f"all namespaces {set(sorted([w['workspace']['namespace'] for w in workspaces]))}")
+
     if project_pattern:
         workspaces = [AttrDict(w) for w in workspaces if re.match(project_pattern, w['workspace']['name'], re.IGNORECASE)]
+
+    logger.debug(f'after project_pattern >{project_pattern}<', len(workspaces))
+    logger.debug(f"all workspaces {set(sorted([w['workspace']['name'] for w in workspaces]))}")
 
     # normalize fields
     for w in workspaces:
@@ -57,10 +65,11 @@ def get_entities(namespace='anvil-datastorage', workspace=None, entity_name=None
     logger.debug(f"get_entities {namespace} {workspace} {entity_name}")
     try:
         entities = [AttrDict(e) for e in FAPI.get_entities(namespace, workspace, entity_name).json()]
+        return entities
     except Exception as e:
         logger.error(f"{workspace} {entity_name} {e}")
-        raise e
-    return entities
+        return []
+    
 
 
 @memoize

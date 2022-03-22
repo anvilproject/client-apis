@@ -5,8 +5,8 @@ from anvil.transformers.fhir.practitioner import Practitioner
 from anvil.transformers.fhir.organization import Organization
 
 import logging
-
-from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
+logger = logging.getLogger(__name__)
+from anvil.transformers.fhir.disease_normalizer import text_ontology, ontology_text, disease_system
 from anvil.transformers.fhir import make_workspace_id
 
 
@@ -28,37 +28,43 @@ class ResearchStudy:
         workspace_name = workspace.attributes.workspace.name
         investigator_name = workspace.investigator
         if not investigator_name:
-            logging.getLogger(__name__).warning(f'{study_id} missing investigator')
+            logger.warning(f'{study_id} missing investigator')
         diseaseOntologyId = workspace.diseaseOntologyId
 
         diseaseOntologyIdText = 'Missing'
-        if diseaseOntologyId and diseaseOntologyId not in disease_text:
-            logging.getLogger(__name__).error(f'{study_id} missing {diseaseOntologyId} see anvil.transformers.fhir.disease_normalizer.disease_text')
+        if diseaseOntologyId and diseaseOntologyId not in ontology_text:
+            logger.error(f'{study_id} missing >{diseaseOntologyId}< see anvil.transformers.fhir.disease_normalizer.disease_text')
+            if ':' not in diseaseOntologyId:
+                logger.info(f"study_id {study_id} diseaseOntologyId {diseaseOntologyId} does not look like an ontology id")
+                diseaseOntologyId = None
         else:
-            diseaseOntologyIdText = disease_text.get(diseaseOntologyId, 'Missing')
+            diseaseOntologyIdText = ontology_text.get(diseaseOntologyId, 'Missing')
 
         # workspace = workspace.attributes.workspace.attributes
         institute = workspace.institute
         if not institute:
-            logging.getLogger(__name__).warning(f'{study_id} missing institute')
+            logger.warning(f'{study_id} missing institute')
         study_name = study_id
         attribution = study_id
         short_name = study_id
         key = study_id
         condition = None
         if diseaseOntologyId:
-            prefix, code = diseaseOntologyId.split(':')            
-            condition = [
-                {
-                    "coding": [
-                        {
-                            "system": disease_system[prefix],
-                            "code": code,
-                            "display": diseaseOntologyIdText,
-                        }
-                    ]
-                }
-            ]
+            prefix, code = diseaseOntologyId.split(':')
+            if prefix not in disease_system:
+                logger.warning(f'{study_id} diseaseOntologyId not configured {prefix}')
+            else:    
+                condition = [
+                    {
+                        "coding": [
+                            {
+                                "system": disease_system[prefix],
+                                "code": code,
+                                "display": diseaseOntologyIdText,
+                            }
+                        ]
+                    }
+                ]
 
         entity = {
             "resourceType": ResearchStudy.resource_type,
