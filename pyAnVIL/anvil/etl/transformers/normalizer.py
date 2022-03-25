@@ -1,104 +1,26 @@
+
 #!/usr/bin/env python3
 
 """Read meta data from terra workspaces."""
 
 import logging
-import re
 from attrdict import AttrDict
-import firecloud.api as FAPI
-import json
-import click
 import os
 from urllib.parse import urlparse
 from collections import defaultdict
-import functools
-import operator
 
-from entities import Entities
+from anvil.etl.utilities.entities import Entities
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(filename)s %(levelname)-8s %(message)s')
-logger = logging.getLogger('anvil.terra.api')
+logger = logging.getLogger(__name__)
 
 
-# where all workspaces are kept w/in terra
-DEFAULT_NAMESPACE = 'anvil-datastorage'
-
-# workspace patterns
-DEFAULT_CONSORTIUMS = (
-    ('CMG', 'AnVIL_CMG_.*'),
-    ('CCDG', 'AnVIL_CCDG_.*'),
-    ('GTEx', '^AnVIL_GTEx_V8_hg38$'),
-    ('Public', '^1000G-high-coverage-2019$'),
-    ('NHGRI', '^AnVIL_NHGRI'),
-    ('NIMH', '^AnVIL_NIMH'),
-)
-
-DEFAULT_OUTPUT_PATH = os.environ.get('OUTPUT_PATH','./DATA')
-
-
-def recursive_default_dict():
+def _recursive_default_dict():
     """Recursive default dict, any key defaults to a dict."""
-    return defaultdict(recursive_default_dict)
-
-def get_workspaces(namespaces=None, name_pattern=None):
-    """Filter terra workspaces by namespaces and project_pattern.
-
-    Args:
-        namespaces ([str]): Optional, list of workspace `namespace` to match ex: 'anvil-datastorage'.
-        name_pattern (str): Optional, regexp to match workspace `name` ex: 'AnVIL_CCDG.*'.
-
-    Returns:
-        dict: keys ['accessLevel', 'public', 'workspace', 'workspaceSubmissionStats']
-
-    """
-    logger.debug(f"get_entities {namespaces} {name_pattern}")
-
-    workspaces = FAPI.list_workspaces()
-    workspaces = workspaces.json()
-
-    if namespaces:
-        workspaces = [AttrDict(w) for w in workspaces if w['workspace']['namespace'] in namespaces]
-
-    if name_pattern:
-        workspaces = [AttrDict(w) for w in workspaces if re.match(name_pattern, w['workspace']['name'], re.IGNORECASE)]
-
-    # normalize fields
-    for w in workspaces:
-        if 'project_files' not in w.workspace:
-            w.workspace.project_files = []
-    return workspaces
+    return defaultdict(_recursive_default_dict)
 
 
-def get_entities(namespace='anvil-datastorage', workspace=None, entity_name=None):
-    """Return all entities in a workspace."""
-    logger.debug(f"get_entities {namespace} {workspace} {entity_name}")
-    try:
-        entities = [AttrDict(e) for e in FAPI.get_entities(namespace, workspace, entity_name).json()]
-        return entities
-    except Exception as e:
-        logger.error(f"{workspace} {entity_name} {e}")
-        return []
-    
-
-def get_schema(namespace, workspace):
-    """Fetch all entity types."""
-    logger.debug(f"get_schema {namespace} {workspace}")
-    schema = FAPI.list_entity_types(namespace=namespace, workspace=workspace).json()
-    if 'statusCode' in schema['schema']:
-        raise Exception(schema)
-    return schema
-
-
-def extract_workspaces(namespaces=None, project_pattern=None):
-    logger.debug(f"get_entities {namespaces} {project_pattern}")
-    workspaces = get_workspaces(namespaces, project_pattern)
-    for workspace in workspaces:
-        dir(workspace)
-        break
-
-
-def extract_bucket_fields(output_path=None, entities=None, workspace_name=None):
-    """Query db, sample all entities, determine fields that have references to bucket object."""
+def _extract_bucket_fields(output_path=None, entities=None, workspace_name=None):
+    """Query db, sample first row in all entities, determine fields that have references to bucket object."""
     if not entities:
         assert output_path
         entities = Entities(path=f"{output_path}/terra_entities.sqlite")
@@ -119,6 +41,9 @@ def extract_bucket_fields(output_path=None, entities=None, workspace_name=None):
                 continue
             buckets = [child[entity_name]['attributes'][key] for key in bucket_keys]
             buckets = list(set([urlparse(b).netloc for b in buckets]))
+            # TODO - move this exception to config or other ?
+            if entity_name == 'sequencing' and 'AnVIL_CMG_Broad' in workspace.workspace.name:
+                bucket_keys = 'crai_or_bai_path,crai_path,cram_or_bam_path,cram_path,md5_path'.split(',')
             yield {
                 'consortium_name': workspace.consortium_name,
                 'workspace_name': workspace.workspace.name,
@@ -126,163 +51,9 @@ def extract_bucket_fields(output_path=None, entities=None, workspace_name=None):
                 'bucket_fields': bucket_keys,
                 'buckets': buckets
             }
-            
-def make_entity_key(workspace_name, entity):
-    """Edges and vertices are stored with this key structure."""
-    return f"{entity['entityType']}/{workspace_name}/{entity['name']}"
 
 
-@click.group()
-@click.pass_context
-def cli(ctx):
-    """Read meta data from terra workspaces."""
-    # ensure that ctx.obj exists and is a dict
-    # in case we want to eventually chain these commands together into a pipeline
-    ctx.ensure_object(dict)
-
-
-@cli.command('clean')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-def clean(output_path):
-    """Remove database."""
-    path = f"{output_path}/terra_entities.sqlite"
-    try:
-        os.remove(path)
-        logger.info(('removed', path))
-    except OSError as e:
-        logger.warning((e, path))
-
-
-@cli.command('extract')
-@click.option('--namespace', default=DEFAULT_NAMESPACE, help=f'Terra namespace default={DEFAULT_NAMESPACE}')
-@click.option('--consortiums', type=(str, str), default=DEFAULT_CONSORTIUMS, multiple=True, help=f'<Name Regexp> e.g "CCDG AnVIL_CCDG.*" default {DEFAULT_CONSORTIUMS}')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-def extract_workspaces(namespace, consortiums, output_path):    
-    """Read workspaces from terra, write to database. Do this first! May take several minutes."""
-    logger.info(f"Extracting metadata for {len(consortiums)} consortiums, this may take several minutes.")
-    entities = Entities(path=f"{output_path}/terra_entities.sqlite")
-    for consortium_name, project_pattern in consortiums:
-        projects = get_workspaces(namespace, name_pattern=project_pattern)
-        for workspace in projects:
-            logger.info((consortium_name, workspace.workspace.name))
-            workspace.consortium_name = consortium_name
-            schema = FAPI.list_entity_types(namespace=namespace, workspace=workspace.workspace.name).json()
-            if 'statusCode' in schema:
-                logger.error(('no.schema', consortium_name, workspace.workspace.name,  schema))
-                continue
-            entities.put(key=workspace.workspace.name, label='workspace', data=workspace)
-            entities.put(key=f"schema/{workspace.workspace.name}", label='schema', data=schema)
-            entities.put_edge(
-                src=workspace.workspace.name, src_name='workspace',
-                dst=f"schema/{workspace.workspace.name}", dst_name='schema',
-            )
-            for entity_name in schema.keys():
-                problem_occurred = False
-                for entity in FAPI.get_entities(namespace, workspace.workspace.name, entity_name).json():
-                    if problem_occurred:
-                        break
-                    if not isinstance(entity, dict):
-                        # write a problem record
-                        entities.put(key=f"problem/{workspace.workspace.name}/{entity_name}", label='problem', data={'error': f'no.entity.returned {entity_name}'})
-                        entities.put_edge(
-                            src=workspace.workspace.name, src_name='workspace',
-                            dst=f"problem/{workspace.workspace.name}/{entity_name}", dst_name='problem',
-                        )                        
-                        problem_occurred = True
-                        continue
-                    # entity['name'] aka 'id'
-                    id = make_entity_key(entity_name, workspace.workspace.name, entity['name'])
-                    entities.put(key=id, label=entity_name, data=entity)
-                    entities.put_edge(
-                        src=workspace.workspace.name, src_name='workspace',
-                        dst=id, dst_name=entity_name
-                    )
-    entities.commit(True)
-    entities.index()
-
-
-@cli.command('cat')
-@click.option('--label', default='workspace', help=f'Terra workspace name')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--name_pattern', default=None, help=f'<Regexp> e.g "AnVIL_CCDG.*" default')
-def get_by_label(label, output_path, name_pattern):    
-    """Read workspaces and their children from database, write to stdout."""
-    entities = Entities(path=f"{output_path}/terra_entities.sqlite")
-    for workspace in entities.get_by_label(label):
-        if name_pattern:
-            if not re.match(name_pattern, workspace['workspace']['name'], re.IGNORECASE):
-                continue
-        workspace = AttrDict(workspace)
-        children = entities.get_edges(src=workspace.workspace.name, src_name='workspace')
-        workspace.children = children
-        print(json.dumps(workspace))
-
-
-@cli.command('bucket_fields')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--workspace_name', default=None, help=f'filter, only this workspace')
-def bucket_fields(output_path, workspace_name):    
-    """Read workspaces from database, determine children with bucket references, write to stdout."""
-    for bucket_fields in extract_bucket_fields(output_path, workspace_name=workspace_name):
-        print(json.dumps(bucket_fields))
-
-@cli.command('bucket_graph')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--details', default=False, is_flag=True, help="Show the details.")
-def bucket_graph(output_path, details):    
-    """Read bucket fields from database, analyze patterns, write to stdout."""
-        
-    G = recursive_default_dict()
-    for bf in extract_bucket_fields(output_path):
-        # {
-        #     'consortium_name': workspace.consortium_name,
-        #     'workspace_name': workspace.workspace.name,
-        #     'entity_name': entity_name,
-        #     'bucket_fields': bucket_keys,
-        #     'buckets': buckets
-        # }
-        bf = AttrDict(bf)
-        G[bf.consortium_name][bf.entity_name][','.join(sorted(bf.bucket_fields))]['workspaces'][bf.workspace_name] = bf.buckets
-
-    analysis = recursive_default_dict()
-    for consortium_name in G:
-        for entity_name in G[consortium_name]:
-            version_count = len(G[consortium_name][entity_name].keys())
-            analysis[consortium_name][entity_name]['version_count'] = version_count
-            if details:
-                analysis[consortium_name][entity_name]['details'] = G[consortium_name][entity_name]
-    print(json.dumps(analysis))
-
-
-@cli.command('schema_graph')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--details', default=False, is_flag=True, help="Show the details.")
-def schema_graph(output_path, details):    
-    """Read schema fields from database, analyze patterns, write to stdout."""
-        
-    entities = Entities(path=f"{output_path}/terra_entities.sqlite")
-    
-    G = recursive_default_dict()
-    for workspace in entities.get_by_label('workspace'):
-        workspace = AttrDict(workspace)
-        schema = entities.get_edges_by_label(src=workspace.workspace.name, src_name='workspace', dst_name='schema')
-        for entity_name in schema['schema']:
-            assert 'attributeNames' in schema['schema'][entity_name], (entity_name, schema)
-            attributeNames = ','.join(sorted(schema['schema'][entity_name]['attributeNames']))
-            G[workspace.consortium_name][entity_name][attributeNames][workspace.workspace.name] = {}
-        #         
-
-    # print(json.dumps(G))
-    analysis = recursive_default_dict()
-    for consortium_name in G:
-        for entity_name in G[consortium_name]:
-            version_count = len(G[consortium_name][entity_name].keys())
-            analysis[consortium_name][entity_name]['version_count'] = version_count
-            if details:
-                analysis[consortium_name][entity_name]['details'] = G[consortium_name][entity_name]
-    print(json.dumps(analysis))
-
-def normalize_workspace(consortium_name, workspace, config, entities):
+def _normalize_workspace(consortium_name, workspace, config, entities, output_path):
     """Stich the graph together."""
 
     #
@@ -293,7 +64,7 @@ def normalize_workspace(consortium_name, workspace, config, entities):
 
     def consortium_config(context, consortium_name, workspace, config):
         context.consortium_config = config[consortium_name]
-        inverted_config = recursive_default_dict()
+        inverted_config = _recursive_default_dict()
         for fhir_entity in context.consortium_config:
             for alias in context.consortium_config[fhir_entity]['aliases']:
                 inverted_config[alias] = fhir_entity
@@ -347,7 +118,7 @@ def normalize_workspace(consortium_name, workspace, config, entities):
 
         if not patient_entity_name:
             if 'no.find.patient_entity_name' not in context['logged_already']:
-                logger.error(('no.find.patient_entity_name', consortium_name, workspace.workspace.name))
+                logger.error(('no.find.patient_entity_name', consortium_name, workspace.workspace.name, context.patient_entity_names, workspace.children.keys()))
                 context['logged_already'].append('no.find.patient_entity_name')
             return None
 
@@ -422,57 +193,149 @@ def normalize_workspace(consortium_name, workspace, config, entities):
             context.task_entity_names = ['_implied']
 
     def ensure_tasks(context, consortium_name, workspace, config):
-        """Set tasks on context to a workspace child, or create an artificial one if _implied."""
+        """Set tasks on workspace to a workspace child, or create an artificial one if _implied."""
         workspace['tasks'] = {}
         if '_implied' in context.task_entity_names:
-            workspace['tasks']['_implied'] = recursive_default_dict()
+            workspace['tasks']['_implied'] = _recursive_default_dict()
         else:
             for task_entity_name in context.task_entity_names:
                 if task_entity_name in workspace.children.keys():
                     workspace['tasks'][task_entity_name] = workspace.children[task_entity_name]
             if not workspace['tasks']:
-                workspace['tasks']['_implied'] = recursive_default_dict()
+                workspace['tasks']['_implied'] = _recursive_default_dict()
+
+    def ensure_bucket_fields(context, consortium_name, workspace, config):
+        """Introspect workspace schema looking for fields that have bucket objects."""
+        context['bucket_fields'] = [bf for bf in _extract_bucket_fields(entities=entities, workspace_name=workspace.workspace.name)]
+
+    def ensure_bucket_fieldsAnVIL_CMG_BaylorHopkins_HMB_NPU_WES(context, consortium_name, workspace, config):
+        """Override sample.bucket_fields"""
+        ensure_bucket_fields(context, consortium_name, workspace, config)
+        assert len(context['bucket_fields']) == 1
+        context['bucket_fields'][0]['bucket_fields'] = "bam,bam_md5,crai,cram,cram_md5".split(',')        
+
+    def ensure_bucket_fieldsAnVIL_CMG_Broad_crai_or_bai(context, consortium_name, workspace, config):
+        """Override sample.bucket_fields"""
+        ensure_bucket_fields(context, consortium_name, workspace, config)
+        assert len(context['bucket_fields']) == 1
+        context['bucket_fields'][0]['bucket_fields'] = 'crai_or_bai_path,crai_path,cram_or_bam_path,cram_path,md5_path'.split(',')        
 
     def ensure_tasks_populated(context, consortium_name, workspace, config):
-        """Ensure tasks have input that is a specimen, and outputs that are document references."""
+        """Create a terra style entity for an implied task if none exists."""
         if '_implied' in workspace['tasks']:
             assert workspace.specimens
+            workspace['tasks']['_implied'] = []
             for specimen in workspace.specimens:
                 # create terra type entity
-                workspace['tasks']['_implied'][specimen.name] = AttrDict({
+                workspace['tasks']['_implied'].append(AttrDict({
                     'entityType': 'Task',
                     'name': specimen['name'],
                     'attributes': {
-                        'inputs': [specimen.name],
-                        # 'outputs': //TODO ... find bucket objects
+                        # TODO - are there any derived attributes?
                     }                    
-                })
+                }))
         # check that other keys exist
-        assert len(workspace['tasks'].keys()) > 0, ('missing.tasks', consortium_name, workspace.workspace.name)
-        for k in workspace['tasks'].keys():
-            assert len(workspace['tasks'][k]) > 0, ('tasks.empty', consortium_name, workspace.workspace.name, k)    
+        assert len(workspace['tasks']) > 0, ('missing.tasks', consortium_name, workspace.workspace.name)
+
+    def extract_specimen_reference(context, consortium_name, workspace, config):
+        """Extract a specimen key from arbitrary entity."""
+        assert 'entity_with_specimen_reference' in context
+        entity = context['entity_with_specimen_reference']
+        if 'sample_alias' in entity['attributes']:
+            context['specimen_reference'] = {
+                'name': entity['attributes']['sample_alias'],
+                'entityType': 'sample',
+                'fhir_entity': context.inverted_config['sample']
+            }
 
     def ensure_tasks_linked_to_documents(context, consortium_name, workspace, config):
         """Ensure tasks have input that is a specimen, and outputs that are document references."""
 
         # set up a hash of children with buckets for quick lookup
-        _children = recursive_default_dict()
+        _children = _recursive_default_dict()
         for bf in context.bucket_fields:
             if bf['entity_name'] in  workspace.children:
                 for child in workspace.children[bf['entity_name']]:
                     _children[bf['entity_name']][child['name']] = child
-        # 
-        
+        # create a task, whose inputs are entities with bucket fields.
+        # and whose outputs are those bucket fields
+        deletion_keys = []
         for task_entity in workspace['tasks']:
-            _task_children = recursive_default_dict()
-            for task_key in workspace['tasks'][task_entity]:                
+            document_count = 0
+            for task in workspace['tasks'][task_entity]:
+                _task_children = _recursive_default_dict()
+                _task_inputs = []
                 for bf in context.bucket_fields:
                     if bf['entity_name'] in  _children:
-                        if task_key in _children[bf['entity_name']]:
-                            child = _children[bf['entity_name']][task_key]                            
+                        if task['name'] in _children[bf['entity_name']]:
+                            child = _children[bf['entity_name']][task['name']]
+                            _task_inputs.append(
+                                {
+                                    'entityType': child['entityType'],
+                                    'name': child['name'],
+                                    'fhir_entity': context.inverted_config[child['entityType']]
+                                }
+                            )
                             for field in bf['bucket_fields']:
-                                _task_children[bf['entity_name']][field] = child['attributes'][field]
-                workspace['tasks'][task_entity][task_key]['children'] = _task_children
+                                if workspace.workspace.name not in ['AnVIL_CMG_BaylorHopkins_HMB-NPU_WES']:
+                                    # TODO - remove if not needed
+                                    if 'AnVIL_CMG_Broad' not in workspace.workspace.name:
+                                        assert field in child['attributes'], (field, child, bf)
+                                if field in child['attributes']:
+                                    _task_children[bf['entity_name']][field] = child['attributes'][field]
+                                    document_count += 1                           
+
+                if 'Specimen' not in [ti['fhir_entity'] for ti in _task_inputs]:
+                    no_specimen = True
+                    for ti in _task_inputs:
+                        context.entity_with_specimen_reference = _children[ti['entityType']][ti['name']]
+                        exec_command(context, consortium_name, workspace, config, 'extract_specimen_reference')
+                        if 'specimen_reference' in context:
+                            _task_inputs.append(context['specimen_reference'])
+                            no_specimen = False
+                            del context['specimen_reference']
+                    if no_specimen and len(_task_inputs) > 0:
+                        logger.error(('no.specimen.in.task', consortium_name, workspace.workspace.name, _task_inputs))
+                
+                # It is possible for an entity that has  bucket fields to be classified as a task,
+                # make sure we don't self reference
+                _task_inputs = [ti for ti in _task_inputs if not (task['name'] == ti['name'] and  task['entityType']  == ti['entityType'] )]
+
+                task['outputs'] = _task_children
+                task['inputs'] = _task_inputs
+                if document_count == 0:
+                    deletion_keys.append(task_entity)
+
+        # delete task entities without documents
+        for key in set(deletion_keys):
+            del workspace['tasks'][key]
+            logger.warning(('no.task', consortium_name, workspace.workspace.name, key))
+
+    def blob_attributes(context, consortium_name, workspace, config):
+        """Decorate task outputs with blob attributes."""
+        google_entities = Entities(path=f"{output_path}/google_entities.sqlite")
+
+        for task_entity in workspace['tasks']:
+            for task in workspace['tasks'][task_entity]:
+                for output_source, output in task['outputs'].items():
+                    for output_property, url in output.items():
+                        blob = google_entities.get(url)
+                        if not blob:
+                            blob = {'url':url}
+                            # if 'blob.not.in.bucket' not in context['logged_already']:                            
+                            logger.warning(('blob.not.in.bucket', consortium_name, workspace.workspace.name, output_source, output_property, url))                            
+                            context['logged_already'].append('blob.not.in.bucket')
+                        task['outputs'][output_source][output_property] = blob
+                        # print('OK', consortium_name, workspace.workspace.name, output_source, output_property, url)
+
+    def practitioner(context, consortium_name, workspace, config):
+        """Determine the PI, set practitioner on workspace."""
+        if 'study_pi' in workspace.workspace.attributes:
+            workspace.practitioner = workspace.workspace.attributes['study_pi']
+        elif 'library:institute' in workspace.workspace.attributes:
+            workspace.practitioner = workspace.workspace.attributes['library:institute']['items'][0]
+        else:
+            assert False, ('no.find.practitioner',  consortium_name, workspace.workspace.name, workspace.workspace.attributes)
 
     #
     # command specializations hierarchy
@@ -488,11 +351,17 @@ def normalize_workspace(consortium_name, workspace, config, entities):
     C['//ensure_tasks'] = lambda context, consortium_name, workspace, config: ensure_tasks(context, consortium_name, workspace, config)
     C['//ensure_tasks_populated'] = lambda context, consortium_name, workspace, config: ensure_tasks_populated(context, consortium_name, workspace, config)
     C['//ensure_tasks_linked_to_documents'] = lambda context, consortium_name, workspace, config: ensure_tasks_linked_to_documents(context, consortium_name, workspace, config)
+    C['//ensure_bucket_fields'] = lambda context, consortium_name, workspace, config: ensure_bucket_fields(context, consortium_name, workspace, config)
+    C['CMG/AnVIL_CMG_BaylorHopkins_HMB-NPU_WES/ensure_bucket_fields'] = lambda context, consortium_name, workspace, config: ensure_bucket_fieldsAnVIL_CMG_BaylorHopkins_HMB_NPU_WES(context, consortium_name, workspace, config)
+    C['CMG/AnVIL_CMG_Broad_Kidney_Hildebrandt_WES/ensure_bucket_fields'] = lambda context, consortium_name, workspace, config: ensure_bucket_fieldsAnVIL_CMG_Broad_crai_or_bai(context, consortium_name, workspace, config)
+    C['CMG/AnVIL_CMG_Broad_Muscle_KNC_WES/ensure_bucket_fields'] = lambda context, consortium_name, workspace, config: ensure_bucket_fieldsAnVIL_CMG_Broad_crai_or_bai(context, consortium_name, workspace, config)
+    C['//blob_attributes'] = lambda context, consortium_name, workspace, config: blob_attributes(context, consortium_name, workspace, config)
+    C['CMG/ANVIL_CMG_Broad_Muscle_Laing_WES/extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference(context, consortium_name, workspace, config)
+    C['//practitioner'] = lambda context, consortium_name, workspace, config: practitioner(context, consortium_name, workspace, config)
     
     #
     # runner
     #
-    # exec_command_logged_already = False
     def exec_command(context, consortium_name, workspace, config, cmd):
         """Find and run version of the command that matches."""
         workspace_name = workspace['workspace']['name']
@@ -523,33 +392,35 @@ def normalize_workspace(consortium_name, workspace, config, entities):
 
     # pass context to commands
     context = AttrDict({'logged_already': []})
+
+    # find config
     exec_command(context, consortium_name, workspace, config, 'consortium_config')
     assert context.consortium_config, "Should set context config"
     assert context.inverted_config, "Should set context inverted_config"
 
-    #
+    # who ran this study?
+    exec_command(context, consortium_name, workspace, config, 'practitioner')
+    assert workspace.practitioner, "Should set workspace.workspacepractitioner"
+
     # deduce entity names in workspace
-    #
     exec_command(context, consortium_name, workspace, config, 'patient_entity_names')
     assert context.patient_entity_names, "Should set context patient_entity_names"
 
     exec_command(context, consortium_name, workspace, config, 'specimen_entity_name')
     assert context.specimen_entity_name, "Should set context specimen_entity_name"
+    assert isinstance(context.specimen_entity_name, str), context.specimen_entity_name
+    # logger.info(('context.specimen_entity_name', consortium_name, workspace, context.specimen_entity_name))
 
-    #
     # start traversal from specimen
-    #
     specimens = workspace.children.get(context.specimen_entity_name, None)
     if not specimens or len(specimens) == 0:
         logger.error(('no.find.specimens', consortium_name, workspace.workspace.name))
         return
     workspace.specimens = specimens
 
-    #
     # traverse up to patient
-    #
     logged_already = False
-    sample_patient_ids = []
+    specimen_patient_ids = []
     for specimen in workspace.specimens:
         context.specimen = specimen
         patient_id = exec_command(context, consortium_name, workspace, config, 'patient_from_specimen')
@@ -557,19 +428,16 @@ def normalize_workspace(consortium_name, workspace, config, entities):
             logged_already = True
             logger.error(("no.find.patient.from.sample", consortium_name, workspace.workspace.name, context.specimen, workspace.children.keys()))
         else:    
-            sample_patient_ids.append((specimen.name, patient_id))
-
+            specimen_patient_ids.append((specimen.name, patient_id))
     # store sample->patient on workspace for now    
     total_patient_count = 0
     for patient_entity_name in context.patient_entity_names:
         # patient_entity_names are possibilities, they don't have to exist        
         total_patient_count += len(workspace.children.get(patient_entity_name, []))
-    workspace.sample_patient_ids = sample_patient_ids
+    workspace.specimen_patient_ids = specimen_patient_ids
     workspace.total_patient_count = total_patient_count
 
-    #
     # find tasks
-    #
     exec_command(context, consortium_name, workspace, config, 'task_entity_names')
     assert context.task_entity_names, "Should set context.task_entity_names"
 
@@ -581,17 +449,85 @@ def normalize_workspace(consortium_name, workspace, config, entities):
     assert workspace.tasks, ("context.tasks.empty", context.keys(), context.task_entity_names, workspace.children.keys() )
     assert len(workspace.tasks) > 0, "context.tasks should be > 0"
 
-    context['bucket_fields'] = [bf for bf in extract_bucket_fields(entities=entities, workspace_name=workspace.workspace.name)]
+    exec_command(context, consortium_name, workspace, config, 'ensure_bucket_fields')    
+    if not context['bucket_fields']:
+        logger.warning( ("no.entity.contains.bucket.objects", consortium_name, workspace.workspace.name))
+
     exec_command(context, consortium_name, workspace, config, 'ensure_tasks_linked_to_documents')    
-    assert workspace.tasks, ("context.tasks.documents", context.keys(), context.task_entity_names, workspace.children.keys() )
-    assert len(workspace.tasks) > 0, "context.tasks should be > 0"
+    if len(workspace.tasks) == 0:
+        logger.warning( ("no.tasks", consortium_name, workspace.workspace.name))
+    else:
+        for task_source, task_list in workspace.tasks.items():
+            for task in task_list:
+                assert len(task['inputs']) > 0, ("tasks.missing.inputs", task_source, task)
+                assert len(task['outputs']) > 0, ("tasks.missing.outputs", task_source, task)
+    # logger.info(('task.count', consortium_name, workspace.workspace.name, workspace.tasks.keys(), len(task_list) ))
+
+    exec_command(context, consortium_name, workspace, config, 'blob_attributes')    
+
+    # setup a hash of patients
+    patients = {}
+    specimens = {}
+    if 'patient_entity_names' not in context:
+        logger.warning(('missing.context.patient_entity_names', consortium_name, workspace.workspace.name))
+        return
+    for patient_entity_name in context.patient_entity_names:
+        if patient_entity_name in workspace.children:
+            for p in workspace.children[patient_entity_name]:
+                patients[p['name']] = p
+    assert len(patients) > 0, f"{context.patient_entity_names} not found in {workspace.children.keys()}"
+
+    assert context.specimen_entity_name in workspace.children.keys()
+    for s in workspace.children[context.specimen_entity_name]:
+        specimens[s['name']] = s
+
+    for task_entity in workspace.tasks:
+        for task in workspace.tasks[task_entity]:
+            for input in task['inputs']:
+                if input['fhir_entity'] == 'Specimen':
+                    assert input['name'] in specimens 
+                    if 'tasks' not in specimens[input['name']]:
+                        specimens[input['name']]['tasks'] = []
+                    specimens[input['name']]['tasks'].append(task)
+
+    for specimen_id, patient_id in workspace.specimen_patient_ids:
+        if not isinstance(patient_id, str):
+            # hmmm - should we always just make this a str
+            patient_id = patient_id['entityName']
+        assert patient_id in patients, f"{patient_id} not in {patients}"
+        assert specimen_id in specimens, f"{specimen_id} not in {specimens}"
+        if 'specimens' not in patients[patient_id]:
+            patients[patient_id]['specimens'] = []
+        patients[patient_id]['specimens'].append(specimens[specimen_id])
+    # set on workspace
+    workspace.patients = patients
 
 
-@cli.command('normalize')
-@click.option('--output_path', default=DEFAULT_OUTPUT_PATH, help=f'output path default={DEFAULT_OUTPUT_PATH}')
-@click.option('--details', default=False, is_flag=True, help="Show the details.")
-def normalize(output_path, details):
-    """Read workspaces from db, map entity to standard FHIR entity names, write to stdout."""
+def analyze(output_path):
+    """Read workspaces from db, normalize and analyze."""
+    G = _recursive_default_dict()
+    for consortium_name,  workspace in normalize(output_path):
+        specimen_count = 0
+        task_count = 0
+        patient_count = 0
+        uniq_documents = set()
+        for p in workspace.patients.values():
+            patient_count += 1
+            specimen_count += len(p['specimens'])
+            for s in p['specimens']:
+                task_count += len(s['tasks'])
+                for task in s['tasks']:
+                    for output_source, output in task['outputs'].items():
+                        for output_property, blob in output.items():
+                            uniq_documents.add(blob['url'])
+        G[consortium_name][workspace.workspace.name]['patients'] = patient_count
+        G[consortium_name][workspace.workspace.name]['specimens'] = specimen_count
+        G[consortium_name][workspace.workspace.name]['tasks'] = task_count
+        G[consortium_name][workspace.workspace.name]['documents'] = len(uniq_documents)
+    return G
+
+def normalize(output_path):
+    """Read workspaces from db, normalize."""
     config = {
         "CMG": {
             "Patient": {
@@ -609,10 +545,10 @@ def normalize(output_path, details):
         },
         "CCDG": {
             "Patient": {
-                "aliases": ["subject", "participant"]
+                "aliases": ["subject", "participant", "pfb:subject"]
             },
             "Specimen": {
-                "aliases": ["sample"] # , "sample_set", "qc_result_sample"]                
+                "aliases": ["sample", "sample_set", "qc_result_sample"]                
             },
             "Task": {
                 "aliases": ["sequencing", "discovery"]                
@@ -663,47 +599,40 @@ def normalize(output_path, details):
 
     entities = Entities(path=f"{output_path}/terra_entities.sqlite")
 
-    consortiums = recursive_default_dict()
 
     for workspace in entities.get_by_label('workspace'):
         workspace = AttrDict(workspace)
 
         consortium_name = workspace.consortium_name
-        if consortium_name != 'Public':
+        if consortium_name not in ['Public']:
             continue
+        # if workspace.workspace.name != 'ANVIL_CMG_Broad_Muscle_Laing_WES':
+        #     continue
 
         logger.info((consortium_name, workspace.workspace.name))
+
+        # get all the other entities for this workspace
         children = entities.get_edges(src=workspace.workspace.name, src_name='workspace')
         workspace.children = children
         
-        normalize_workspace(consortium_name, workspace, config, entities)
-        consortiums[consortium_name][workspace.workspace.name] = workspace
+        # wrangle the entities into a consistent, predictable form
+        _normalize_workspace(consortium_name, workspace, config, entities, output_path)
+        try:
+            assert workspace.patients, 'missing.patients'
+            # assert workspace.specimens, 'missing.specimens'
+            # assert workspace.specimen_patient_ids, 'missing.specimen.to.patient.links'
+            # assert workspace.tasks, 'missing.tasks'
+            # for task_entity in workspace.tasks:
+            #     for task in workspace.tasks[task_entity]:
+            #         for input in task['inputs']:
+            #             assert 'fhir_entity' in input, 'missing.fhir_entity.in.task'
+            #         for output_source, output in task['outputs'].items():
+            #             for output_property, blob in output.items():
+            #                 assert 'url' in blob, ('missing.url.in.blob', output_source, output_property)
+        except Exception as e:
+            logger.error((str(e) , consortium_name, workspace.workspace.name))
+            continue
 
-    counts = recursive_default_dict()
-    for consortium_name, consortium in consortiums.items():
-        for workspace_name in consortium:
-            workspace = consortium[workspace_name]
-            total_patient_count = workspace.get('total_patient_count', None)
-            sample_patient_ids = workspace.get('sample_patient_ids', None)
-            if not total_patient_count:
-                logger.error(('normalization_failed', consortium_name, workspace_name))
-                continue
-            if total_patient_count != len(sample_patient_ids):
-                logger.error(('sample_patient_ids.reconcile.fail', consortium_name, workspace_name, total_patient_count, len(sample_patient_ids)))
-            # counts[consortium_name][workspace_name] = len(sample_patient_ids)
-            counts[consortium_name][workspace_name] = len(workspace.tasks.values())
-            # print(json.dumps(workspace.tasks))
-            tasks_length = functools.reduce(operator.add, [len(d) for d in workspace.tasks.values()])
-            if len(workspace.specimens) != tasks_length:
-                msg = {k:len(v)for k, v in workspace.tasks.items()}
-                logger.error(('tasks.not.equal.specimens', consortium_name, workspace_name, total_patient_count, msg))
-                specimens_keys = set([s.name for s in workspace.specimens])
-                print(workspace.tasks['_implied'].keys())
-                # print([v for v in workspace.tasks.values()][0])
-                task_keys = set(workspace.tasks.values()[0])
-                print(task_keys - specimens_keys)
-    
-    # print(json.dumps(counts))
+        yield consortium_name, workspace
 
-if __name__ == '__main__':
-    cli()
+
