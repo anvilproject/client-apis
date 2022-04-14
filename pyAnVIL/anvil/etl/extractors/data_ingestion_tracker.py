@@ -68,5 +68,5 @@ def write(output_path):
 
 def read(output_path):
     """Load json file."""
-    output_path = f"{output_path}/data_ingestion_tracker.json"    
+    output_path = f"{output_path}/data_ingestion_tracker.json"
     return json.load(open(output_path))

@@ -7,6 +7,7 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
+
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code."""
     if isinstance(obj, (datetime, date)):
@@ -19,6 +20,7 @@ def dict_factory(cursor, row):
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
 
 class Entities():
     """Cache items in sqlite."""
@@ -41,7 +43,7 @@ class Entities():
             dst text,
             src_name text,
             dst_name text
-        );        
+        );
         """)
         self._conn.commit()
 
@@ -70,7 +72,6 @@ class Entities():
             logger.debug(f"miss {key}")
         cur.close()
         return data
-
 
     @property
     def cursor(self):
@@ -124,7 +125,6 @@ class Entities():
         destination_edges = self.cursor.execute(f"SELECT dst, dst_name FROM edges where src = ? and src_name = ? and dst_name = ? {limit}", (src, src_name, dst_name, )).fetchall()
         destination_vertices = {de['dst_name']: self.get(de['dst']) for de in destination_edges}
         return destination_vertices
-
 
     def index(self):
         logger.info('Indexing')

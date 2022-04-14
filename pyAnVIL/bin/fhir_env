@@ -1,0 +1,75 @@
+#!/bin/bash
+# Pre-requisites for Google Healthcare API FHIR server
+# exports variables used to contruct URIs and query data
+
+unset MISSING
+
+
+[ -z "$1" ] && echo "missing: GOOGLE_PROJECT_NAME the name of the project that will host the FHIR service." && MISSING="Y"
+[ -z "$2" ] && echo "missing: GOOGLE_LOCATION the name of the region that will host API and buckets." && MISSING="Y"
+[ ! -z "$MISSING" ] &&  echo "usage: fhir_env GOOGLE_PROJECT_NAME GOOGLE_LOCATION [GOOGLE_DATASET] [GOOGLE_DATASTORE] [BILLING_ACCOUNT] [OUTPUT_PATH]" && return 1
+
+export GOOGLE_PROJECT_NAME=$1
+export GOOGLE_LOCATION=$2
+
+if [ -z "$GOOGLE_DATASET" ]; then
+    export GOOGLE_DATASET=${3:-anvil-test}
+fi
+
+if [ -z "$GOOGLE_DATASTORE" ]; then
+    export GOOGLE_DATASTORE=${4:-test}
+fi
+
+if [ -z "$GOOGLE_BILLING_ACCOUNT" ]; then
+    # NIH-Awd.NHGRI.JHU.AnVIL
+    export GOOGLE_BILLING_ACCOUNT=${5:-016D13-3B2B1C-E919A9}
+fi
+
+if [ -z "$OUTPUT_PATH" ]; then
+    export OUTPUT_PATH=${6:-./DATA}
+fi
+
+
+export GOOGLE_PROJECT=$(gcloud projects list --filter=name=$GOOGLE_PROJECT_NAME --format="value(projectId)" )
+if [ -z "$GOOGLE_PROJECT" ]; then
+    # echo "Need to create project >$GOOGLE_PROJECT_NAME<"
+    unset GOOGLE_PROJECT
+    unset GOOGLE_BUCKET
+else
+    export GOOGLE_BUCKET=$GOOGLE_PROJECT
+fi    
+
+
+if [ -z "$IMPLEMENTATION_GUIDE_PATH" ]; then
+    export IMPLEMENTATION_GUIDE_PATH=$OUTPUT_PATH/IG
+fi    
+
+
+echo '***** env variables *****'
+
+echo GOOGLE_PROJECT_NAME $GOOGLE_PROJECT_NAME  The root for the API, billing, buckets, etc.
+echo GOOGLE_BILLING_ACCOUNT $GOOGLE_BILLING_ACCOUNT Google Cloud Billing Accounts allow you to configure payment and track spending in GCP.
+echo GOOGLE_LOCATION $GOOGLE_LOCATION The physical location of the data
+echo GOOGLE_DATASET $GOOGLE_DATASET  Datasets are top-level containers that are used to organize and control access to your stores. 
+echo GOOGLE_DATASTORE $GOOGLE_DATASTORE A FHIR store is a data store in the Cloud Healthcare API that holds FHIR resources.
+echo OUTPUT_PATH $OUTPUT_PATH A directory on your local system, used to store work files.
+if [ -z "$GOOGLE_PROJECT" ]; then
+    echo "Need to create or set project >$GOOGLE_PROJECT_NAME<"
+    echo "Need to create or set bucket >$GOOGLE_BUCKET<"
+else
+    echo GOOGLE_PROJECT $GOOGLE_PROJECT The project identifier
+    echo GOOGLE_BUCKET $GOOGLE_BUCKET The bucket used to store extracted FHIR files
+fi    
+
+
+return
+
+# # point as this project by default.
+# gcloud config set project $GOOGLE_PROJECT > /dev/null
+
+# export TOKEN=$(gcloud auth application-default print-access-token)
+
+# export GOOGLE_DATASTORES=$(gcloud beta healthcare fhir-stores list --dataset=$GOOGLE_DATASET --location=$GOOGLE_LOCATION --format="table[no-heading](ID)" | tr '\n' ',')
+
+# export PYANVIL_CACHE_PATH=$OUTPUT_PATH/pyanvil-cache.sqlite
+

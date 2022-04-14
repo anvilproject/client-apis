@@ -1,27 +1,23 @@
 import logging
 import sqlite3
-
 from gen3.auth import Gen3Auth
-from gen3.submission import Gen3Submission
 from anvil.clients.gen3_auth import Gen3TerraAuth
 from anvil.clients.gen3_auth import TERRA_TOKEN_URL
 from gen3.query import Gen3Query
-
-import sqlite3
 from tabulate import tabulate
 
+
 def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, expected_row_count):
-    """Retrieve DRS url for all gen3 files."""
+    """Retrieve DRS url from Gen3's flat file index."""
     gen3_endpoint = "https://gen3.theanvil.io"
 
     # Install n API Key downloaded from the
     # commons' "Profile" page at ~/.gen3/credentials.json
-    
+
     if use_terra_credentials:
         auth = Gen3TerraAuth(endpoint=gen3_endpoint, terra_auth_url=TERRA_TOKEN_URL, user_email=None)
     else:
         auth = Gen3Auth(endpoint=gen3_endpoint, refresh_file=gen3_credentials_path)
-
 
     logger = logging.getLogger(__name__)
 
@@ -30,9 +26,6 @@ def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, exp
     raw_data = query_client.raw_data_download(data_type='file', fields='node_id,project_id,anvil_project_id,subject_submitter_id,sample_submitter_id,sequencing_assay_submitter_id,file_name,file_size,md5sum,submitter_id,md5sum,drs_id,_subject_id'.split(','))
 
     assert len(raw_data) > expected_row_count, f"Expected over {expected_row_count} file records, got {len(raw_data)} instead.  Projects {set(sorted([(r['project_id']) for r in raw_data]))}"
-
-#     anvil_project_ids = set(sorted([','.join(r['anvil_project_id']) for r in raw_data]))
-#     gen3_project_ids = set(sorted([(r['project_id']) for r in raw_data]))
 
     logger.info(f"retrieved {len(raw_data)} file records from gen3.")
 
@@ -69,15 +62,13 @@ def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, exp
             return None
         return _array[0]
 
-
     commit_threshold = 1000
     c = 0
     for row in raw_data:
         try:
             cur.execute(
-                "INSERT into drs_file values (?, ?, ?, ?, ?, ?, ?, ?, ?);",
-
-                (    row['md5sum'],
+                "INSERT into drs_file values (?, ?, ?, ?, ?, ?, ?, ?, ?);", (
+                    row['md5sum'],
                     row['node_id'],
                     row['file_name'],
                     row['drs_id'],
@@ -87,9 +78,8 @@ def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, exp
                     row['project_id'],
                     _first(row['anvil_project_id']),
                 )
-
             )
-        except Exception as e:
+        except Exception:
             logger.error(row)
             logger.error("Fatal error writing row above to sqlite.", exc_info=True)
             break
@@ -106,14 +96,12 @@ def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, exp
     """)
     _conn.commit()
     logger.info(f'Created {sqlite_path}')
-    
+
     def _dict_factory(cursor, row):
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
-
-
 
     _conn = sqlite3.connect(sqlite_path)
     _conn.row_factory = _dict_factory
@@ -122,6 +110,5 @@ def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, exp
     dataset = cur.execute('SELECT project_id as "gen3_project_id", anvil_project_id, count(*) as "file_count" FROM drs_file group by  project_id, anvil_project_id').fetchall()
 
     header = dataset[0].keys()
-    rows =  [x.values() for x in dataset]
+    rows = [x.values() for x in dataset]
     logger.info(f"\nExtracted File Counts\n{tabulate(rows, header)}")
-    

@@ -133,6 +133,7 @@ setup(
         'Click==7.1.2',
         'google-cloud-storage==1.42.3',
         'google-cloud-core==2.0.0',
+        'click-loglevel'
         # 'fhirclient @ git+https://github.com/smart-on-fhir/client-py#egg=fhirclient'
     ],
 
