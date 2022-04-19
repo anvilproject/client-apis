@@ -19,6 +19,9 @@ from . import logger
 #
 # runner
 #
+from ..extractors.gen3 import DRSReader
+
+
 def exec_command(context, consortium_name, workspace, config, cmd):
     """Find and run version of the command that matches."""
     workspace_name = workspace['workspace']['name']
@@ -431,6 +434,7 @@ def blob_attributes(context, consortium_name, workspace, config):
     google_entities = None
     if context['validate_buckets']:
         google_entities = Entities(path=f"{context['output_path']}/google_entities.sqlite")
+    drs_reader = DRSReader(context['output_path'])
 
     missing_blob_count = 0
     for task_entity in workspace['tasks']:
@@ -440,14 +444,17 @@ def blob_attributes(context, consortium_name, workspace, config):
                     if context['validate_buckets']:
                         blob = google_entities.get(url)
                         if not blob:
-                            blob = {'url': url}
+                            blob = {'url': url, 'drs_uri': None}
                             missing_blob_count += 1
                             if 'blob.not.in.bucket' not in context['logged_already']:
                                 logger.warning(('blob.not.in.bucket', consortium_name, workspace.workspace.name,
                                                 output_source, output_property, url))
                                 context['logged_already'].append('blob.not.in.bucket')
                     else:
-                        blob = {'url': url}
+                        blob = {'url': url, 'drs_uri': None}
+                    drs = drs_reader.get(url.split('/')[-1])
+                    if drs:
+                        blob['drs_uri'] = drs.get('ga4gh_drs_uri', None)
                     task['outputs'][output_source][output_property] = blob
     if missing_blob_count > 0:
         logger.error(('total.blob.not.in.bucket', consortium_name, workspace.workspace.name, missing_blob_count))
@@ -656,6 +663,16 @@ def family_relationship(context, consortium_name, workspace, config):
 
     context['patient']['family_relationship_values'] = [family_relationship_values]
 
+    if len(family_relationship_values) > 0:
+        assert 'FamilyRelationship' in context.consortium_config['entities']
+        if 'FamilyRelationship' in context.consortium_config['entities']:
+            for alias in context.consortium_config['entities']['FamilyRelationship']['aliases']:
+                if alias in workspace['children']:
+                    for family in workspace['children'][alias]:
+                        if family['name'] == family_relationship_values['family_id']:
+                            context['patient']['family'] = family
+            if 'family' not in context['patient']:
+                logger.error(('no.family', consortium_name, workspace.workspace.name, context['patient']['name']))
 
 # def family_relationship_CMG(context, consortium_name, workspace, config):
 #     """Retrieve family relationship from patient."""

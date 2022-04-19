@@ -1,3 +1,4 @@
+import json
 import logging
 import sqlite3
 from gen3.auth import Gen3Auth
@@ -6,9 +7,12 @@ from anvil.clients.gen3_auth import TERRA_TOKEN_URL
 from gen3.query import Gen3Query
 from tabulate import tabulate
 
+from anvil.etl.utilities.entities import dict_factory
+
 
 def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, expected_row_count):
     """Retrieve DRS url from Gen3's flat file index."""
+    # TODO - consider wrapping this using the Entities class
     gen3_endpoint = "https://gen3.theanvil.io"
 
     # Install n API Key downloaded from the
@@ -112,3 +116,21 @@ def drs_extractor(gen3_credentials_path, output_path, use_terra_credentials, exp
     header = dataset[0].keys()
     rows = [x.values() for x in dataset]
     logger.info(f"\nExtracted File Counts\n{tabulate(rows, header)}")
+
+
+class DRSReader:
+    """Read items in sqlite."""
+
+    def __init__(self, output_path):
+        """Set up sqlite db."""
+        self._path = f'{output_path}/drs_file.sqlite'
+        self._conn = sqlite3.connect(self._path, check_same_thread=True)
+        self._conn.row_factory = dict_factory
+
+    def get(self, file_name=None, md5sum=None):
+        """Retrieve an item."""
+        assert file_name or md5sum, "Please provide either file_name or md5sum"
+        cur = self._conn.cursor()
+        data = cur.execute("SELECT * FROM drs_file where file_name=? or md5sum=?", (file_name, md5sum, )).fetchone()
+        cur.close()
+        return data

@@ -118,7 +118,7 @@ def _create_administrative_entities(workspace, consortium_name):
     ]
 
     data_store_name = ensure_data_store_name(workspace)    
-    data_store_org = FHIROrganization.Organization({'id': data_store_name})
+    data_store_org = FHIROrganization.Organization({'id': _fhir_id(data_store_name)})
     data_store_org.partOf = _ref(consortium_org)
     data_store_org.identifier = [
         FHIRIdentifier.Identifier({
@@ -172,6 +172,96 @@ def _create_administrative_entities(workspace, consortium_name):
     )
 
 
+def _make_fhir_task_NEW(fhir_patient, task, workspace, workspace_name):
+    """Generate Task, etc."""
+    for output_source, output in task['outputs'].items():
+        for output_property, blob in output.items():
+            _task_id_keys.append(blob['url'])
+    task_id = _id(*_task_id_keys)
+    identifiers = [_identifier(workspace, task)]
+    inputs = []
+    for _input in task['inputs']:
+        assert 'fhir_entity' in _input, 'missing.fhir_entity.in.task'
+        inputs.append(
+            {
+                'type': {'coding': [{'code': 'Reference'}]},
+                'valueReference': {
+                    'reference': f"{_input['fhir_entity']}/{_id(workspace_name, _input['fhir_entity'], _input['name'])}"}
+            }
+        )
+
+    task = {
+      "id": task_id,
+      "identifier": identifiers,
+      "input": inputs,
+      "intent": "unknown",
+      "output": [
+        {
+          "type": {
+            "coding": [
+              {
+                "code": "Reference"
+              }
+            ]
+          },
+          "valueReference": {
+            "reference": "DocumentReference/c07e3b64-f677-5ef7-9bb0-8a2a188592c2"
+          }
+        },
+        {
+          "type": {
+            "coding": [
+              {
+                "code": "Reference"
+              }
+            ]
+          },
+          "valueReference": {
+            "reference": "DocumentReference/f21602c9-f5ad-5863-9fa3-cef957311a5f"
+          }
+        },
+        {
+          "type": {
+            "coding": [
+              {
+                "code": "Reference"
+              }
+            ]
+          },
+          "valueReference": {
+            "reference": "DocumentReference/19162a3a-346a-54de-8587-a4aa5d7b1a5b"
+          }
+        },
+        {
+          "type": {
+            "coding": [
+              {
+                "code": "Reference"
+              }
+            ]
+          },
+          "valueReference": {
+            "reference": "DocumentReference/c07e3b64-f677-5ef7-9bb0-8a2a188592c2"
+          }
+        },
+        {
+          "type": {
+            "coding": [
+              {
+                "code": "Reference"
+              }
+            ]
+          },
+          "valueReference": {
+            "reference": "DocumentReference/f21602c9-f5ad-5863-9fa3-cef957311a5f"
+          }
+        }
+      ],
+      "status": "accepted",
+      "resourceType": "Task"
+    }
+
+
 def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
     """Generate FHIR Specimen, Task and DocumentReference."""
     workspace_name = workspace.workspace.name
@@ -185,49 +275,58 @@ def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
                 yield _terra_observation(workspace, specimen, fhir_specimen)
             if 'tasks' in specimen:
                 for task in specimen['tasks']:
-                    # create unique task id
-                    _task_id_keys = [input['name'] for input in task['inputs']]
-                    for output_source, output in task['outputs'].items():
-                        for output_property, blob in output.items():
-                            _task_id_keys.append(blob['url'])
-                    task_id = _id(*_task_id_keys)
-                    fhir_task = FHIRTask.Task({'id': task_id, 'input': [], 'output': [], 'status': 'accepted', 'intent': 'unknown'})
-                    fhir_task.identifier = [_identifier(workspace, task)]
-                    for input in task['inputs']:
-                        assert 'fhir_entity' in input, 'missing.fhir_entity.in.task'                    
-                        fhir_task.input.append(FHIRTask.TaskInput(
-                            {
-                                'type': {'coding': [{'code': 'Reference'}]},                                    
-                                'valueReference': {'reference': f"{input['fhir_entity']}/{_id(workspace_name, input['fhir_entity'], input['name'])}"}
-                            }
-                        ))
-                    seen_already = set()
-                    for output_source, output in task['outputs'].items():
-                        for output_property, blob in output.items():
-                            assert 'url' in blob, ('missing.url.in.blob', output_source, output_property)
-                            document_reference = FHIRDocumentReference.DocumentReference(
-                                {
-                                    'id': _id(blob['url']),
-                                    'status': 'current',
-                                    'content': [{'attachment': {'url': blob['url']}}],
-                                    'subject': _ref(fhir_patient).as_json()
-                                }
-                            )
-                            document_reference.identifier = [_document_reference_identifier(workspace, output_source, output_property, task['inputs'][0])]
-
-                            # FHIRDocumentReference.DocumentReferenceContent({'attachment': {'url': blob['url']} })
-                            fhir_task.output.append(
-                                FHIRTask.TaskOutput(
-                                    {'type': {'coding': [{'code': 'Reference'}]}, 'valueReference': _ref(document_reference).as_json()}
-                                )
-                            )
-                            # multiple tasks can refer to same document, so de-duplicate
-                            if document_reference.id not in seen_already:
-                                yield document_reference
-                            seen_already.add(document_reference.id)
+                    fhir_task = yield from _make_fhir_task(fhir_patient, task, workspace, workspace_name)
                     yield fhir_task
                     if details:
                         yield _terra_observation(workspace, task, fhir_task)
+
+
+def _make_fhir_task(fhir_patient, task, workspace, workspace_name):
+    """Create task and its descendants."""
+    # create unique task id
+    _task_id_keys = [input['name'] for input in task['inputs']]
+    for output_source, output in task['outputs'].items():
+        for output_property, blob in output.items():
+            _task_id_keys.append(blob['url'])
+    task_id = _id(*_task_id_keys)
+    fhir_task = FHIRTask.Task({'id': task_id, 'input': [], 'output': [], 'status': 'accepted', 'intent': 'unknown'})
+    fhir_task.identifier = [_identifier(workspace, task)]
+    for input in task['inputs']:
+        assert 'fhir_entity' in input, 'missing.fhir_entity.in.task'
+        fhir_task.input.append(FHIRTask.TaskInput(
+            {
+                'type': {'coding': [{'code': 'Reference'}]},
+                'valueReference': {
+                    'reference': f"{input['fhir_entity']}/{_id(workspace_name, input['fhir_entity'], input['name'])}"}
+            }
+        ))
+    seen_already = set()
+    for output_source, output in task['outputs'].items():
+        for output_property, blob in output.items():
+            assert 'url' in blob, ('missing.url.in.blob', output_source, output_property)
+            document_reference = FHIRDocumentReference.DocumentReference(
+                {
+                    'id': _id(blob['url']),
+                    'status': 'current',
+                    'content': [{'attachment': {'url': blob['url']}}],
+                    'subject': _ref(fhir_patient).as_json()
+                }
+            )
+            document_reference.identifier = [
+                _document_reference_identifier(workspace, output_source, output_property, task['inputs'][0])]
+
+            # FHIRDocumentReference.DocumentReferenceContent({'attachment': {'url': blob['url']} })
+            fhir_task.output.append(
+                FHIRTask.TaskOutput(
+                    {'type': {'coding': [{'code': 'Reference'}]}, 'valueReference': _ref(document_reference).as_json()}
+                )
+            )
+            # multiple tasks can refer to same document, so de-duplicate
+            if document_reference.id not in seen_already:
+                yield document_reference
+            seen_already.add(document_reference.id)
+    yield fhir_task
+    return fhir_task
 
 
 def _create_individual(workspace, patient, workspace_org, research_study):
@@ -764,12 +863,15 @@ def generate_fhir(workspace, consortium_name, details, config):
 def write(consortium_name, workspace, output_path, details, config):
     """Write normalized workspace to disk as FHIR."""
     emitters = {}
+    import cProfile, pstats
+    profiler = cProfile.Profile()
+    profiler.enable()
     for fhir_resource in generate_fhir(workspace, consortium_name, details, config):
-        # print(fhir_resource.relativePath())
-        resourceType = fhir_resource.resource_type        
-        dir_path = f"{output_path}/fhir/{consortium_name}/{workspace.workspace.name}"
+        resource_type = fhir_resource.resource_type
+        data_store_name = ensure_data_store_name(workspace)
+        dir_path = f"{output_path}/fhir/{data_store_name}/{consortium_name}/{workspace.workspace.name}"
         public_protected = 'protected'
-        if resourceType in ['ResearchStudy', 'Organization', 'Practitioner', 'PractitionerRole']:
+        if resource_type in ['ResearchStudy', 'Organization', 'Practitioner', 'PractitionerRole']:
             public_protected = 'public'
         file_path = None
 
@@ -790,7 +892,7 @@ def write(consortium_name, workspace, output_path, details, config):
             else:
                 resource_code = resource_code[0]
 
-        if resourceType == 'Observation':
+        if resource_type == 'Observation':
             if resource_code == 'Summary':
                 file_path = f"{dir_path}/public/{resource_reference}Observation{resource_code}.ndjson"
             else:
@@ -808,3 +910,7 @@ def write(consortium_name, workspace, output_path, details, config):
             emitters[file_path] = emitter
         json.dump(fhir_resource.as_json(), emitter, separators=(',', ':'))
         emitter.write('\n')
+    profiler.disable()
+    # Export profiler output to file
+    stats = pstats.Stats(profiler)
+    stats.dump_stats(f'{output_path}/program.prof')

@@ -120,17 +120,17 @@ For more information on usage see [smart-on-fhir/client-py](https://github.com/s
 # create a working directory for our data
 mkdir  -p ./DATA
 
-# clean all work files and databases
-anvil_extract clean --output_path ./DATA
+# transform all consortiums
+anvil_etl transform  fhir 2> /tmp/fhir.log
+# download latest NCPI ImplementationGuide
+anvil_etl load fhir  IG create
+# create all data stores
+anvil_etl load fhir data-store create
 
-# extract all from gen3
-anvil_extract drs-extract --output_path ./DATA  --expected_row_count 175000
-
-# extract all from terra
-anvil_extract extract --user_project $GOOGLE_BILLING_ACCOUNT --output_path ./DATA
-
-# create a summary report of data extracted, see "./DATA/qa-report.md"
-anvil_extract report --output_path ./DATA
+# Verify IG load
+export TOKEN=$(gcloud auth application-default print-access-token)
+export GOOGLE_DATASTORES=$(gcloud beta healthcare fhir-stores list --dataset=$GOOGLE_DATASET --location=$GOOGLE_LOCATION | awk '(NR>1){print $1}' | sed  's/$/,/g' | tr -d "\n")
+fhir_curl --data_store public /ImplementationGuide?_count=1 | jq .
 
 ```
 

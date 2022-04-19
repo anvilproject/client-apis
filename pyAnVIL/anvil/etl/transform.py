@@ -1,3 +1,4 @@
+import os
 import click
 from anvil.etl.transformers.normalizer import ontologies, _recursive_default_dict, fetch_workspace_names, \
     write_workspace
@@ -43,11 +44,11 @@ def _print_analysis(output_path, consortium, workspace, details, validate_bucket
     if analysis == {}:
         logger.error(('no.analysis', workspace))
         return
+    logger.info(f"working on {workspace}")
     _json = json.dumps(analysis[consortium][workspace], separators=(',', ':'))
     with open(file_name, "a") as output_stream:
         output_stream.write(_json)    
         output_stream.write('\n')    
-    logger.info(f"wrote {workspace}")
 
 
 def _consortium_from_workspace(config, workspace_name):    
@@ -63,7 +64,7 @@ def _consortium_from_workspace(config, workspace_name):
 @transform.command(name='analyze')
 @click.option('--consortium', default=None, help='Filter, only this consortium.')
 @click.option('--workspace', default=None, help='Filter, only this workspace.')
-@click.option('--details', default=False, help='Include error details.', show_default=True, is_flag=True)
+@click.option('--details', default=True, help='Include error details.', show_default=True, is_flag=True)
 @click.option('--validate_buckets/--no-validate_buckets', default=True, help='Check gs:// urls against bucket contents.', show_default=True)
 @click.pass_context
 def _analyze(ctx, consortium, workspace, details, validate_buckets):
@@ -108,6 +109,9 @@ def _fhir(ctx, consortium, workspace, validate_buckets, details):
     else:
         workspace_names = fetch_workspace_names(ctx.obj['output_path'], requested_consortium_name=consortium, workspace_name=workspace)
 
-    with Pool(maxtasksperchild=1) as pool:
-        for consortium_name, workspace_name in workspace_names:
-            pool.starmap(_fhir_transform, [(workspace_name, ctx.obj['output_path'], ctx.obj['config'], validate_buckets, details,)])
+    # with Pool(maxtasksperchild=1) as pool:
+    #     for consortium_name, workspace_name in workspace_names:
+    #         pool.starmap(_fhir_transform, [(workspace_name, ctx.obj['output_path'], ctx.obj['config'], validate_buckets, details,)])
+
+    for consortium_name, workspace_name in workspace_names:
+        _fhir_transform(workspace_name, ctx.obj['output_path'], ctx.obj['config'], validate_buckets, details,)

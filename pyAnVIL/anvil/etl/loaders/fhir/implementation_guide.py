@@ -1,6 +1,8 @@
 import json
 import os
 
+import requests
+
 from anvil.etl.utilities.shell_helper import run_cmd
 
 import click
@@ -65,7 +67,7 @@ def create(ctx):
     json.dump(ig, open(ig_path, 'w'), separators=(',', ':'))
 
     move_ig_to_bucket = """
-    gsutil -m cp -J -r $OUTPUT_PATH/fhir/IG    gs://$GOOGLE_BUCKET/fhir/IG   
+    gsutil -m cp -J -r $OUTPUT_PATH/fhir/IG    gs://$GOOGLE_BUCKET/fhir
     # also need to include all dependencies
     curl -s http://hl7.org/fhir/us/core/STU3.1.1/ImplementationGuide-hl7.fhir.us.core.json | gsutil cp - gs://$GOOGLE_BUCKET/IG/ImplementationGuide-hl7.fhir.us.core.json
 
@@ -91,3 +93,46 @@ def delete(ctx):
     gsutil -m rm -r  gs://$GOOGLE_BUCKET/fhir/IG 
     """
     run_cmd(delete_script)
+
+
+def _enable_ig(ctx, data_store, token):
+    """Enable IG in datastores"""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8"
+    }
+    project = os.environ['GOOGLE_PROJECT']
+    location = os.environ['GOOGLE_LOCATION']
+    data_set = os.environ['GOOGLE_DATASET']
+    url = f"https://healthcare.googleapis.com/v1beta1/projects/{project}/locations/{location}/datasets/{data_set}/fhirStores/{data_store}?updateMask=validationConfig"
+    response = requests.patch(
+        url=url,
+        headers=headers,
+        json={
+            "validationConfig": {
+                "enabledImplementationGuides": ["https://ncpi-fhir.github.io/ncpi-fhir-ig/ImplementationGuide/NCPI-FHIR-Implementation-Guide"]
+            }
+        }
+    )
+    if response.status_code == 200:
+        logger.info(f"IG enabled on {data_store}")
+    else:
+        logger.info(("could.not.enable.ig", data_store, response.status_code, response.text))
+
+
+def _get_ig(ctx, data_store, token):
+    """Get IG info"""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json; charset=utf-8"
+    }
+    project = os.environ['GOOGLE_PROJECT']
+    location = os.environ['GOOGLE_LOCATION']
+    data_set = os.environ['GOOGLE_DATASET']
+    url = f"https://healthcare.googleapis.com/v1beta1/projects/{project}/locations/{location}/datasets/{data_set}/fhirStores/{data_store}"
+    response = requests.get(
+        url=url,
+        headers=headers,
+    )
+    response.raise_for_status()
+    return response.json()

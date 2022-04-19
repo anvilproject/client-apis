@@ -137,8 +137,11 @@ def _normalize_workspace(consortium_name, workspace, config, entities, output_pa
 
 def ontologies(output_path, consortium_name, workspace_name, details):
     """Determine if there are any fields that are ontologies in workspace."""
-    for workspace_name in fetch_workspace_names(output_path=output_path, requested_consortium_name=consortium_name, workspace_name=workspace_name):
-        yield [ontology_field for ontology_field in _extract_ontology_fields(output_path=output_path, workspace_name=workspace_name)]
+    for _consortium_name, _workspace_name in fetch_workspace_names(output_path=output_path,
+                                                    requested_consortium_name=consortium_name,
+                                                    workspace_name=workspace_name):
+        yield [ontology_field for ontology_field in
+               _extract_ontology_fields(output_path=output_path, workspace_name=_workspace_name)]
 
 
 def get_pickled_workspace(output_path, consortium_name, workspace_name):
@@ -179,7 +182,6 @@ def analyze(output_path, consortium_name, workspace_name, details, validate_buck
         family_relationship_items = {}
         files = {}
         data_store_name = "None"
-        
 
         for p in workspace.patients.values():
             patient_count += 1
@@ -214,15 +216,17 @@ def analyze(output_path, consortium_name, workspace_name, details, validate_buck
                                     uniq_documents.add(blob['url'])
                                     extension = blob['url'].split('/')[-1].replace('.gz', '').split('.')[-1]
                                     if extension not in files:
-                                        files[extension] = {'size': 0, 'count': 0}
+                                        files[extension] = {'size': 0, 'count': 0, 'drs_count': 0}
                                     files[extension]['size'] += int(blob.get('size', 0))
                                     files[extension]['count'] += 1
+                                    if 'drs_uri' in blob and blob['drs_uri']:
+                                        files[extension]['drs_count'] += 1
 
         # xform to a list
         for k, v in phenotype_values.items():
-            phenotype_values[k] = sorted(v)
+            phenotype_values[k] = sorted(list(v))
         for k, v in disease_values.items():
-            disease_values[k] = sorted(v)
+            disease_values[k] = sorted(list(v))
 
         G[consortium_name][workspace.workspace.name]['consortium'] = consortium_name
         G[consortium_name][workspace.workspace.name]['workspace'] = workspace.workspace.name
@@ -237,11 +241,23 @@ def analyze(output_path, consortium_name, workspace_name, details, validate_buck
         G[consortium_name][workspace.workspace.name]['documents_size'] = documents_size
         G[consortium_name][workspace.workspace.name]['files'] = files
         G[consortium_name][workspace.workspace.name]['data_store_name'] = ensure_data_store_name(workspace)
+        G[consortium_name][workspace.workspace.name]['indication'] = None
+        if 'tracker' in workspace and workspace['tracker']:
+            G[consortium_name][workspace.workspace.name]['indication'] = workspace['tracker']["library:indication"]
 
         error_count = 0
         for error_name, entries in workspace.errors.items():
             error_count += len(entries)
             if details:
+                try:
+                    json.dumps(entries)
+                except Exception as e:
+                    import pprint
+                    from itertools import islice
+                    iterator = islice(entries, 10)
+                    pp = pprint.PrettyPrinter(depth=10)
+                    pp.pprint((workspace.workspace.name, [e for e in iterator]))
+                    raise e
                 G[consortium_name][workspace.workspace.name]['errors'][error_name] = entries
             else:
                 G[consortium_name][workspace.workspace.name]['errors'][error_name] = len(entries)
@@ -253,6 +269,7 @@ def analyze(output_path, consortium_name, workspace_name, details, validate_buck
 def qa(output_path, consortium_name, workspace_name, config):
     """Produce a QA report."""
     pass
+
 
 def fetch_workspace_names(output_path, requested_consortium_name, workspace_name):
     """Query db and return workspace names."""

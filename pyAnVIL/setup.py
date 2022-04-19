@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.13rc7',  # Required
+    version='0.0.13rc13',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -140,7 +140,8 @@ setup(
         'fastavro==1.2.0',
         'tabulate==0.8.9',
         'gspread==5.2.0',
-        'oauth2client==4.1.3'
+        'oauth2client==4.1.3',
+        'click_loglevel==0.4.0.post1'
     ],
 
     # List additional groups of dependencies here (e.g. development

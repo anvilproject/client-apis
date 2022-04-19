@@ -1,4 +1,5 @@
 import logging
+import sys
 from collections import defaultdict
 
 
@@ -24,8 +25,10 @@ class LogCapture(logging.Logger):
 
 
 logger = LogCapture()
-assert len(logging.root.handlers) > 0, "Please initialize logging."
-logger.addHandler(logging.root.handlers[0])
+if len(logging.root.handlers) == 0:
+    print("Please initialize logging.",  file=sys.stderr)
+else:
+    logger.addHandler(logging.root.handlers[0])
 
 
 def _recursive_default_dict():

@@ -21,7 +21,7 @@ def create_dataset(ctx, data_set):
         gcloud healthcare datasets list --location=$GOOGLE_LOCATION | grep $GOOGLE_DATASET
     """
     check_results = run_cmd(check_script)
-    if data_set in check_results:
+    if check_results and data_set in check_results:
         logger.info(f"{data_set} already exists")
         return
     create_script = """
