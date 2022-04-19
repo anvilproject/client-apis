@@ -1,0 +1,242 @@
+consortiums:
+  CCDG:
+    workspaces: 'AnVIL_CCDG_.*'
+    entities:
+      FamilyRelationship:
+        aliases:
+        - family
+      Patient:
+        aliases:
+        - subject
+        - participant
+        - pfb:subject
+      Specimen:
+        aliases:
+        - sample
+        - sample_set
+        - qc_result_sample
+      Task:
+        aliases:
+        - sequencing
+        - discovery
+  CMG:
+    workspaces: 'AnVIL_CMG_.*'
+    entities:
+      FamilyRelationship:
+        aliases:
+        - family
+      Patient:
+        aliases:
+        - subject
+        - participant
+      Specimen:
+        aliases:
+        - sample
+      Task:
+        aliases:
+        - sequencing
+        - discovery
+  GTEx:
+    workspaces: '^AnVIL_GTEx_V8_hg38$'
+    entities:
+      Patient:
+        aliases:
+        - participant
+      Specimen:
+        aliases:
+        - sample
+  NHGRI:
+    workspaces: '^AnVIL_NHGRI'
+    entities:
+      Patient:
+        aliases:
+        - participant
+      Specimen:
+        aliases:
+        - sample
+  NIMH:
+    workspaces: '^AnVIL_NIMH'
+    entities:
+      Patient:
+        aliases:
+        - subject
+        - participant
+      Specimen:
+        aliases:
+        - sample
+      Task:
+        aliases:
+        - sequencing
+  Public:
+    workspaces: '^1000G-high-coverage-2019-DEV_ONLY$'
+    entities:
+      FamilyRelationship:
+        aliases:
+        - pedigree
+      Patient:
+        aliases:
+        - participant
+      Specimen:
+        aliases:
+        - sample
+
+mapping:
+  family_relationships:
+    terms:
+      # exact match relationship in submitted data mapped to https://terminology.hl7.org/3.1.0/CodeSystem-v3-RoleCode.html
+      exact_match:
+        _not_related_: NOTRELATED
+        _other_: EXT
+        affected father: FTH
+        aunt: AUNT
+        brother: BRO
+        brother or sister: SIB
+        brother or sister-in-law: INLAW
+        child: CHILD
+        cousin: COUSN
+        daughter: DAU
+        father: FTH
+        grandfather: GRFTH
+        grandmother: GRMTH
+        half-sib: HSIB
+        husband: HUSB
+        inlaw: INLAW
+        maternal grandparent: MGRPRN
+        mother: MTH
+        nephew or niece: NIENEPH
+        other: EXT
+        parent: PRN
+        paternal aunt: PAUNT
+        paternal grandfather: PGRFTH
+        paternal grandparent: PGRPRN
+        paternal uncle: PUNCLE
+        proband: ONESELF
+        affected: ONESELF
+        affected1: ONESELF
+        affected2: ONESELF
+        self: ONESELF
+        proband (twin): ONESELF
+        sibling: SIB
+        sister: SIS
+        son: SON
+        son or daughter: CHILD
+        spouse: SPS
+        twin: TWIN
+        twin brother: TWINBRO
+        twin sister: TWINSIS
+        uncle: UNCLE
+        wife: WIFE
+        granddaughter: GRNDDAU
+        grandson: GRNDSON
+        nephew: NEPHEW
+        niece: NIECE
+        step father: STPFTH
+        maternal uncle: MUNCLE
+        materal uncle: MUNCLE
+        maternal aunt: MAUNT
+        maternal great uncle: EXT
+        married-in: EXT
+        grandchild: GRNDCHILD
+        niece's child: EXT
+        distant relative: EXT
+      # any occurrence of string in relationship in submitted data mapped to
+      occurrence:
+        other: EXT
+        in law: INLAW
+        cousin: COUSN
+        husband or wife: SPS
+        son or daughter: SIB
+        aunt or uncle: EXT
+        identical twin of proband: TWIN
+        father1: FTH
+        father2: FTH
+        sister2: SIS
+        unaffected sibling: SIB
+        not related: NOTRELATED
+        unknown: NOTRELATED
+        twin: TWIN
+        half: HSIB
+        sibling: SIB 
+        daughter: DAU
+
+    intra_family:
+      # family relationships 
+      pairs:
+        # focus and subject family_roles compared to these arrays
+        CHILD:
+          -
+            - SIS
+            - FTH
+        PRN:
+          -
+            - FTH
+            - SIS
+        SPS:
+          # father and mother are spouses
+          -
+            - FTH
+            - MTH
+          -
+            - PRN
+            - PRN            
+          # So are grandparents
+          -
+            - MGRPRN
+            - MGRPRN
+          -
+            - PGRPRN
+            - PGRPRN
+        SIS:
+          # two aunts are sisters
+          -
+            - MAUNT
+            - MAUNT
+        COUSN:
+          -
+            - CHILD
+            - NIENEPH
+          -
+            - SIB
+            - NIENEPH
+          -
+            - COUSN
+            - SIB
+        EXT:
+          # two niece/nephew are extended
+          -
+            - NIENEPH
+            - NIENEPH
+          # so are maternal / paternal g parents  
+          -
+            - MGRPRN
+            - PGRPRN
+          -
+            - COUSN
+            - COUSN
+          -
+            - PUNCLE
+            - SIB
+          -
+            - SIB                      
+            - PUNCLE            
+        SIB:
+          # two siblings are siblings
+          -
+            - SIB
+            - SIB
+          -
+            - FTH
+            - PUNCLE
+          -
+            - PUNCLE
+            - FTH
+      rules:
+        # One liners that resolve to True or False. Eval locals contain dicts 'focus' and 'subject'
+        CHILD:
+          - focus['family_role'] in ['FTH', 'MTH', 'PRN', 'SPS'] and subject['family_role'] in ['SIB', 'CHILD']
+        PRN:
+          - subject['family_role'] in ['FTH', 'MTH', 'PRN', 'SPS'] and focus['family_role'] in ['SIB', 'CHILD']
+        EXT:
+          - len(set(['EXT', 'NIENEPH', 'MGRPRN', 'PGRPRN', 'COUSN']) & set([focus['family_role'], subject['family_role']])) > 0
+        NOTRELATED:
+          - len(set(['NOTRELATED']) & set([focus['family_role'], subject['family_role']])) > 0

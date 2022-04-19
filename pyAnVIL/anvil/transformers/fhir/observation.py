@@ -2,7 +2,7 @@
 
 from anvil.transformers.fhir import make_identifier
 import logging
-from anvil.transformers.fhir.disease_normalizer import disease_text, disease_system
+from anvil.transformers.fhir.disease_normalizer import ontology_text, disease_system
 from anvil.transformers.fhir import CANONICAL
 from anvil.transformers.fhir.patient import Patient
 from anvil.transformers.fhir import make_id
@@ -29,7 +29,7 @@ class DiseaseObservation:
         if ":" not in disease:
             disease = f"OMIM:{disease}"
         workspace_diseaseOntologyId = disease  # subject.workspace_diseaseOntologyId
-        diseaseOntologyText = disease_text.get(disease, None)
+        diseaseOntologyText = ontology_text.get(disease, None)
         diseaseOntologySystem = disease_system.get(disease.split(':')[0], None)
         workspace_diseaseOntologyId = disease.split(':')[1]
         slug = DiseaseObservation.slug(subject, workspace_diseaseOntologyId)

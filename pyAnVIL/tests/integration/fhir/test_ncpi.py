@@ -1,5 +1,7 @@
+from collections import defaultdict
 import os
 import pytest
+import json
 
 from anvil.clients.fhir_client import DispatchingFHIRClient
 from anvil.clients.smart_auth import KidsFirstFHIRAuth, GoogleFHIRAuth
@@ -10,8 +12,10 @@ from fhirclient.models.practitioner  import Practitioner
 from fhirclient.models.researchsubject  import ResearchSubject
 from fhirclient.models.patient  import Patient
 from fhirclient.models.bundle  import Bundle
+from urllib.parse import urlparse
 
 import logging
+
 
 @pytest.fixture
 def token():
@@ -42,6 +46,7 @@ def anvil_server(token):
 def kids_first_server(kids_first_cookie):
     """Create FHIRClient for Kids First server. 
     :param kids_first_cookie: AWSELBAuthSessionCookie cookie captured from browser after login to https://kf-api-fhir-service.kidsfirstdrc.org"""
+
     settings = {
         'app_id': __name__,
         'api_bases': ['https://kf-api-fhir-service.kidsfirstdrc.org']
@@ -89,11 +94,12 @@ def anvil_research_studies_with_observations(anvil_server, search_research_studi
 
 
 @pytest.fixture
-def kids_first_research_studies_with_observations(kids_first_server, search_research_studies_with_observations):
+def kids_first_research_studies_with_observations(caplog, kids_first_server, search_research_studies_with_observations):
     """
     Perform search on kids_first_server.
     :return: List of resources
     """
+    # caplog.set_level(logging.DEBUG)
     return search_research_studies_with_observations.perform_resources(kids_first_server.server)
 
 @pytest.fixture
@@ -158,7 +164,7 @@ def _validate_ResearchStudy_Condition(research_studies_with_observations):
     # for k in research_studies_missing_condition:
     #     from pprint import pprint
     #     pprint(research_studies_missing_condition[k].as_json())
-    #     break
+    #     break```
     assert len(research_studies_missing_condition) == 0, f"{len(research_studies_missing_condition)} of {len(research_studies)} ResearchStudies missing Condition codeable concept\n{research_studies_missing_condition.keys()}"
 
 
@@ -217,47 +223,137 @@ def test_dbGapResearchStudy_Focus(dbgap_research_studies_with_observations):
     _validate_ResearchStudy_Focus(dbgap_research_studies_with_observations)
 
 
-def _validateResearchStudy_Source(research_studies_with_observations):
-    research_studies = {r.relativePath():r for r in research_studies_with_observations if r.__class__.__name__ == 'ResearchStudy'}
-    for research_study in research_studies.values():
-        print(research_study.id, research_study.meta.source)
-    assert False
-
-
-def test_dbGapResearchStudy_Source(dbgap_research_studies_with_observations):
-    """All ResearchStudies should have a valid source"""
-    _validateResearchStudy_Source(dbgap_research_studies_with_observations)
-
-
-def test_AnvilResearchStudy_Source(anvil_research_studies_with_observations):
-    """All ResearchStudies should have a valid source"""
-    _validateResearchStudy_Source(anvil_research_studies_with_observations)
-
-
 def search_research_study_with_subjects(_id):
     """Search clause for all ResearchStudy with Observation"""
     return ResearchStudy.where(struct={'_id': _id}).include('study', ResearchSubject, reverse=True)
 
 
-def test_kids_first_research_study_with_subjects(kids_first_server, kids_first_research_studies_with_observations):
-    """
-    Perform search on aggregated_server.
-    :return: List of resources
-    """
+def _validate_patient_everything(caplog, fhir_client, research_studies_with_observations):
+    assert research_studies_with_observations, 'Should be non-null'
+    assert len(research_studies_with_observations) > 0, 'Should have at least one ResearchStudy'
     # pick the first ResearchStudy
-    research_studies = {r.relativePath():r for r in kids_first_research_studies_with_observations if r.__class__.__name__ == 'ResearchStudy'}
+    research_studies = {r.relativePath():r for r in research_studies_with_observations if r.__class__.__name__ == 'ResearchStudy'}
     research_study = list(research_studies.values())[0]
     # get the list of subjects, extract Patient ids
-    study_with_subjects = search_research_study_with_subjects(research_study.id).perform_resources(kids_first_server.server)
+    study_with_subjects = search_research_study_with_subjects(research_study.id).perform_resources(fhir_client.server)
     subjects = {r.relativePath():r for r in study_with_subjects if r.__class__.__name__ == 'ResearchSubject'}
     patient_ids = [subjects[s].individual.reference.split('/')[-1] for s in subjects]
-    patients = []
+    patient_bundles = []
+    caplog.set_level(logging.DEBUG)
+    desired_types = ['ResearchStudy', 'ResearchSubject', 'Patient','Specimen', 'Task', 'DocumentReference']
+    # KF: ['Patient', 'DocumentReference', 'Specimen', 'ResearchSubject', 'ResearchStudy', 'Practitioner', 'Organization', 'PractitionerRole']
+    # Anvil: ['Patient', 'DocumentReference', 'Specimen', 'ResearchSubject']
+
     for patient_id in patient_ids:
-        patients.append(Bundle.read_from(f"Patient/{patient_id}/$everything", kids_first_server.server))
-    print(patients[0].as_json())
-    assert False
+        print(patient_id)
+        patient_bundles.append(Bundle.read_from(f"Patient/{patient_id}/$everything?_type={','.join(desired_types)}", fhir_client.server))
+        break
+    resource_counts = {}
+    for patient_bundle in patient_bundles:
+        resource_counts = defaultdict(int)
+        for entry in patient_bundle.entry:
+            resource_counts[entry.resource.resource_type] += 1
+    for resource_type in desired_types:
+        assert resource_type in resource_counts, f"{resource_type} should be in $everything {resource_counts}"
+    return resource_counts
+
+def test_kids_first_patient_everything(caplog, kids_first_server, kids_first_research_studies_with_observations):
+    """
+    Test that a Patient/XXX/$everything returns a set of resources.
+    """
+    resource_counts = _validate_patient_everything(caplog, kids_first_server, kids_first_research_studies_with_observations)
+    assert False, resource_counts
 
 
-# 'https://kf-api-fhir-service.kidsfirstdrc.org/ResearchStudy?_id=76758&_revinclude=ResearchSubject:study&_summary=text'
-# 'https://kf-api-fhir-service.kidsfirstdrc.org/Patient/21953/$everything?_summary=text'
+def test_anvil_first_patient_everything(caplog, anvil_server, anvil_research_studies_with_observations):
+    """
+    Test that a Patient/XXX/$everything returns a set of resources.
+    """
+    research_studies = {r.relativePath():r for r in anvil_research_studies_with_observations if r.__class__.__name__ == 'ResearchStudy'}    
+    resource_counts = _validate_patient_everything(caplog, anvil_server, [research_studies['ResearchStudy/1000G-high-coverage-2019']])
+    assert False, resource_counts
+
+def search_research_subjects_with_patients(study_id):
+    """Search clause for all ResearchStudy with Observation"""
+    return ResearchSubject.where(struct={'study':f'ResearchStudy/{study_id}'}).include('individual').include('study')
+
+
+def validate_research_subjects_with_patients(caplog, search, fhir_client):
+    """
+    Test search on client.server
+    """
+    from collections import defaultdict
+    # caplog.set_level(logging.DEBUG)
+    research_subjects_with_patients = search.perform_resources(fhir_client.server)
+    resource_types = defaultdict(int)
+    for r in research_subjects_with_patients:
+        resource_types[r.resource_type] += 1
+    assert resource_types['ResearchSubject'] > 1, f"Should have at least one ResearchSubject f{resource_types}"
+    assert resource_types['ResearchSubject'] == resource_types['Patient'], f"Should have equal number of patients and subjects f{resource_types}"
+    for r in research_subjects_with_patients:
+        if r.resource_type == 'ResearchStudy':
+            print(r.id)
+    assert resource_types['ResearchStudy'] > 1, f"Should have at least one ResearchStudy f{resource_types}"
+
+
+def test_dbgap_research_subjects_with_patients(caplog, dbgap_server):
+    """
+    Test search on dbgap_server.
+    """
+    validate_research_subjects_with_patients(caplog, search_research_subjects_with_patients('phs002409'), dbgap_server)
+
+
+def test_kf_research_subjects_with_patients(caplog, kids_first_server):
+    """
+    Test search on dbgap_server.
+    """
+    validate_research_subjects_with_patients(caplog, search_research_subjects_with_patients('281300'), kids_first_server)
+
+
+def test_anvil_research_subjects_with_patients(caplog, anvil_server):
+    """
+    Test ResearchStudy search on anvil
+    """
+    validate_research_subjects_with_patients(caplog, search_research_subjects_with_patients('1000G-high-coverage-2019'), anvil_server)
+
+
+def _validateResearchStudy_tag_fullUrl(research_studies_with_observations):
+    """Validate .meta.tag has a fullUrl code."""
+    research_studies = {r.relativePath():r for r in research_studies_with_observations if r.__class__.__name__ == 'ResearchStudy'}    
+    for research_study in research_studies.values():
+        has_fullUrl_tag = False
+        for tag in research_study.meta.tag:
+            if tag['system'] != "https://nih-ncpi.github.io/ncpi-fhir-ig/#fullUrl":
+                continue
+            url_parts = urlparse(tag['code'])
+            assert all([url_parts.scheme, url_parts.netloc]), f"{tag} code should be a valid url"
+            has_fullUrl_tag = True
+        assert has_fullUrl_tag, f"Should contain fullURL tag {research_study.meta.tags}"
+
+
+def test_dbGapResearchStudy_tag_fullUrl(dbgap_research_studies_with_observations):
+    """All ResearchStudies should have a valid source"""
+    _validateResearchStudy_tag_fullUrl(dbgap_research_studies_with_observations)
+
+
+def test_AnvilResearchStudy_tag_fullUrl(anvil_research_studies_with_observations):
+    """All ResearchStudies should have a valid source"""
+    _validateResearchStudy_tag_fullUrl(anvil_research_studies_with_observations)
+
+
+def test_KidsFirstResearchStudy_tag_fullUrl(kids_first_research_studies_with_observations):
+    """All ResearchStudies should have a valid source"""
+    _validateResearchStudy_tag_fullUrl(kids_first_research_studies_with_observations)
+
+
+def test_AllResearchStudy_tag_fullUrl(all_research_studies_with_observations):
+    """All ResearchStudies should have a url source, used to disambiguate combined results."""
+    research_studies = [r for r in all_research_studies_with_observations if r.__class__.__name__ == 'ResearchStudy']
+    sources = defaultdict(int)
+    for research_study in research_studies:
+        url_parts = urlparse(research_study.meta.source)
+        assert all([url_parts.scheme, url_parts.netloc]), f"{research_study.meta.source} should be a valid url"
+        sources[url_parts.netloc] += 1
+    assert len(sources) > 1, f"Should have more than one source in a combined result {sources}"
+ 
 

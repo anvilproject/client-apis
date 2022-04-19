@@ -52,7 +52,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.11rc6',  # Required
+    version='0.0.13rc13',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
@@ -135,10 +135,13 @@ setup(
         'xmltodict==0.12.0',
         'Click==7.1.2',
         'attrdict==2.0.1',
-        'google-cloud-storage==1.42.3',
+        'google-cloud-storage==2.0.0',
         'google-cloud-core==2.0.0',
         'fastavro==1.2.0',
-        'tabulate',
+        'tabulate==0.8.9',
+        'gspread==5.2.0',
+        'oauth2client==4.1.3',
+        'click_loglevel==0.4.0.post1'
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -159,9 +162,9 @@ setup(
     #
     # If using Python 2.6 or earlier, then these have to be included in
     # MANIFEST.in as well.
-    # package_data={  # Optional
-    #     'sample': ['package_data.dat'],
-    # },
+    package_data={  # Optional
+        '': ['*.yaml'],
+    },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
@@ -191,9 +194,11 @@ setup(
     #     ],
     # },
     scripts="""
+        bin/anvil_etl
         bin/fhir_curl
-        bin/anvil_extract
-        bin/anvil_transform
+        bin/fhir_env
+        bin/fhir_setup
+        bin/fhir_load        
     """.split(),
     include_package_data=True,
 

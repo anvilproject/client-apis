@@ -30,3 +30,6 @@ fastavro==1.2.0
 
 ## markdown table generator
 tabulate
+
+# read google spreadsheet
+gspread

@@ -190,7 +190,7 @@ class DispatchingFHIRClient(client.FHIRClient):
                                 result.origin_server = server
                         else:
                             result = None
-                    logger.debug(f"worker done {result}")
+                    logger.debug(f"worker done {result.as_json()}")
 
                 logger.debug("starting threads")
                 workers = []

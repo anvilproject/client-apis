@@ -11,7 +11,7 @@ from datetime import datetime
 from anvil.terra.api import get_entities, get_schema
 from anvil.terra.subject import subject_factory
 from anvil.terra.sample import sample_factory
-
+import json
 
 def _blobs(bucket_name, user_project, workspace_id):
     """Retrieve all blobs in terra bucket associated with workspace, dict keyed by object url.
@@ -44,7 +44,7 @@ def _blobs(bucket_name, user_project, workspace_id):
 class Workspace():
     """Represent terra workspace."""
 
-    def __init__(self, *args, user_project=None, drs_file_path=None):
+    def __init__(self, *args, user_project=None, drs_file_path=None, data_ingestion_tracker=None):
         """Pass all args to AttrDict, set id for cacheing."""
         self.attributes = AttrDict(*args)
         assert user_project, "Must have user_project"
@@ -60,6 +60,8 @@ class Workspace():
         self.missing_sequence = False
         self.drs_file_path = drs_file_path
         self._already_logged = []
+        self.data_ingestion_tracker_path = data_ingestion_tracker
+        self._data_ingestion_tracker = None
 
     @property
     def subjects(self):
@@ -294,7 +296,9 @@ class Workspace():
             'missing_project_files': self.missing_project_files is not None,
             'missing_subjects': self.missing_subjects,
             'missing_schema': self.schemas is None or len(self.schemas.keys()) == 0,
-            'missing_sequence': self.missing_sequence
+            'missing_sequence': self.missing_sequence,
+            'missing_diseaseOntology': self.diseaseOntologyId is None,
+            'missing_fromSpreadSheet': self.data_ingestion_tracker_attributes is None,
         })
 
     @property
@@ -319,6 +323,7 @@ class Workspace():
                 },
             ],
             'size': sum([f['size']for f in self.files.values()]),
+            'disease_ontology_id': self.diseaseOntologyId,
             'project_id': self.name,
             'public': self.attributes['public'],
             'createdDate': self.attributes.workspace.createdDate,
@@ -352,13 +357,28 @@ class Workspace():
         return _institute
 
     @property
+    def data_ingestion_tracker_attributes(self):
+        if self._data_ingestion_tracker:
+            return self._data_ingestion_tracker
+        rows = json.load(open(self.data_ingestion_tracker_path))
+        for row in rows:
+            if row['workspace_name'] == self.name:
+                self._data_ingestion_tracker = row
+        if not self._data_ingestion_tracker and 'missing_fromSpreadSheet' not in self._already_logged:        
+            logging.getLogger(__name__).error(f"data_ingestion_tracker_attributes missing from spreadsheet {self.name} (supressing error for this workspace)")
+            self._already_logged.append('missing_fromSpreadSheet')
+        return self._data_ingestion_tracker
+
+    @property
     def diseaseOntologyId(self):
         """Deduce disease."""
         _diseaseOntologyID = self.attributes.workspace.attributes.get('diseaseOntologyID', None)
         if not _diseaseOntologyID:
             _diseaseOntologyID = self.attributes.workspace.attributes.get('library:diseaseOntologyID', None)
+        if not _diseaseOntologyID and self.data_ingestion_tracker_attributes:
+            _diseaseOntologyID = self.data_ingestion_tracker_attributes['diseaseOntologyId']
         if _diseaseOntologyID:
-            _diseaseOntologyID = _diseaseOntologyID.split('/')[-1].replace('_', ':')
+            _diseaseOntologyID = _diseaseOntologyID.split('/')[-1].replace('_', ':')            
         else:
             logging.debug(f"{self.id} missing diseaseOntologyID")
         return _diseaseOntologyID

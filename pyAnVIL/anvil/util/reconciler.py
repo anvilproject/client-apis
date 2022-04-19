@@ -24,10 +24,10 @@ DEFAULT_CONSORTIUMS = (
 DEFAULT_OUTPUT_PATH = os.environ.get('OUTPUT_PATH', '/tmp')
 
 
-def reconcile(name, user_project, namespace, workspace_regex, drs_file_path=None, terra_output_path=None):
+def reconcile(name, user_project, namespace, workspace_regex, drs_file_path=None, terra_output_path=None, data_ingestion_tracker=None):
     """Run a reconciler on a set of workspaces, ."""
     logger = logging.getLogger('anvil.util.reconciler')
-    reconciler = Reconciler(name, user_project, namespace, workspace_regex, drs_file_path, terra_output_path)
+    reconciler = Reconciler(name, user_project, namespace, workspace_regex, drs_file_path, terra_output_path, data_ingestion_tracker)
     reconciler.save()
     reconciled_schemas = reconciler.reconcile_schemas()
     reconciled_schemas['name'] = name
@@ -51,14 +51,14 @@ def reconcile(name, user_project, namespace, workspace_regex, drs_file_path=None
     yield reconciled_schemas
 
 
-def aggregate(namespace, user_project, consortium, drs_file_path=None, terra_output_path=None):
+def aggregate(namespace, user_project, consortium, drs_file_path=None, terra_output_path=None, data_ingestion_tracker=None):
     """Run a series of reconciliations."""
     def counts_factory():
         return {'expected_sample_count': 0, 'actual_sample_count': 0, 'problems': []}
     accessions = defaultdict(counts_factory)
     assert drs_file_path
     for name, workspace_regex in consortium:
-        for view in reconcile(name, user_project, namespace, workspace_regex, drs_file_path, terra_output_path):
+        for view in reconcile(name, user_project, namespace, workspace_regex, drs_file_path, terra_output_path, data_ingestion_tracker):
             if 'qualified_accession' in view:
                 accessions[view['qualified_accession']]['expected_sample_count'] = view['dbgap_sample_count']
                 accessions[view['qualified_accession']]['actual_sample_count'] += [n for n in view['nodes'] if n['type'] == 'Samples'][0]['count']
@@ -102,6 +102,7 @@ def flatten(aggregations):
             file_sizes[file_types.index(f['type'])] = f['size']
         flat.extend(file_sizes)
         flat.append(p.get('size', 0))
+        flat.append(p.get('disease_ontology_id', None))
 
         node_counts = [''] * len(node_types)
         for n in p.get('nodes', []):
@@ -115,4 +116,4 @@ def flatten(aggregations):
 
         flattened.append(flat)
 
-    return flattened, ['source', 'workspace', 'accession'] + file_types + ['size'] + node_types + problem_types
+    return flattened, ['source', 'workspace', 'accession'] + file_types + ['size', 'disease_ontology_id'] + node_types + problem_types

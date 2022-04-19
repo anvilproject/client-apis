@@ -6,12 +6,17 @@
 # create dir
 mkdir -p  $OUTPUT_PATH/IG
 cd $OUTPUT_PATH/IG
+pwd
 # clean up old
 rm *.json
 rm *.internals
-# copy from IG build
-unzip ../../../fhir/ncpi-fhir-ig/output/definitions.json.zip
-unzip ../../../fhir/ncpi-fhir-ig/output/expansions.json.zip
+# download IG
+
+curl https://nih-ncpi.github.io/ncpi-fhir-ig/definitions.json.zip --output $OUTPUT_PATH/definitions.json.zip 
+curl https://nih-ncpi.github.io/ncpi-fhir-ig/expansions.json.zip --output $OUTPUT_PATH/expansions.json.zip 
+
+unzip $OUTPUT_PATH/definitions.json.zip
+unzip $OUTPUT_PATHexpansions.json.zip
 # delete extraneous
 rm *.internals
 # configure for google

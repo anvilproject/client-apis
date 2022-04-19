@@ -51,15 +51,22 @@ def download_projects():
             yield {keys[i]: normalize_value(v) for i, v in enumerate(lst)}
 
 
-def data_ingestion_tracker(output_path):
+def write(output_path):
     """Read spreadsheet, write to json file."""
-    abbreviated_projects = [
-        {'workspace_name': p['name'],
-         'study_accession': p['phsId'],
-         'dataUseRestriction': p['library:dataUseRestriction'],
-         'indication': p['library:indication']} for p in list(download_projects())]
+    # abbreviated_projects = [
+    #     {'workspace_name': p['name'],
+    #      'study_accession': p['phsId'],
+    #      'dataUseRestriction': p['library:dataUseRestriction'],
+    #      'indication': p['library:indication']} for p in list(download_projects())]
+
+    abbreviated_projects = [p for p in list(download_projects())]
+    output_path = f"{output_path}/data_ingestion_tracker.json"
     with open(output_path, 'w') as fp:
         json.dump(abbreviated_projects, fp)
     logger.info(f"Read {len(abbreviated_projects)} projects from {URL}. Wrote to {output_path}")
 
 
+def read(output_path):
+    """Load json file."""
+    output_path = f"{output_path}/data_ingestion_tracker.json"
+    return json.load(open(output_path))

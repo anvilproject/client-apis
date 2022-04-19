@@ -133,6 +133,7 @@ setup(
         'Click==7.1.2',
         'google-cloud-storage==1.42.3',
         'google-cloud-core==2.0.0',
+        'click-loglevel'
         # 'fhirclient @ git+https://github.com/smart-on-fhir/client-py#egg=fhirclient'
     ],
 
@@ -193,10 +194,11 @@ setup(
         bin/anvil_transform
         bin/data_ingestion_spreadsheet
         bin/enable_implementation_guide.sh
-        bin/fhir_env.sh
+        bin/fhir_env
         bin/fhir_query
-        bin/fhir_setup.sh
+        bin/fhir_setup
         bin/fix_ig_for_google
+        bin/ig_setup.sh
         bin/load_all_data.sh
         bin/load_public_data.sh
         bin/query.sh    
