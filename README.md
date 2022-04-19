@@ -1,42 +1,63 @@
-# client-APIs
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-## name
+# client-apis
 
-theanvil/bioxyz
+## About
 
-## definition
+* Provides a single auth layer from terra to gen3
+* Wrangles diverse data from terra submissions, ingestion tracker, google buckets and gen3 into a single unified model (FHIR) 
 
-Define clients for Python, R, javascript that interact with [terra, gen3, galaxy, others]
+## Built With
 
-## goals
+* Python 3
+* Terra - [firecloud](https://github.com/broadinstitute/fiss)
+* Gen3 - [gen3](https://github.com/uc-cdis/gen3sdk-python)
+* [fhirclient](https://github.com/smart-on-fhir/client-js) 
+* [google-cloud-storage](https://github.com/googleapis/python-storage)
 
-### short term
+## Getting Started
 
-* Integrate swagger/openapi documents and individual client libraries to access [terra, gen3, others].
-* Maintain independence of micros ervices and their respective swagger/openapi documents and individual client libraries
-* Create an server side endpoint that will enable service discovery
-* Create an AnVIL specific, versioned, testable client for each of the client targets
-* Aggregate documentation, examples and cookbooks to inform developers
-* Opinionated, given multiple ways to accomplish a function, the client will support and promote one. ex: [upload/download, get data model]
+```commandline
+pip install pyAnVIL
+```
 
-### long term
+If you are running in a Terra VM 
+```commandline
+unset PIP_TARGET
+# Install our package, includes dependencies drsclient and gen3
+pip install pyAnVIL==0.0.13rc13 --user
+# Install other dependencies
+pip install fhirclient@git+https://github.com/smart-on-fhir/client-py#egg=fhirclient  --user
+# Restore original setting
+set PIP_TARGET=/home/jupyter/notebooks/packages 
+echo Please re-start jupyter kernel
+```
 
-* Enable analysis on cross project cohorts.  Cross project in that data originates from multiple non-AnVIL projects.
-* Add value to vendor libraries [google, aws]  
+## Usage
 
-### first iteration
+See pyAnVIL's [readme](pyAnVIL/README.md).
 
-* auth
-* minimum set of methods ( print version )
-* consider swagger vs. openapi (code gen capability drift ?)
-* integration tests
-* revisit package name
-* create CI against versioned data (assume we will have synthetic data)
+## Roadmap
 
-### context
+See pyAnVIL's [readme](pyAnVIL/README.md).
 
-endpoint urls:
-  * AnVIL will have a single domain hosting gen3 and terra
-  * firecloud maintains different urls per micro service.  There is one instance of each micro service (multi tenant)
-  * gen3 maintains different urls per micro service.  There is one instance of each micro service per project
-  * galaxy maintains different urls per user in AnVIL.
+## Contact
+Brian Walsh walsbr at ohsu dot edu
+
+## Contributing
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+
+## License
+
+[Apache](LICENSE)
