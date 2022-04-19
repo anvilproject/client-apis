@@ -1,5 +1,0 @@
-# retrieve the hash of the repo and the openapi document
-wget 'https://notebooks.firecloud.org/api-docs.yaml' -O input/leo.yml
-# leonardo git repo ?
-# git ls-remote https://github.com/broadinstitute/??leo?? | head -1 | cut -f1 > provenance/leo.commit
-md5sum input/leo.yml > provenance/leo.commit

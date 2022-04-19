@@ -1,6 +1,0 @@
-# retrieve the hash of the repo and the openapi document
-bin/get_indexd
-bin/get_leo
-bin/get_peregrine
-bin/get_sheepdog
-bin/get_dockstore

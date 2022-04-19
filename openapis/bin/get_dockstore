@@ -1,3 +1,0 @@
-# use github versus published 'https://dockstore.org/api/swagger.json'
-wget 'https://raw.githubusercontent.com/dockstore/dockstore/master/dockstore-webservice/src/main/resources/swagger.yaml' -O input/dockstore.yml
-git ls-remote https://github.com/dockstore/dockstore | head -1 | cut -f1 > provenance/dockstore.commit
