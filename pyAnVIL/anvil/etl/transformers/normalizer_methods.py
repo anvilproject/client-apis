@@ -8,7 +8,7 @@ from attrdict import AttrDict
 from anvil.etl.transformers import LogCapture
 from anvil.etl.utilities.entities import Entities
 
-# logger = LogCapture('anvil.etl.transformers.normalizer')
+# logger = LogCapture('anvil.etl_old.transformers.normalizer')
 # logger.addHandler(logging.root.handlers[0])
 
 # from contextvars import ContextVar

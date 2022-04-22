@@ -12,7 +12,7 @@ import pickle
 
 # from . import LogCapture
 # import logging
-# logger = LogCapture('anvil.etl.transformers.normalizer')
+# logger = LogCapture('anvil.etl_old.transformers.normalizer')
 # logger.addHandler(logging.root.handlers[0])
 
 from . import logger

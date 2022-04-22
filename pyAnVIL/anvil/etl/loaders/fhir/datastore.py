@@ -137,6 +137,14 @@ def load_data_stores(ctx):
     _log_console_link(logger)
 
 
+@data_store_cli.command(name='load-public')
+@click.pass_context
+def load_public_data_stores(ctx):
+    """Load public resources from bucket into 'public' data store."""
+    run_cmd("gcloud healthcare fhir-stores import gcs public --location=$GOOGLE_LOCATION --dataset=$GOOGLE_DATASET --content-structure=resource --async --gcs-uri=gs://$GOOGLE_BUCKET/fhir/*/*/*/public/*.ndjson")
+    _log_console_link(logger)
+
+
 @data_store_cli.command(name='delete')
 @click.pass_context
 def delete(ctx):
@@ -161,12 +169,12 @@ def delete(ctx):
 @click.option('--workspace', default=None, help='Filter, only this workspace.')
 @click.option('--token',
               default=None,
-              help='gcloud access token. if null cmd will exec `gcloud auth application-default print-access-token`',
+              envvar='TOKEN',
+              help='gcloud access token. If missing cmd  `gcloud auth application-default print-access-token`',
               show_default=True)
 @click.pass_context
 def _data_stores(ctx, consortium, workspace, token):
-    """Print server data-store info to stdout."""
-    workspace_mapping = _extract_workspace_mapping(ctx.obj['output_path'])
+    """Print server's data-stores info to stdout."""
 
     if not token:
         token = run_cmd("gcloud auth application-default print-access-token")

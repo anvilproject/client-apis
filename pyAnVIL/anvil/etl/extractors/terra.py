@@ -15,7 +15,7 @@ from collections import defaultdict
 from anvil.etl.utilities.entities import Entities
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(filename)s %(levelname)-8s %(message)s')
-logger = logging.getLogger('anvil.etl.extractors.terra')
+logger = logging.getLogger('anvil.etl_old.extractors.terra')
 
 
 # where all workspaces are kept w/in terra

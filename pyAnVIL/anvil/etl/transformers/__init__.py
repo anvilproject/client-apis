@@ -5,7 +5,7 @@ from collections import defaultdict
 
 class LogCapture(logging.Logger):
     """Capture warnings and errors in `entries`, assumes tuple is logged, entries.key = tuple[0]."""
-    def __init__(self, name='anvil-etl-transformers'):
+    def __init__(self, name='anvil-etl_old-transformers'):
         self.entries = defaultdict(list)
         super(LogCapture, self).__init__(name=name)
 
