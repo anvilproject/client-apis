@@ -16,7 +16,7 @@ def token():
 @pytest.fixture
 def kids_first_cookie():
     """AWSELBAuthSessionCookie cookie captured from https://kf-api-fhir-service.kidsfirstdrc.org browser"""
-    assert 'KIDS_FIRST_COOKIE' in os.environ
+    assert 'KIDS_FIRST_COOKIE' in os.environ, "AWSELBAuthSessionCookie cookie captured from https://kf-api-fhir-service.kidsfirstdrc.org browser"
     return os.environ['KIDS_FIRST_COOKIE']
 
 
