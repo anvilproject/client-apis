@@ -197,6 +197,9 @@ tutorial-synthetic_data_set_1                                                  1
 ###### commands
 
 ```commandline
+# setup environmental values
+source /dev/stdin <<< `anvil_etl utility env`  
+
 # normalize the data
 anvil_etl transform normalize 2> /tmp/normalize.log
 # log should list workspaces, with any warnings or errors logged without exception stack traces.
@@ -222,6 +225,18 @@ display(Markdown("./DATA/qa-report.md"))
 ###### expected results
 
 ```text
+
+export GOOGLE_PROJECT_NAME=xxx
+export GOOGLE_LOCATION=xxx
+export GOOGLE_PROJECT=xxx
+export GOOGLE_DATASET=xxx
+export TOKEN=xxx
+export GOOGLE_DATASTORES=xxx
+export GOOGLE_DATASTORE=xxx
+export GOOGLE_BUCKET=xxx
+export OUTPUT_PATH=xxx
+export IMPLEMENTATION_GUIDE_PATH=xxx
+
 
 2022-04-12 15:05:34,105 normalizer.py INFO     ('CCDG', 'anvil_ccdg_broad_ai_ibd_niddk_daly_silverberg_wes')
 2022-04-12 15:05:36,168 normalizer.py INFO     ('CCDG', 'anvil_ccdg_broad_daly_igsr_1kg_twist_gsa')
@@ -280,33 +295,18 @@ Commands:
 
 
 ```commandline
-source fhir_env fhir-test-16  us-west2 ;
-
 # create the IG, FHIR's "schema"
 anvil_etl load fhir IG create
 # create the data set and data store containers
 anvil_etl load fhir data-set create
 anvil_etl load fhir data-store create
-# load the data
+# load the data to respective stores
 anvil_etl load fhir data-store load
-
+# load all public resources into the public store
+anvil_etl load fhir data-store load-public
 ```
 
 ###### expected results
-
-```text
-
-***** env variables *****
-GOOGLE_PROJECT_NAME fhir-test-16 The root for the API, billing, buckets, etc.
-GOOGLE_BILLING_ACCOUNT XXXXX-YYYY-ZZZZZ Google Cloud Billing Accounts allow you to configure payment and track spending inGCP.
-GOOGLE_LOCATION us-west2 The physical location of the data
-GOOGLE_DATASET anvil-test Datasets are top-level containers that are used to organize and control access to your stores.
-GOOGLE_DATASTORE test A FHIR store is a data store in the Cloud Healthcare API that holds FHIR resources.
-OUTPUT_PATH ./DATA A directory on your local system, used to store work files.
-GOOGLE_PROJECT fhir-test-16-342800 The project identifier
-GOOGLE_BUCKET fhir-test-16-342800 The bucket used to store extracted FHIR files
-
-```
 
 * You can view progress at https://console.cloud.google.com/healthcare/browser/locations/us-west2/datasets/anvil-test/operations?project=fhir-test-16-342800
 
@@ -314,25 +314,27 @@ GOOGLE_BUCKET fhir-test-16-342800 The bucket used to store extracted FHIR files
 
 ##### Query
 
-###### Access
+###### Access: Permissions
 
-####### Permissions
 
-Roles are assigned at the data-set level 
+Roles are assigned at the **data set** level
+
 ![image](https://user-images.githubusercontent.com/47808/164029675-43cb8a7c-54ee-4bef-bda0-53dc90eaaf4b.png)
 
 
-and are inherited by child data-stores:
+and are inherited by child **data-stores**:
+
 ![image](https://user-images.githubusercontent.com/47808/164029728-fc59b2b9-7181-4d7a-a564-d6ec64c08469.png)
 
 
-####### REST API
+###### REST API
   * See FHIR's [Search API](https://www.hl7.org/fhir/search.html)
   * See Google's [Healthcare API conformance statement](https://cloud.google.com/healthcare-api/docs/fhir#r4)
 
-* The base url is: `https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores`
+  * The base url is: `https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores`
 
-* Append data-store to this for a complete url e.g. `public/fhir/` : https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir/
+  * Append data-store to this for a complete url e.g. `public/fhir/` : 
+> https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir/
 
 
 * Complete data-store list:
@@ -496,7 +498,7 @@ https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations
 ```
 
 
-## 
+## Contributing
 
 * Setup Environment
 
@@ -508,17 +510,16 @@ The script will set reasonable values for other environmental variables.  You ma
 
 
 ```
-$ source fhir_env fhir-test-14  us-west2
+$ source fhir_env fhir-test-16 us-west2
 ***** env variables *****
-GOOGLE_PROJECT_NAME fhir-test-14 The root for the API, billing, buckets, etc.
-GOOGLE_BILLING_ACCOUNT XXXXX-XXXXX-XXXXXX Google Cloud Billing Accounts allow you to configure payment and track spending in GCP.
-GOOGLE_LOCATION us-west1 The physical location of the data
+GOOGLE_PROJECT_NAME fhir-test-16 The root for the API, billing, buckets, etc.
+GOOGLE_BILLING_ACCOUNT XXXXXX-XXXX-XXXX Google Cloud Billing Accounts allow you to configure payment and track spending in GCP.
+GOOGLE_LOCATION us-west2 The physical location of the data
 GOOGLE_DATASET anvil-test Datasets are top-level containers that are used to organize and control access to your stores.
 GOOGLE_DATASTORE test A FHIR store is a data store in the Cloud Healthcare API that holds FHIR resources.
-GOOGLE_APPLICATION_CREDENTIALS ./XXXX.json Your google identity - used to retrieve the terra maintained spreadsheet and issue FHIR commands.
-SPREADSHEET_UUID 17VAXsRSOz9Y2K6RhYwSt2RJMxyeLtJq09M2O2kiSbRo The spreadsheet key
 OUTPUT_PATH ./DATA A directory on your local system, used to store work files.
-GOOGLE_BUCKET fhir-test A bucket that will contain you ImplementationGuide and FHIR resources
+GOOGLE_PROJECT fhir-test-16-342800 The project identifier
+GOOGLE_BUCKET fhir-test-16-342800 The bucket used to store extracted FHIR files
 ```
 
 
@@ -527,7 +528,7 @@ We incorporated `fhirclient`, a flexible Python client for FHIR servers supporti
 Note: You will need to install the fhir client separately.  see  https://github.com/smart-on-fhir/client-py/issues/70
 
 ```
-pip install  git+https://github.com/smart-on-fhir/client-py#egg=fhirclient
+pip install  fhirclientr4
 ```
 
 Example
@@ -535,11 +536,16 @@ Example
 ```
 
 from anvil.fhir.client import FHIRClient
+from anvil.fhir.smart_auth import GoogleFHIRAuth
 settings = {
     'app_id': 'my_web_app',
-    'api_base': 'https://healthcare.googleapis.com/v1/projects/gcp-testing-308520/locations/us-east4/datasets/testset/fhirStores/fhirstore/fhir'
+    'api_base': 'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir'
 }
 smart = FHIRClient(settings=settings)
+# optionally pass token
+# smart.server.auth = GoogleFHIRAuth(access_token='ya29.abcd...')
+smart.server.auth = GoogleFHIRAuth()
+smart.prepare()
 assert smart.ready, "server should be ready"
 # search for all ResearchStudy
 import fhirclient.models.researchstudy as rs
@@ -552,7 +558,13 @@ import fhirclient.models.researchstudy as rs
 For more information on usage see [smart-on-fhir/client-py](https://github.com/smart-on-fhir/client-py)
 
 
+Local testing
 
+Test json files using FHIR reference validator 
+
+```commandline
+java -jar validator_cli.jar  /tmp/invalid_body_no_subject.json -ig ~/client-apis/pyAnVIL/DATA/fhir/IG/
+```
  
 
 

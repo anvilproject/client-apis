@@ -58,6 +58,14 @@ Brian Walsh walsbr at ohsu dot edu
 5. Open a Pull Request
 
 
+## Next steps
+
+- [ ] FHIR->PFB
+- [ ] Informatics Paper  
+- [ ] Investigate a terra/leo `verified third party app` [facade](https://github.com/DataBiosphere/terra-app) to access FHIR service
+- [ ] Galaxy client
+
+
 ## License
 
 [Apache](LICENSE)
