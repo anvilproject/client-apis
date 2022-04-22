@@ -506,52 +506,35 @@ Set environmental variables by calling `fhir_env`  Provide a project name and re
 
 The script will set reasonable values for other environmental variables.  You may override them on the command line.
 
-> usage: fhir_env GOOGLE_PROJECT_NAME GOOGLE_LOCATION [GOOGLE_DATASET] [GOOGLE_DATASTORE] [BILLING_ACCOUNT] [GOOGLE_APPLICATION_CREDENTIALS] [SPREADSHEET_UUID] [OUTPUT_PATH]
-
 
 ```
-$ source fhir_env fhir-test-16 us-west2
-***** env variables *****
-GOOGLE_PROJECT_NAME fhir-test-16 The root for the API, billing, buckets, etc.
-GOOGLE_BILLING_ACCOUNT XXXXXX-XXXX-XXXX Google Cloud Billing Accounts allow you to configure payment and track spending in GCP.
-GOOGLE_LOCATION us-west2 The physical location of the data
-GOOGLE_DATASET anvil-test Datasets are top-level containers that are used to organize and control access to your stores.
-GOOGLE_DATASTORE test A FHIR store is a data store in the Cloud Healthcare API that holds FHIR resources.
-OUTPUT_PATH ./DATA A directory on your local system, used to store work files.
-GOOGLE_PROJECT fhir-test-16-342800 The project identifier
-GOOGLE_BUCKET fhir-test-16-342800 The bucket used to store extracted FHIR files
+# setup environmental values
+$ source /dev/stdin <<< `anvil_etl utility env`  
+
 ```
 
 
 We incorporated `fhirclient`, a flexible Python client for FHIR servers supporting the SMART on FHIR protocol. 
 
-Note: You will need to install the fhir client separately.  see  https://github.com/smart-on-fhir/client-py/issues/70
-
-```
-pip install  fhirclientr4
-```
 
 Example
 
 ```
-
-from anvil.fhir.client import FHIRClient
-from anvil.fhir.smart_auth import GoogleFHIRAuth
+from anvil.clients.fhir_client import FHIRClient
+from anvil.clients.smart_auth import GoogleFHIRAuth
 settings = {
     'app_id': 'my_web_app',
     'api_base': 'https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/public/fhir'
 }
-smart = FHIRClient(settings=settings)
-# optionally pass token
-# smart.server.auth = GoogleFHIRAuth(access_token='ya29.abcd...')
-smart.server.auth = GoogleFHIRAuth()
+# optionally pass token e.g. GoogleFHIRAuth(access_token='ya29.abcd...')
+smart = FHIRClient(settings=settings, auth=GoogleFHIRAuth())
 smart.prepare()
 assert smart.ready, "server should be ready"
 # search for all ResearchStudy
 import fhirclient.models.researchstudy as rs
-[s.title for s in rs.ResearchStudy.where(struct={}).perform_resources(smart.server)]
+[s.id for s in rs.ResearchStudy.where(struct={}).perform_resources(smart.server)]
 >>> 
-['1000g-high-coverage-2019', 'my NCPI research study example']
+['AnVIL-CMG-Broad-Muscle-Myoseq-WES', 'AnVIL-CMG-Broad-Orphan-Estonia-Ounap-WGS', ... ]
 
 ```
 
