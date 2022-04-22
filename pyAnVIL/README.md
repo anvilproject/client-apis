@@ -267,7 +267,108 @@ export IMPLEMENTATION_GUIDE_PATH=xxx
 | 445 | NHGRI        | anvil_nhgri_broad_ibd_daly_winter_wes                           |        823 |         823 |     823 |        1236 |       |       |    412 |   100      |      0      |   412 |    412 |        |       |      |       |       |         |         |       |       |       |
 
 
+```text
+./DATA
+├── analysis.ndjson
+├── google_entities.sqlite
 
+├── fhir
+│   ├── IG
+│   │   ├── ImplementationGuide-NCPI-FHIR-Implementation-Guide.json
+│   │   ├── ...
+│   └── public
+│       └── Public
+│           └── 1000G-high-coverage-2019
+│               ├── protected
+│               │   ├── DocumentReference.ndjson
+│               │   ├── Patient.ndjson
+│               │   ├── ResearchSubject.ndjson
+│               │   ├── Specimen.ndjson
+│               │   └── Task.ndjson
+│               └── public
+│                   ├── Organization.ndjson
+│                   ├── Practitioner.ndjson
+│                   ├── PractitionerRole.ndjson
+│                   ├── ResearchStudy.ndjson
+│                   └── ResearchStudyObservationSummary.ndjson
+│   ├── pending
+│   │   ├── CCDG
+│   │   │   ├── AnVIL_ccdg_asc_ndd_daly_talkowski_ac-boston_asd_exome
+│   │   │   │   ├── protected
+│   │   │   │   └── public
+    ...
+│   │   ├── CMG
+│   │   │   ├── AnVIL_CMG_Broad_Brain_Engle_WGS
+│   │   │   │   ├── protected
+│   │   │   │   └── public
+│   ├── phs000160-Consortia_Access_Only
+│   │   └── CCDG
+│   │       └── AnVIL_CCDG_NYGC_NP_Alz_LOAD_WGS
+│   │           ├── protected
+│   │           └── public
+│   ├── phs000298
+│   │   └── CCDG
+│   │       ├── AnVIL_ccdg_asc_ndd_daly_talkowski_CDCSEED_asd_exome
+│   │       │   ├── protected
+│   │       │   └── public
+    ...  
+
+├── sample
+│   ├── CCDG
+│   │   ├── AnVIL_CCDG_Baylor_CVD_AFib_BioVU_WGS
+│   │   │   ├── blob.ndjson
+│   │   │   ├── qc_result_sample.ndjson
+│   │   │   ├── schema.ndjson
+│   │   │   ├── sequencing.ndjson
+│   │   │   └── subject.ndjson
+│   │   ├── AnVIL_CCDG_Baylor_CVD_AFib_Groningen_WGS
+│   │   │   └── ...
+│   │   ├── ...
+
+│   ├── CMG
+│   │   ├── ANVIL_CMG_BROAD_BRAIN_ENGLE_WES
+│   │   │   ├── blob.ndjson
+│   │   │   ├── participant.ndjson
+│   │   │   ├── sample.ndjson
+│   │   │   └── schema.ndjson
+│   │   ├── ANVIL_CMG_BROAD_BRAIN_SHERR_WGS
+│   │   │   └── ...
+│   │   ├── ...
+│   ├── GTEx
+│   │   └── AnVIL_GTEx_V8_hg38
+│   │       └── ...
+│   ├── NHGRI
+│   │   ├── anvil_nhgri_broad_ibd_daly_kugathasan_wes
+│   │   │   └── ...
+│   │   └── ...
+│   ├── NIMH
+│   │   ├── AnVIL_NIMH_Broad_ConvergentNeuro_McCarroll_Eggan_CIRM_GRU_WGS
+│   │   │   └── ...
+│   │   └── ...
+│   └── Public
+│       ├── 1000G-high-coverage-2019
+│   │   │   └── ...
+│   │   └── ...
+└── workspaces
+    ├── CCDG
+    │   ├── AnVIL_CCDG_Baylor_CVD_AFib_BioVU_WGS.pickle
+    │   └── ...
+    ├── CMG
+    │   ├── ANVIL_CMG_BROAD_BRAIN_ENGLE_WES.pickle
+    │   └── ...
+    ├── GTEx
+    │   └── ...
+    ├── NHGRI
+    │   └── ...
+    ├── NIMH
+    │   └── ...
+    └── Public
+        └── 1000G-high-coverage-2019-DEV_ONLY.pickle
+
+468 directories, 2386 files
+
+
+```
 
 ##### Load
 
@@ -560,15 +661,35 @@ java -jar validator_cli.jar  /tmp/invalid_body_no_subject.json -ig ~/client-apis
   source venv/bin/activate
   python3 -m pip install -r requirements.txt
   python3 -m pip install -r requirements-dev.txt
+  python3 -m pip install -e . 
   ```
 
-- test gen3 authorization
+- tests
 
   ```
-  python3 -m pytest --user_email <GMAIL ACCOUNT>  --log-level DEBUG  --gen3_endpoint <GEN3_ENDPOINT>  tests/integration/test_gen3_auth.py
+  # setup environmental values
+  source /dev/stdin <<< `anvil_etl utility env`  
+
+  pytest tests/integration/
   ```
 
+- exploratory
 
+Investigates Google FHIR conformance, KF and dbGAP FHIR:
+- they are designed to find corner cases in the way the data was encoded.
+- as such they will fail
+
+```text
+tests/exploratory/
+├── google
+│ │ └── test_validation.cpython-39-pytest-7.1.1.pyc
+│ └── test_validation.py
+└── ncpi
+    ├── test_condition.py
+    └── test_ncpi_conformance.py
+
+
+```
 ### Distribution
 
 - PyPi
