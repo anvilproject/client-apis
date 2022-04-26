@@ -288,14 +288,14 @@ class DispatchingFHIRClient(client.FHIRClient):
         """Expose list of clients instantiated from settings.api_bases."""
         return self._clients
 
-    def dispatch(self, _worker):
+    def dispatch(self, _worker, *args, **kwargs):
         """Execute callback(server) on thread for every server. """
         logger.debug("starting threads")
         results = []
         # We can use a with statement to ensure threads are cleaned up promptly
         with concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
             # Start the load operations and mark each future with its URL
-            future_result = {executor.submit(_worker, _client.server, ): _client for _client in self._clients}
+            future_result = {executor.submit(_worker, _client.server, *args, **kwargs, ): _client for _client in self._clients}
             for future in concurrent.futures.as_completed(future_result):
                 try:
                     worker_results = future.result()
