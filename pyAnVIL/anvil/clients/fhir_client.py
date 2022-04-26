@@ -2,11 +2,15 @@
 
 
 import logging
-import threading
+import concurrent.futures
 from urllib.parse import urlparse
-from fhirclient import client
+from fhirclient import client, server as fhirclient_server
 from fhirclient.models.meta import Meta
 from fhirclient.models.bundle import Bundle
+import resource
+
+from fhirclient.server import FHIRPermissionDeniedException
+import fhirclient.models.identifier as FHIRIdentifier
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +52,7 @@ class FHIRClient(client.FHIRClient):
         client_major_version = int(client.__version__.split('.')[0])
         assert client_major_version >= 4, f"requires version >= 4.0.0 current version {client.__version__} `pip install -e git+https://github.com/smart-on-fhir/client-py#egg=fhirclient`"
         if auth:
+            logger.debug("Setting auth")
             self.server.auth = auth
             self.server.session.hooks['response'].append(self.server.auth.handle_401)
         self.prepare()
@@ -55,13 +60,16 @@ class FHIRClient(client.FHIRClient):
 
 
 class DispatchingFHIRClient(client.FHIRClient):
-    """Instances of this class handle authorizing and talking to Google Healthcare API FHIR Service.
+    """We monkey patch Search.perform, dispatching worker threads for each endpoint in api_bases.
+    Same auth handler used for all connections.
 
     Parameters:
         See https://github.com/smart-on-fhir/client-py/blob/master/fhirclient/client.py#L19
 
     :param settings.api_bases: The servers against which to perform the search **settings.api_base ignored**
-    :param access_token: Optional access token, if none provided `gcloud auth print-access-token` is used
+    :param auth: An instance of FHIRAuth that will authenticate each request.
+    :param max_workers: Number of thread workers, if null will be set to the maximum of open files per process
+    or the number of api bases, whichever is less.
 
     Returns:
         Instance of client, with injected authorization method
@@ -113,6 +121,21 @@ class DispatchingFHIRClient(client.FHIRClient):
             auth = kwargs['auth']
             del kwargs['auth']
 
+        # determine number of worker threads
+        max_workers = None
+
+        if 'max_workers' in kwargs:
+            max_workers = kwargs['max_workers']
+            del kwargs['max_workers']
+
+        if not max_workers:
+            max_workers = int(resource.getrlimit(resource.RLIMIT_NOFILE)[0]/3)
+            if max_workers > len(_settings['api_bases']):
+                max_workers = max(len(_settings['api_bases']), 1)
+            logger.debug(f"Setting number of threads to {max_workers}")
+
+        self._max_workers = max_workers
+
         # normal setup with our authenticator
         super(DispatchingFHIRClient, self).__init__(*args, **kwargs)
         client_major_version = int(client.__version__.split('.')[0])
@@ -121,6 +144,7 @@ class DispatchingFHIRClient(client.FHIRClient):
         if auth:
             self.server.auth = auth
             self.server.session.hooks['response'].append(self.server.auth.handle_401)
+
         self.prepare()
         assert self.ready, "server should be ready"
 
@@ -137,7 +161,7 @@ class DispatchingFHIRClient(client.FHIRClient):
             _client.prepare()
             self._clients.append(_client)
 
-        # monkey patch search perform if we haven't already
+        # monkey patch Search.perform if we haven't already
         from fhirclient.models.fhirsearch import FHIRSearch
         if not hasattr(FHIRSearch, '_anvil_patch'):
             FHIRSearch._anvil_patch = True
@@ -151,7 +175,7 @@ class DispatchingFHIRClient(client.FHIRClient):
                     logger.debug(f"* * * * * * * original_perform {server.client.__class__.__name__}")
                     return original_perform(self, server)
 
-                def _worker(self, server, _results):
+                def _worker(self, server):
                     """Dispatches request to underlying class, return an entry indexed by base uri.
 
                     Sets bundle.meta.source
@@ -161,23 +185,25 @@ class DispatchingFHIRClient(client.FHIRClient):
                     :_results: Result of operation added to this array
                     """
                     logger.debug(f"worker starting {server.base_uri}")
-                    result = original_perform(self, server)
-                    logger.debug(f"worker got {result}")
-                    while result:
+                    _worker_results = []
+                    _result = original_perform(self, server)
+                    logger.debug(f"worker got {_result}")
+
+                    while _result:
 
                         # add source to meta if it doesn't already exist
-                        if not result.meta:
-                            result.meta = Meta()
-                        if not result.meta.source:
-                            result.meta.source = server.base_uri
-                        _results.append(result)
+                        if not _result.meta:
+                            _result.meta = Meta()
+                        if not _result.meta.source:
+                            _result.meta.source = server.base_uri
+                        _worker_results.append(_result)
                         if not me._retrieve_all:
                             break
 
                         # follow `next` link for pagination
-                        if hasattr(result, 'link'):
-                            _next = next((lnk.as_json() for lnk in result.link if lnk.relation == 'next'), None)
-                            result = None
+                        if hasattr(_result, 'link'):
+                            _next = next((lnk.as_json() for lnk in _result.link if lnk.relation == 'next'), None)
+                            _result = None
                             if _next:
                                 logger.debug(f"has next {_next}")
                                 # request_json takes a full path & query (not host)
@@ -186,29 +212,31 @@ class DispatchingFHIRClient(client.FHIRClient):
                                 path = f"{parts.path}?{parts.query}"
                                 logger.debug(f"attempting next {path}")
                                 res = server.request_json(path)
-                                result = Bundle(res)
-                                result.origin_server = server
+                                _result = Bundle(res)
+                                _result.origin_server = server
                         else:
-                            result = None
-                    logger.debug(f"worker done {result.as_json()}")
+                            _result = None
+                    logger.debug(f"worker done {len(_worker_results)}")
+                    return _worker_results
 
                 logger.debug("starting threads")
-                workers = []
                 results = []
-                for _client in server.client._clients:
-                    workers.append(
-                        threading.Thread(target=_worker, args=(self, _client.server, results, ))
-                    )
-                # Start workers.
-                for w in workers:
-                    w.start()
-
-                # Wait for workers to quit.
-                logger.debug("waiting for results.")
-                for w in workers:
-                    w.join()
-                logger.debug(f"all workers done. {len(results)}")
+                # We can use a with statement to ensure threads are cleaned up promptly
+                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    # Start the load operations and mark each future with its URL
+                    future_result = {executor.submit(_worker, self, __client.server, ): __client for __client
+                                     in server.client._clients}
+                    for future in concurrent.futures.as_completed(future_result):
+                        try:
+                            worker_results = future.result()
+                            results.extend(worker_results)
+                        except Exception as exc:
+                            if 'FHIRPermissionDeniedException' in exc.__class__.__name__:
+                                # requests.response embedded in exception
+                                logger.error(f"{str(exc)} {exc.args[0].url}")
+                            raise exc
                 return results
+
             # monkey patch
             FHIRSearch.perform = _perform
 
@@ -234,18 +262,22 @@ class DispatchingFHIRClient(client.FHIRClient):
                                 if not entry.resource.meta:
                                     entry.resource.meta = Meta()
 
-                                if not entry.resource.meta.source:
-                                    entry.resource.meta.source = bundle.meta.source
+                                # if not entry.resource.meta.source:
+                                #     assert bundle.meta, bundle.as_json()
+                                #     entry.resource.meta.source = bundle.meta.source
 
                                 # add tag for fullURL, allows caller
                                 # to disambiguate resources returned from different base URL
-                                # TODO Expecting property "tag" on <class 'fhirclient.models.meta.Meta'> to be <class 'fhirclient.models.coding.Coding'>, but is <class 'dict'>
-                                # if not entry.resource.meta.tag:
-                                #     entry.resource.meta.tag = []
-                                # entry.resource.meta.tag.append({
-                                #     "system" : "https://nih-ncpi.github.io/ncpi-fhir-ig/#fullUrl",
-                                #     "code" : entry.fullUrl
-                                # })
+                                if not entry.resource.meta.tag:
+                                    entry.resource.meta.tag = []
+                                entry.resource.meta.tag.append(
+                                    FHIRIdentifier.Identifier(
+                                        {
+                                            "system": "https://nih-ncpi.github.io/ncpi-fhir-ig/#fullUrl",
+                                            "value": entry.fullUrl
+                                        }
+                                    )
+                                )
                                 resources.append(entry.resource)
                 return resources
             FHIRSearch.perform_resources = _perform_resources
@@ -253,5 +285,25 @@ class DispatchingFHIRClient(client.FHIRClient):
 
     @property
     def clients(self):
-        """Expose our list of clients for caller to add to."""
+        """Expose list of clients instantiated from settings.api_bases."""
         return self._clients
+
+    def dispatch(self, _worker, *args, **kwargs):
+        """Execute callback(server) on thread for every server. """
+        logger.debug("starting threads")
+        results = []
+        # We can use a with statement to ensure threads are cleaned up promptly
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
+            # Start the load operations and mark each future with its URL
+            future_result = {executor.submit(_worker, _client.server, *args, **kwargs, ): _client for _client in self._clients}
+            for future in concurrent.futures.as_completed(future_result):
+                try:
+                    worker_results = future.result()
+                    results.append(worker_results)
+                except Exception as exc:
+                    if 'FHIRPermissionDeniedException' in exc.__class__.__name__:
+                        # requests.response embedded in exception
+                        logger.error(f"{str(exc)} {exc.args[0].url}")
+                    raise exc
+        return results
+

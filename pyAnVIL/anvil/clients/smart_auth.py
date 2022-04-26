@@ -49,6 +49,7 @@ class GoogleFHIRAuth(auth.FHIRAuth):
         """Initialize access_token, call super."""
         self.access_token = access_token
         if not self.access_token:
+            logger.debug('Getting access token')
             self.access_token = self._get_auth_value()
         super(GoogleFHIRAuth, self).__init__(state=state)
 
@@ -170,7 +171,7 @@ class GoogleFHIRAuth(auth.FHIRAuth):
 
 # register class
 if GoogleFHIRAuth not in REGISTERED:
-    print('GoogleFHIRAuth registered')
+    # print('GoogleFHIRAuth registered')
     GoogleFHIRAuth.register()
     REGISTERED.append(GoogleFHIRAuth)
 
@@ -288,6 +289,6 @@ class KidsFirstFHIRAuth(auth.FHIRAuth):
 
 # register class
 if KidsFirstFHIRAuth not in REGISTERED:
-    print('KidsFirstFHIRAuth registered')
+    # print('KidsFirstFHIRAuth registered')
     KidsFirstFHIRAuth.register()
     REGISTERED.append(KidsFirstFHIRAuth)

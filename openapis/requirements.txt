@@ -1,3 +1,0 @@
-# dvc==0.22.0
-pytest==4.0.1
-PyYAML

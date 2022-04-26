@@ -14,6 +14,7 @@ from anvil.etl.extractors.gen3 import DRSReader
 from anvil.etl.transform import _consortium_from_workspace
 from anvil.etl.transformers import _recursive_default_dict
 from anvil.etl.transformers.normalizer import ontologies, normalize, fetch_workspace_names
+from anvil.etl.utilities.shell_helper import ensure_env_variables
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +27,22 @@ def utility(ctx):
     logger.setLevel(ctx.obj['log_level'])
 
 
-@utility.command(name='config')
-@click.option('--format', type=click.Choice(['json', 'yaml'],case_sensitive=False), default='json', show_default=True)
+@utility.command(name='env')
 @click.pass_context
-def _config(ctx, format):
+def env(ctx):
+    """Load env variables. source /dev/stdin <<< `anvil_etl utility env` ; env | grep GOOGLE """
+    for k, v in ensure_env_variables()._asdict().items():
+        if k == 'GOOGLE_DATASTORES':
+            v = ','.join(v)
+        print(f"export {k}={v}")
+
+
+@utility.command(name='config')
+@click.option('--format', 'format_', type=click.Choice(['json', 'yaml'],case_sensitive=False), default='json', show_default=True)
+@click.pass_context
+def _config(ctx, format_):
     """Print config to stdout."""
-    if format == 'yaml':
+    if format_ == 'yaml':
         print(yaml.dump(ctx.obj['config']))
     else:
         print(json.dumps(ctx.obj['config']))
@@ -81,7 +92,6 @@ def qa(ctx, consortium, workspace, details):
             summaries.append(o)
     df = pd.DataFrame(summaries).replace({np.nan: None})
     print(tabulate(df, headers='keys', tablefmt='github'))
-
 
 
 @utility.command(name='backup')
@@ -138,10 +148,6 @@ def _sample(ctx, consortium, workspace, depth):
 
     drs_reader = DRSReader(ctx.obj['output_path'])
 
-    # from random import seed
-    # from random import randint
-    # seed()
-
     def _generate_samples(_consortium_name, _workspace_name):
         for _consortium_name, _workspace in normalize(
                 ctx.obj['output_path'],
@@ -154,14 +160,7 @@ def _sample(ctx, consortium, workspace, depth):
             for index, patient_id in zip(range(depth), _workspace.patients):
                 patient = _workspace.patients[patient_id]
                 yield patient
-                # if 'family_relationship_values' in patient:
-                #     if patient['family_relationship_values'] != [{}]:
-                #         for family_relationship_value in patient['family_relationship_values']:
-                #             yield {
-                #                 'entityType': 'family_relationship',
-                #                 'name': str(randint(1, 10000000)),
-                #                 'attributes': family_relationship_value
-                #             }
+
                 if 'family' in patient:
                     yield patient['family']
 

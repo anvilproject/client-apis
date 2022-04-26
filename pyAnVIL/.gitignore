@@ -4,3 +4,4 @@ service_account.json
 client_secret.json
 apps/
 data/
+.idea/

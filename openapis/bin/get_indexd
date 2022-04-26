@@ -1,3 +1,0 @@
-# retrieve the hash of the repo and the openapi document
-git ls-remote https://github.com/uc-cdis/indexd | head -1 | cut -f1 > provenance/indexd.commit
-wget 'https://raw.githubusercontent.com/uc-cdis/indexd/master/openapis/swagger.yaml' -O input/indexd.yml

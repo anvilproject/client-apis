@@ -1,1 +1,0 @@
-This directory contains the embedded data_ingestion_tracker.json file created by setup.py.

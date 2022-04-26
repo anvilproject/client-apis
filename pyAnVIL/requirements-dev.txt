@@ -4,8 +4,7 @@ sphinx_rtd_theme
 twine
 flake8
 flake8-docstrings
-pytest==3.6.3
-pytest-cov==2.5.1
-gspread
-oauth2client
+pytest==7.1.1
+pytest-cov==3.0.0
 wheel
+

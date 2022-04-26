@@ -115,3 +115,5 @@ openapis/input
 .DS_Store
 
 fhir/ncpi-model-forge/
+attic/
+.idea/
