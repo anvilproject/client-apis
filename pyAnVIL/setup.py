@@ -40,7 +40,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.0rc4',  # Required
+    version='0.1.0rc6',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
