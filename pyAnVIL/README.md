@@ -614,6 +614,53 @@ $ source /dev/stdin <<< `anvil_etl utility env`
 
 ```
 
+Google project setup:
+
+* See [Setting up Google FHIR to support research](https://kellrott.medium.com/using-google-fhir-to-support-research-8f726834d77)
+
+Bash snippets to setup Google Project:
+
+
+```bash
+
+export GOOGLE_PROJECT=$(gcloud projects list --filter=name=$GOOGLE_PROJECT_NAME --format="value(projectId)" )
+if [ -z "$GOOGLE_PROJECT" ]; then
+    echo "Need to create project"
+    unset MISSING
+    [ -z "$GOOGLE_BILLING_ACCOUNT" ] && echo "missing: GOOGLE_BILLING_ACCOUNT billing account for project" && MISSING="Y"
+    [ -z "$GOOGLE_LOCATION" ] && echo "missing: GOOGLE_LOCATION the google region for the project & service" && MISSING="Y"
+    [ ! -z "$MISSING" ] &&  echo "please set required env variables" && exit 1
+    # create the project
+    gcloud projects create --name=$GOOGLE_PROJECT_NAME --quiet
+    #  capture that ID and assign it to an environmental variable
+    export GOOGLE_PROJECT=$(gcloud projects list --filter=name=$GOOGLE_PROJECT_NAME --format="value(projectId)" )
+    [ -z "$GOOGLE_PROJECT" ] && echo "Could not create GOOGLE_PROJECT" && exit 1
+    # attach a billing to the project
+    gcloud beta billing projects link $GOOGLE_PROJECT --billing-account=$GOOGLE_BILLING_ACCOUNT
+    # point as this project by default.
+    gcloud config set project $GOOGLE_PROJECT
+    #  ‘Cloud Healthcare API’ click ‘Enable’ to add the API to the current project.
+    gcloud services enable healthcare.googleapis.com
+fi
+
+# point as this project by default.
+gcloud config set project $GOOGLE_PROJECT
+
+# get service account
+export GOOGLE_SERVICE_ACCOUNT=$(gcloud projects get-iam-policy $GOOGLE_PROJECT --format="value(bindings.members)" --flatten="bindings[]" | grep serviceAccount | sed s/serviceAccount:// | head -1)
+[ -z "$GOOGLE_SERVICE_ACCOUNT" ] &&  echo "Unable to set GOOGLE_SERVICE_ACCOUNT ??" && exit 1
+# assign bucket reader permissions so that it can be used to read the bucket.
+gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objectViewer
+[ $? -ne 0 ] && echo "Unable to set roles/storage.objectViewer" && exit 1
+echo Granted roles/storage.objectViewer to $GOOGLE_SERVICE_ACCOUNT on $GOOGLE_BUCKET
+gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objects.list
+[ $? -ne 0 ] && echo "Unable to set roles/storage.objects.list" && exit 1
+echo Granted roles/storage.objects.list to $GOOGLE_SERVICE_ACCOUNT on $GOOGLE_BUCKET
+
+```
+
+
+## etc.
 
 We incorporated `fhirclient`, a flexible Python client for FHIR servers supporting the SMART on FHIR protocol. 
 
