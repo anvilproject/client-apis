@@ -173,7 +173,7 @@ def _create_administrative_entities(workspace, consortium_name):
 
 
 def _make_fhir_task_NEW(fhir_patient, task, workspace, workspace_name):
-    """Generate Task, etc."""
+    """Generate Task, etc. TODO - see if this is faster!"""
     for output_source, output in task['outputs'].items():
         for output_property, blob in output.items():
             _task_id_keys.append(blob['url'])
@@ -275,13 +275,13 @@ def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
                 yield _terra_observation(workspace, specimen, fhir_specimen)
             if 'tasks' in specimen:
                 for task in specimen['tasks']:
-                    fhir_task = yield from _make_fhir_task(fhir_patient, task, workspace, workspace_name)
+                    fhir_task = yield from _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name)
                     yield fhir_task
                     if details:
                         yield _terra_observation(workspace, task, fhir_task)
 
 
-def _make_fhir_task(fhir_patient, task, workspace, workspace_name):
+def _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name):
     """Create task and its descendants."""
     # create unique task id
     _task_id_keys = [input['name'] for input in task['inputs']]
@@ -289,7 +289,10 @@ def _make_fhir_task(fhir_patient, task, workspace, workspace_name):
         for output_property, blob in output.items():
             _task_id_keys.append(blob['url'])
     task_id = _id(*_task_id_keys)
-    fhir_task = FHIRTask.Task({'id': task_id, 'input': [], 'output': [], 'status': 'accepted', 'intent': 'unknown'})
+
+    fhir_task = FHIRTask.Task({'id': task_id, 'input': [], 'output': [], 'status': 'accepted', 'intent': 'unknown',
+                               'for': _ref(fhir_patient).as_json(), 'focus': _ref(fhir_specimen).as_json()})
+
     fhir_task.identifier = [_identifier(workspace, task)]
     for input in task['inputs']:
         assert 'fhir_entity' in input, 'missing.fhir_entity.in.task'
@@ -877,7 +880,10 @@ def write(consortium_name, workspace, output_path, details, config):
 
         resource_reference = None
         if hasattr(fhir_resource, 'focus') and fhir_resource.focus:
-            resource_reference = [foci.reference for foci in fhir_resource.focus]
+            if isinstance(fhir_resource.focus, list):
+                resource_reference = [foci.reference for foci in fhir_resource.focus]
+            else:
+                resource_reference = [fhir_resource.focus.reference]
             if len(resource_reference) == 0:
                 resource_reference = None
             else:
