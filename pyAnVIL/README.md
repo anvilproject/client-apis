@@ -618,7 +618,7 @@ Google project setup:
 
 * See [Setting up Google FHIR to support research](https://kellrott.medium.com/using-google-fhir-to-support-research-8f726834d77)
 
-Bash snippets to setup Google Project:
+Bash snippets to set up Google Project:
 
 
 ```bash
