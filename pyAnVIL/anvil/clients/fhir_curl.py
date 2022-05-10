@@ -113,7 +113,7 @@ class DefaultCommand(click.Command):
 
 
 @click.command(cls=DefaultCommand)
-@click.option('--project', default=os.environ.get('GOOGLE_PROJECT', None), show_default=True, help='env var. GOOGLE_PROJECT')
+@click.option('--project', default=os.environ.get('FHIR_PROJECT', None), show_default=True, help='env var. FHIR_PROJECT')
 @click.option('--location', default=os.environ.get('GOOGLE_LOCATION', None), show_default=True, help='env var. GOOGLE_LOCATION')
 @click.option('--dataset', default=os.environ.get('GOOGLE_DATASET', None), show_default=True, help='env var. GOOGLE_DATASET')
 @click.option('--token', default=_get_token(), help=f'env var. TOKEN [default: {_get_token_help()}]')

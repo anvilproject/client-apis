@@ -29,7 +29,7 @@ def _extract_workspace_mapping(output_path):
 
 def _log_console_link(logger):
     """Log a message with a link to the GCP console"""
-    project = os.environ['GOOGLE_PROJECT']
+    project = os.environ['FHIR_PROJECT']
     location = os.environ['GOOGLE_LOCATION']
     data_set = os.environ['GOOGLE_DATASET']
     logger.info(

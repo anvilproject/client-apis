@@ -4,11 +4,11 @@ import yaml
 import click
 from collections import OrderedDict
 
-DEFAULT_OUTPUT_PATH = os.environ.get('OUTPUT_PATH','./DATA')
+DEFAULT_OUTPUT_PATH = os.environ.get('OUTPUT_PATH', './DATA')
 
 DEFAULT_GEN3_CREDENTIALS_PATH = os.path.expanduser('~/.gen3/credentials.json')
 
-DEFAULT_GOOGLE_PROJECT = os.environ.get('GOOGLE_PROJECT', None)
+DEFAULT_FHIR_PROJECT = os.environ.get('FHIR_PROJECT', None)
 
 
 def read_config(path=None):

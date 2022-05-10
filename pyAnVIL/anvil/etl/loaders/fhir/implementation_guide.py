@@ -101,7 +101,7 @@ def _enable_ig(ctx, data_store, token):
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8"
     }
-    project = os.environ['GOOGLE_PROJECT']
+    project = os.environ['FHIR_PROJECT']
     location = os.environ['GOOGLE_LOCATION']
     data_set = os.environ['GOOGLE_DATASET']
     url = f"https://healthcare.googleapis.com/v1beta1/projects/{project}/locations/{location}/datasets/{data_set}/fhirStores/{data_store}?updateMask=validationConfig"
@@ -126,7 +126,7 @@ def _get_ig(ctx, data_store, token):
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json; charset=utf-8"
     }
-    project = os.environ['GOOGLE_PROJECT']
+    project = os.environ['FHIR_PROJECT']
     location = os.environ['GOOGLE_LOCATION']
     data_set = os.environ['GOOGLE_DATASET']
     url = f"https://healthcare.googleapis.com/v1beta1/projects/{project}/locations/{location}/datasets/{data_set}/fhirStores/{data_store}"
