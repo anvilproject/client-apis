@@ -866,9 +866,9 @@ def generate_fhir(workspace, consortium_name, details, config):
 def write(consortium_name, workspace, output_path, details, config):
     """Write normalized workspace to disk as FHIR."""
     emitters = {}
-    import cProfile, pstats
-    profiler = cProfile.Profile()
-    profiler.enable()
+    # import cProfile, pstats
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     for fhir_resource in generate_fhir(workspace, consortium_name, details, config):
         resource_type = fhir_resource.resource_type
         data_store_name = ensure_data_store_name(workspace)
@@ -916,7 +916,7 @@ def write(consortium_name, workspace, output_path, details, config):
             emitters[file_path] = emitter
         json.dump(fhir_resource.as_json(), emitter, separators=(',', ':'))
         emitter.write('\n')
-    profiler.disable()
-    # Export profiler output to file
-    stats = pstats.Stats(profiler)
-    stats.dump_stats(f'{output_path}/program.prof')
+    # profiler.disable()
+    # # Export profiler output to file
+    # stats = pstats.Stats(profiler)
+    # stats.dump_stats(f'{output_path}/program.prof')
