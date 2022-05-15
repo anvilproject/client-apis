@@ -120,14 +120,19 @@ class DefaultCommand(click.Command):
 @click.option('--data_stores', default=_get_data_stores(), show_default=True, help=f'env var. GOOGLE_DATASTORES. [default: {_get_data_stores_help()}]')
 @click.option("-l", "--log-level", type=LogLevel(), default=logging.INFO)
 @click.argument('data_store', required=False, default='dispatch')
-@click.argument('path', required=True)
+@click.argument('path', required=False)
 def cli(project, location, dataset, token, data_stores, data_store, path, log_level):
     """Utility to manufacture FHIR URLs, dispatch path via threads.
 
         data_store: FHIR data store name.  'dispatch' will send to all data stores.
         path: FHIR compliant path i.e. http{s}://server{/path} see https://www.hl7.org/fhir/http.html#general
     """
-    logging.basicConfig(level=log_level, format=LOG_FORMAT)
+    logging.basicConfig(level=log_level, format=LOG_FORMAT, force=True)
+    logger.setLevel(log_level)
+    if not data_stores:
+        logger.error("Please set data_stores parameter")
+    logger.debug(f"data_store:{data_store} path:{path}")
+    assert logging.getLogger(__name__).level != logging.NOTSET, f"Should be {log_level}"
     _dispatch(project, location, dataset, data_stores, data_store, path, token)
 
 
