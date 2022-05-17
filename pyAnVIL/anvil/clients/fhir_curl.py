@@ -52,7 +52,7 @@ def worker(server, path=None, no_sign=False, headers={}):
     # main
     assert path, "caller MUST pass path"
     if path.startswith('/'):
-        path = path[:1]
+        path = path[1:]
     initial_url = urlparse.urljoin(server.base_uri, path)
     _url = initial_url
     while _url:
