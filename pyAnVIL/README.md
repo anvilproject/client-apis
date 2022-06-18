@@ -598,6 +598,14 @@ https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations
 ...
 ```
 
+```commandline
+# setup env variables
+source /dev/stdin <<< `anvil_etl utility env`
+# show count of ResearchStudy in each data store
+anvil_curl '/ResearchStudy?_count=1000&_elements=id' |  jq -c  '{"data_store": (.link[2].url | match(".*/fhirStores/(.*)/fhir.*").captures[0].string), "total":.total}'
+
+```
+
 
 ## Contributing
 
