@@ -21,7 +21,7 @@ logger = logging.getLogger('anvil.etl_old.extractors.terra')
 # where all workspaces are kept w/in terra
 DEFAULT_NAMESPACE = 'anvil-datastorage'
 
-# workspace patterns
+# workspace patterns named tuple:  name, workspace_pattern
 DEFAULT_CONSORTIUMS = (
     ('CMG', 'AnVIL_CMG_.*'),
     ('CCDG', 'AnVIL_CCDG_.*'),
@@ -29,6 +29,10 @@ DEFAULT_CONSORTIUMS = (
     ('Public', '^1000G-high-coverage-2019$'),
     ('NHGRI', '^AnVIL_NHGRI'),
     ('NIMH', '^AnVIL_NIMH'),
+    # emerge
+    # gregor
+    # primed
+    # IGVF
 )
 
 
@@ -148,14 +152,20 @@ def clean(ctx):
 
 @cli.command('extract')
 @click.option('--namespace', default=DEFAULT_NAMESPACE, help=f'Terra namespace default={DEFAULT_NAMESPACE}')
+@click.option('--consortium', default=None, help='Filter, only this consortium.')
 @click.pass_context
-def extract_workspaces(ctx, namespace):
+def extract_workspaces(ctx, namespace, consortium):
     """Read workspaces from terra, write to database. Do this first! May take several minutes."""
     output_path = ctx.obj['output_path']
-    consortiums = ctx.obj['config']['consortiums']    
-    logger.info(f"Extracting metadata for {len(consortiums)} consortiums, this may take several minutes.")
+    consortiums = ctx.obj['config']['consortiums']
+    number_of_consortiums = len(consortiums)
+    if consortium:
+        number_of_consortiums = 1
+    logger.info(f"Extracting metadata for {number_of_consortiums} consortiums, this may take several minutes.")
     entities = Entities(path=f"{output_path}/terra_entities.sqlite")
     for consortium_name, config in consortiums.items():
+        if consortium and consortium != consortium_name:
+            continue
         projects = get_workspaces(namespace, name_pattern=config['workspaces'])
         for workspace in projects:
             logger.info((consortium_name, workspace.workspace.name))
