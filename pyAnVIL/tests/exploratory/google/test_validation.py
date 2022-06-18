@@ -29,6 +29,7 @@ def test_implementation_guide(token, base_api):
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     print(json.dumps(response.json()))
+    assert response.json()['total'] > 0, "Should have an IG"
     assert response.json()['entry'][0]['resource']['id'] == 'NCPI-FHIR-Implementation-Guide'
 
 
@@ -90,7 +91,7 @@ def test_document_reference_invalid_body_no_subject(token, base_api):
 
 
 def test_document_reference_missing_task(token, base_api):
-    validate_url = f'{base_api}/DocumentReference/$validate'
+    validate_url = f'{base_api}/DocumentReference/$validate?profile=https://ncpi-fhir.github.io/ncpi-fhir-ig/StructureDefinition/ncpi-drs-document-reference'
 
     headers = {
         "Content-Type": "application/fhir+json;charset=utf-8",
@@ -99,7 +100,7 @@ def test_document_reference_missing_task(token, base_api):
 
     # missing task
     invalid_body_no_task = {"resourceType": "DocumentReference", "id": "44a58180-e4ff-5a8c-9a1f-db4a76ce6f1f", "meta": {
-        "profile": ["http://fhir.ncpi-project-forge.io/StructureDefinition/ncpi-drs-document-reference"]},
+        "profile": ["https://ncpi-fhir.github.io/ncpi-fhir-ig/StructureDefinition/ncpi-drs-document-reference"]},
                             "identifier": [{
                                                "system": "https://anvil.terra.bio/#workspaces/anvil-datastorage/1000G-high-coverage-2019",
                                                "value": "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_14151/Project_CCDG_14151_B01_GRM_WGS.cram.2020-02-12/Sample_HG00405/analysis/HG00405.final.cram"},
@@ -112,6 +113,7 @@ def test_document_reference_missing_task(token, base_api):
     response = requests.post(validate_url, json=invalid_body_no_task, headers=headers)
     response.raise_for_status()
     issues = response.json()['issue']
+    print(response.json())
     errors = [issue['expression'][0] for issue in issues if issue['severity'] == 'error']
     assert 'DocumentReference.subject' in errors, f"Should have raised a 'invalid number of elements, min is 1, got 0' {issues}. To see the expected errors try `java -jar validator_cli.jar  /tmp/invalid_body_no_subject.json -ig ~/client-apis/pyAnVIL/DATA/fhir/IG/` "
     print("invalid_body_no_task OK")
