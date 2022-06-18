@@ -18,8 +18,10 @@ import fhirclient.models.fhirreference as FHIRReference
 import fhirclient.models.identifier as FHIRIdentifier
 import fhirclient.models.practitioner as FHIRPractitioner
 import fhirclient.models.practitionerrole as FHIRPractitionerRole
+import fhirclient.models.extension as FHIRExtension
 
 from anvil.etl.utilities.disease_normalizer import ontology_text, disease_system, text_ontology
+from anvil.etl.utilities.body_site_normalizer import lookup_body_site
 
 logger = logging.getLogger(__name__)
 
@@ -270,6 +272,20 @@ def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
         for specimen in patient['specimens']:
             fhir_specimen = FHIRSpecimen.Specimen({'id': _id(workspace_name, 'Specimen', specimen['name']), 'subject': _ref(fhir_patient).as_json()})
             fhir_specimen.identifier = [_identifier(workspace, specimen)]
+            if 'body_site' in specimen:
+                system, code = lookup_body_site(specimen['body_site'])
+                fhir_specimen.collection = FHIRSpecimen.SpecimenCollection({
+                    'bodySite': {
+                        'coding': [
+                            {
+                                'system': system,
+                                'code': code,
+                                'display': specimen['body_site']
+                            }
+                        ],
+                        'text': specimen['body_site']
+                    }
+                })
             yield fhir_specimen
             if details:
                 yield _terra_observation(workspace, specimen, fhir_specimen)
@@ -344,6 +360,17 @@ def _create_individual(workspace, patient, workspace_org, research_study):
     )
     if 'gender' in patient:
         fhir_patient.gender = patient['gender']
+
+    if 'age' in patient:
+        fhir_patient.extension = [
+            FHIRExtension.Extension(
+                {
+                    'valueInteger': int(patient['age']),
+                    'url': 'https://emerge.hgsc.bcm.edu/fhir/StructureDefinition/patient-age'
+                 }
+            )
+        ]
+
     fhir_patient.identifier = [_identifier(workspace, patient)]
 
     research_subject = FHIRResearchSubject.ResearchSubject(

@@ -611,6 +611,13 @@ def gender(context, consortium_name, workspace, config):
     context['patient']['gender'] = None
 
 
+def age(context, consortium_name, workspace, config):
+    """Retrieve age from patient."""
+    context['patient']['age'] = None
+    if 'age' in context['patient']['attributes']:
+        context['patient']['age'] = context['patient']['attributes']['age']
+
+
 def gender_NHGRI(context, consortium_name, workspace, config):
     """Retrieve gender from patient."""
     assert 'patient' in context
@@ -648,6 +655,17 @@ def gender_CCDG(context, consortium_name, workspace, config):
     gender_CMG(context, consortium_name, workspace, config)
 
 
+def gender_GTEx(context, consortium_name, workspace, config):
+    """Retrieve gender from patient."""
+    """Retrieve gender from patient."""
+    assert 'patient' in context
+    keys = ["sex"]
+    for k in keys:
+        if k in context['patient']['attributes']:
+            context['patient']['gender'] = context['patient']['attributes'][k].lower()
+            assert context['patient']['gender'] in "male,female,other,unknown".split(',')
+
+
 def family_relationship(context, consortium_name, workspace, config):
     """Retrieve family relationship from patient."""
     family_relationship_values = {}
@@ -679,9 +697,16 @@ def family_relationship(context, consortium_name, workspace, config):
 #     ["family_id", "family_relationship", "maternal_id", "paternal_id"]
 #     pass
 
+
 def body_site(context, consortium_name, workspace, config):
     """Retrieve body site from specimen."""
-    pass
+    context['specimen']['body_site'] = None
+
+
+def body_site_GTEx(context, consortium_name, workspace, config):
+    """Retrieve body site from specimen."""
+    if 'tissue_site_detail' in context['specimen']['attributes']:
+        context['specimen']['body_site'] = context['specimen']['attributes']['tissue_site_detail']
 
 
 def body_site_CMG(context, consortium_name, workspace, config):
@@ -744,6 +769,7 @@ def patient_model(context, consortium_name, workspace, config):
                 exec_command(context, consortium_name, workspace, config, 'phenotypes')
                 exec_command(context, consortium_name, workspace, config, 'disease')
                 exec_command(context, consortium_name, workspace, config, 'gender')
+                exec_command(context, consortium_name, workspace, config, 'age')
                 exec_command(context, consortium_name, workspace, config, 'family_relationship')
                 # hash by several keys, the name and any other we know about
                 patients[p['name']] = p
@@ -848,12 +874,16 @@ C['CMG//gender'] = lambda context, consortium_name, workspace, config: gender_CM
 C['NHGRI//gender'] = lambda context, consortium_name, workspace, config: gender_NHGRI(context, consortium_name, workspace, config)
 C['NIMH//gender'] = lambda context, consortium_name, workspace, config: gender_NIMH(context, consortium_name, workspace, config)
 C['CCDG//gender'] = lambda context, consortium_name, workspace, config: gender_CCDG(context, consortium_name, workspace, config)
+C['GTEx//gender'] = lambda context, consortium_name, workspace, config: gender_GTEx(context, consortium_name, workspace, config)
 
 C['//family_relationship'] = lambda context, consortium_name, workspace, config: family_relationship(context, consortium_name, workspace, config)
 
 C['//body_site'] = lambda context, consortium_name, workspace, config: body_site(context, consortium_name, workspace, config)
 C['CMG//body_site'] = lambda context, consortium_name, workspace, config: body_site_CMG(context, consortium_name, workspace, config)
+C['GTEx//body_site'] = lambda context, consortium_name, workspace, config: body_site_GTEx(context, consortium_name, workspace, config)
 
 C['//link_specimen_to_patient'] = lambda context, consortium_name, workspace, config: link_specimen_to_patient(context, consortium_name, workspace, config)
 
 C['//patient_model'] = lambda context, consortium_name, workspace, config: patient_model(context, consortium_name, workspace, config)
+
+C['//age'] = lambda context, consortium_name, workspace, config: age(context, consortium_name, workspace, config)

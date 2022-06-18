@@ -325,7 +325,7 @@ def normalize(output_path, requested_consortium_name, workspace_name, validate_b
         # wrangle the entities into a consistent, predictable form
         _normalize_workspace(consortium_name, workspace, config, entities, output_path, validate_buckets)
         try:
-            assert 'patients' in workspace , 'missing.patients'
+            assert 'patients' in workspace, 'missing.patients'
             # assert workspace.specimens, 'missing.specimens'
             # assert workspace.specimen_patient_ids, 'missing.specimen.to.patient.links'
             # assert workspace.tasks, 'missing.tasks'
