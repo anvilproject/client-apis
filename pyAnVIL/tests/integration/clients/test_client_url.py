@@ -3,7 +3,6 @@ from anvil.clients.smart_auth import GoogleFHIRAuth
 import fhirclient.models.researchstudy as rs
 
 
-
 def test_query_simple():
     settings = {
         'app_id': 'my_web_app',
