@@ -272,7 +272,7 @@ def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
         for specimen in patient['specimens']:
             fhir_specimen = FHIRSpecimen.Specimen({'id': _id(workspace_name, 'Specimen', specimen['name']), 'subject': _ref(fhir_patient).as_json()})
             fhir_specimen.identifier = [_identifier(workspace, specimen)]
-            if 'body_site' in specimen:
+            if 'body_site' in specimen and specimen['body_site']:
                 system, code = lookup_body_site(specimen['body_site'])
                 fhir_specimen.collection = FHIRSpecimen.SpecimenCollection({
                     'bodySite': {
@@ -361,7 +361,7 @@ def _create_individual(workspace, patient, workspace_org, research_study):
     if 'gender' in patient:
         fhir_patient.gender = patient['gender']
 
-    if 'age' in patient:
+    if 'age' in patient and patient['age']:
         fhir_patient.extension = [
             FHIRExtension.Extension(
                 {
