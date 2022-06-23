@@ -291,10 +291,10 @@ def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
                 yield _terra_observation(workspace, specimen, fhir_specimen)
             if 'tasks' in specimen:
                 for task in specimen['tasks']:
-                    fhir_task = yield from _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name)
-                    yield fhir_task
-                    if details:
-                        yield _terra_observation(workspace, task, fhir_task)
+                    for fhir_task in _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name):
+                        yield fhir_task
+                        if details:
+                            yield _terra_observation(workspace, task, fhir_task)
 
 
 def _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name):
@@ -345,7 +345,6 @@ def _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name
                 yield document_reference
             seen_already.add(document_reference.id)
     yield fhir_task
-    return fhir_task
 
 
 def _create_individual(workspace, patient, workspace_org, research_study):
