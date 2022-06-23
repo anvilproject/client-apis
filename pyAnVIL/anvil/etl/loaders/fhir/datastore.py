@@ -116,16 +116,19 @@ def upload(ctx, consortium, workspace, drop, check, go_fast):
 
 
 @data_store_cli.command(name='load')
+@click.option('--data_store', default=None, help='Filter only this data_store', show_default=True)
 @click.pass_context
-def load_data_stores(ctx):
+def load_data_stores(ctx, data_store):
     """Load data from bucket into data stores."""
     output_path = ctx.obj["output_path"]
     workplace_mapping = _extract_workspace_mapping(output_path)
     workspace_datastore_mapping = workplace_mapping['data_store']
-
+    data_store_param = data_store
     cmds = []
     for data_store, workspaces in workspace_datastore_mapping.items():
         for mapping in workspaces:
+            if data_store_param and mapping['data_store'] != data_store_param:
+                continue
             object_path = f"fhir/{mapping['data_store']}/{mapping['consortium']}/{mapping['name']}"
             cmds.append(
                 f"gcloud healthcare fhir-stores import gcs {data_store} --location=$GOOGLE_LOCATION --dataset=$GOOGLE_DATASET --content-structure=resource --async --gcs-uri=gs://$GOOGLE_BUCKET/{object_path}/**.ndjson"
