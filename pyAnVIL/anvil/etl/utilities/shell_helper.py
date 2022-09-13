@@ -5,9 +5,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 PROPERTIES_LIST = """
-    GOOGLE_PROJECT_NAME 
+    FHIR_PROJECT_NAME 
     GOOGLE_LOCATION 
-    GOOGLE_PROJECT 
+    FHIR_PROJECT 
     GOOGLE_DATASET 
     TOKEN 
     GOOGLE_DATASTORES 
@@ -32,29 +32,27 @@ def ensure_env_variables():
 
     variables = {property_: os.environ.get(property_) for property_ in PROPERTIES_LIST if os.environ.get(property_, None)}
 
-    variables["GOOGLE_PROJECT_NAME"] = variables.get("GOOGLE_PROJECT_NAME", 'fhir-test-16')
+    variables["FHIR_PROJECT_NAME"] = variables.get("FHIR_PROJECT_NAME", 'fhir-test-16')
+    variables["FHIR_PROJECT"] = variables.get("FHIR_PROJECT", 'fhir-test-16-342800')
     variables["GOOGLE_LOCATION"] = variables.get("GOOGLE_LOCATION", 'us-west2')
     variables["GOOGLE_DATASET"] = variables.get("GOOGLE_DATASET", 'anvil-test')
     variables["GOOGLE_DATASTORE"] = variables.get("GOOGLE_DATASTORE", 'public')
     variables["OUTPUT_PATH"] = variables.get("OUTPUT_PATH", './DATA')
     variables["IMPLEMENTATION_GUIDE_PATH"] = variables.get("IMPLEMENTATION_GUIDE_PATH", f'{variables["OUTPUT_PATH"]}/fhir/IG')
 
-    if not variables.get('GOOGLE_PROJECT', None):
-        variables['GOOGLE_PROJECT'] = run_cmd(f'gcloud projects list --filter=name={variables["GOOGLE_PROJECT_NAME"]} --format="value(projectId)"')
+    if not variables.get('FHIR_PROJECT', None):
+        variables['FHIR_PROJECT'] = run_cmd(f'gcloud projects list --filter=name={variables["FHIR_PROJECT_NAME"]} --format="value(projectId)"')
 
     if not variables.get("GOOGLE_BUCKET", None):
-        variables["GOOGLE_BUCKET"] = variables['GOOGLE_PROJECT']
+        variables["GOOGLE_BUCKET"] = variables['FHIR_PROJECT']
 
-    for k in ["GOOGLE_DATASET", "GOOGLE_LOCATION", 'GOOGLE_PROJECT', "GOOGLE_BUCKET"]:
+    for k in ["GOOGLE_DATASET", "GOOGLE_LOCATION", 'FHIR_PROJECT', "GOOGLE_BUCKET"]:
         assert variables[k], f"Should have set variable {k}"
 
     if not variables.get('GOOGLE_DATASTORES', None):
         variables['GOOGLE_DATASTORES'] = run_cmd(f'gcloud beta healthcare fhir-stores list --dataset={variables["GOOGLE_DATASET"]}  --location={variables["GOOGLE_LOCATION"]}  --format="table[no-heading](ID)"')
     if isinstance(variables['GOOGLE_DATASTORES'], str):
         variables['GOOGLE_DATASTORES'] = variables['GOOGLE_DATASTORES'].split()
-
-    if not variables.get('GOOGLE_BUCKET', None):
-        variables['GOOGLE_BUCKET'] = variables['GOOGLE_PROJECT']
 
     if not variables.get('TOKEN', None):
         variables['TOKEN'] = run_cmd(f'gcloud auth print-access-token')

@@ -18,8 +18,10 @@ import fhirclient.models.fhirreference as FHIRReference
 import fhirclient.models.identifier as FHIRIdentifier
 import fhirclient.models.practitioner as FHIRPractitioner
 import fhirclient.models.practitionerrole as FHIRPractitionerRole
+import fhirclient.models.extension as FHIRExtension
 
 from anvil.etl.utilities.disease_normalizer import ontology_text, disease_system, text_ontology
+from anvil.etl.utilities.body_site_normalizer import lookup_body_site
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +175,7 @@ def _create_administrative_entities(workspace, consortium_name):
 
 
 def _make_fhir_task_NEW(fhir_patient, task, workspace, workspace_name):
-    """Generate Task, etc."""
+    """Generate Task, etc. TODO - see if this is faster!"""
     for output_source, output in task['outputs'].items():
         for output_property, blob in output.items():
             _task_id_keys.append(blob['url'])
@@ -270,18 +272,32 @@ def _generate_specimen_descendants(workspace, patient, fhir_patient, details):
         for specimen in patient['specimens']:
             fhir_specimen = FHIRSpecimen.Specimen({'id': _id(workspace_name, 'Specimen', specimen['name']), 'subject': _ref(fhir_patient).as_json()})
             fhir_specimen.identifier = [_identifier(workspace, specimen)]
+            if 'body_site' in specimen and specimen['body_site']:
+                system, code = lookup_body_site(specimen['body_site'])
+                fhir_specimen.collection = FHIRSpecimen.SpecimenCollection({
+                    'bodySite': {
+                        'coding': [
+                            {
+                                'system': system,
+                                'code': code,
+                                'display': specimen['body_site']
+                            }
+                        ],
+                        'text': specimen['body_site']
+                    }
+                })
             yield fhir_specimen
             if details:
                 yield _terra_observation(workspace, specimen, fhir_specimen)
             if 'tasks' in specimen:
                 for task in specimen['tasks']:
-                    fhir_task = yield from _make_fhir_task(fhir_patient, task, workspace, workspace_name)
+                    fhir_task = yield from _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name)
                     yield fhir_task
                     if details:
                         yield _terra_observation(workspace, task, fhir_task)
 
 
-def _make_fhir_task(fhir_patient, task, workspace, workspace_name):
+def _make_fhir_task(fhir_patient, fhir_specimen, task, workspace, workspace_name):
     """Create task and its descendants."""
     # create unique task id
     _task_id_keys = [input['name'] for input in task['inputs']]
@@ -289,7 +305,10 @@ def _make_fhir_task(fhir_patient, task, workspace, workspace_name):
         for output_property, blob in output.items():
             _task_id_keys.append(blob['url'])
     task_id = _id(*_task_id_keys)
-    fhir_task = FHIRTask.Task({'id': task_id, 'input': [], 'output': [], 'status': 'accepted', 'intent': 'unknown'})
+
+    fhir_task = FHIRTask.Task({'id': task_id, 'input': [], 'output': [], 'status': 'accepted', 'intent': 'unknown',
+                               'for': _ref(fhir_patient).as_json(), 'focus': _ref(fhir_specimen).as_json()})
+
     fhir_task.identifier = [_identifier(workspace, task)]
     for input in task['inputs']:
         assert 'fhir_entity' in input, 'missing.fhir_entity.in.task'
@@ -341,6 +360,17 @@ def _create_individual(workspace, patient, workspace_org, research_study):
     )
     if 'gender' in patient:
         fhir_patient.gender = patient['gender']
+
+    if 'age' in patient and patient['age']:
+        fhir_patient.extension = [
+            FHIRExtension.Extension(
+                {
+                    'valueInteger': int(patient['age']),
+                    'url': 'https://emerge.hgsc.bcm.edu/fhir/StructureDefinition/patient-age'
+                 }
+            )
+        ]
+
     fhir_patient.identifier = [_identifier(workspace, patient)]
 
     research_subject = FHIRResearchSubject.ResearchSubject(
@@ -863,9 +893,9 @@ def generate_fhir(workspace, consortium_name, details, config):
 def write(consortium_name, workspace, output_path, details, config):
     """Write normalized workspace to disk as FHIR."""
     emitters = {}
-    import cProfile, pstats
-    profiler = cProfile.Profile()
-    profiler.enable()
+    # import cProfile, pstats
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     for fhir_resource in generate_fhir(workspace, consortium_name, details, config):
         resource_type = fhir_resource.resource_type
         data_store_name = ensure_data_store_name(workspace)
@@ -877,7 +907,10 @@ def write(consortium_name, workspace, output_path, details, config):
 
         resource_reference = None
         if hasattr(fhir_resource, 'focus') and fhir_resource.focus:
-            resource_reference = [foci.reference for foci in fhir_resource.focus]
+            if isinstance(fhir_resource.focus, list):
+                resource_reference = [foci.reference for foci in fhir_resource.focus]
+            else:
+                resource_reference = [fhir_resource.focus.reference]
             if len(resource_reference) == 0:
                 resource_reference = None
             else:
@@ -910,7 +943,7 @@ def write(consortium_name, workspace, output_path, details, config):
             emitters[file_path] = emitter
         json.dump(fhir_resource.as_json(), emitter, separators=(',', ':'))
         emitter.write('\n')
-    profiler.disable()
-    # Export profiler output to file
-    stats = pstats.Stats(profiler)
-    stats.dump_stats(f'{output_path}/program.prof')
+    # profiler.disable()
+    # # Export profiler output to file
+    # stats = pstats.Stats(profiler)
+    # stats.dump_stats(f'{output_path}/program.prof')

@@ -2,7 +2,7 @@ import click
 import logging
 
 
-from anvil.etl import DEFAULT_GEN3_CREDENTIALS_PATH, DEFAULT_GOOGLE_PROJECT
+from anvil.etl import DEFAULT_GEN3_CREDENTIALS_PATH, DEFAULT_FHIR_PROJECT
 
 from anvil.etl.extractors.data_ingestion_tracker import write as write_projects
 from anvil.etl.extractors.gen3 import drs_extractor
@@ -22,7 +22,7 @@ def extract(ctx):
 
 
 @extract.command('google')
-@click.option('--user_project', default=DEFAULT_GOOGLE_PROJECT, help="AnVIL buckets use the `Requester Pays` feature. Please include a billing project. Defaults to GOOGLE_PROJECT")
+@click.option('--user_project', default=DEFAULT_FHIR_PROJECT, help="AnVIL buckets use the `Requester Pays` feature. Please include a billing project. Defaults to FHIR_PROJECT")
 @click.pass_context
 def _google(ctx, user_project):
     """Extract bucket data, write to db."""

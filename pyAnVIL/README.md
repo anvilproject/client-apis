@@ -226,9 +226,9 @@ display(Markdown("./DATA/qa-report.md"))
 
 ```text
 
-export GOOGLE_PROJECT_NAME=xxx
+export FHIR_PROJECT_NAME=xxx
 export GOOGLE_LOCATION=xxx
-export GOOGLE_PROJECT=xxx
+export FHIR_PROJECT=xxx
 export GOOGLE_DATASET=xxx
 export TOKEN=xxx
 export GOOGLE_DATASTORES=xxx
@@ -578,12 +578,12 @@ and are inherited by child **data-stores**:
   * public
 
 ### Research Study discovery
-* The `fhir_curl` command will dispatch to all stores and discover `ResearchStudy` entities:
+* The `anvil_curl` command will dispatch to all stores and discover `ResearchStudy` entities:
 
 ```
 export TOKEN=$(gcloud auth application-default print-access-token)
 export GOOGLE_DATASTORES=$(gcloud beta healthcare fhir-stores list --dataset=$GOOGLE_DATASET --location=$GOOGLE_LOCATION | awk '(NR>1){print $1}' | sed  's/$/,/g' | tr -d "\n")
-fhir_curl '/ResearchStudy?_elements=id&_count=1000'  | jq -rc '.entry[] | .fullUrl' | sort 
+anvil_curl '/ResearchStudy?_elements=id&_count=1000'  | jq -rc '.entry[] | .fullUrl' | sort 
 
 https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir/ResearchStudy/AnVIL-ccdg-asc-ndd-daly-talkowski-ac-boston-asd-exome
 https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir/ResearchStudy/AnVIL-ccdg-asc-ndd-daly-talkowski-AGRE-FEMF-asd-exome
@@ -596,6 +596,14 @@ https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations
 https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir/ResearchStudy/AnVIL-ccdg-asc-ndd-daly-talkowski-puura-asd-exome
 https://healthcare.googleapis.com/v1beta1/projects/fhir-test-16-342800/locations/us-west2/datasets/anvil-test/fhirStores/pending/fhir/ResearchStudy/AnVIL-ccdg-asc-ndd-daly-talkowski-TASC-asd-exome
 ...
+```
+
+```commandline
+# setup env variables
+source /dev/stdin <<< `anvil_etl utility env`
+# show count of ResearchStudy in each data store
+anvil_curl '/ResearchStudy?_count=1000&_elements=id' |  jq -c  '{"data_store": (.link[2].url | match(".*/fhirStores/(.*)/fhir.*").captures[0].string), "total":.total}'
+
 ```
 
 
@@ -618,42 +626,42 @@ Google project setup:
 
 * See [Setting up Google FHIR to support research](https://kellrott.medium.com/using-google-fhir-to-support-research-8f726834d77)
 
-Bash snippets to setup Google Project:
+Bash snippets to set up Google Project:
 
 
 ```bash
 
-export GOOGLE_PROJECT=$(gcloud projects list --filter=name=$GOOGLE_PROJECT_NAME --format="value(projectId)" )
-if [ -z "$GOOGLE_PROJECT" ]; then
+export FHIR_PROJECT=$(gcloud projects list --filter=name=$FHIR_PROJECT_NAME --format="value(projectId)" )
+if [ -z "$FHIR_PROJECT" ]; then
     echo "Need to create project"
     unset MISSING
     [ -z "$GOOGLE_BILLING_ACCOUNT" ] && echo "missing: GOOGLE_BILLING_ACCOUNT billing account for project" && MISSING="Y"
     [ -z "$GOOGLE_LOCATION" ] && echo "missing: GOOGLE_LOCATION the google region for the project & service" && MISSING="Y"
     [ ! -z "$MISSING" ] &&  echo "please set required env variables" && exit 1
     # create the project
-    gcloud projects create --name=$GOOGLE_PROJECT_NAME --quiet
+    gcloud projects create --name=$FHIR_PROJECT_NAME --quiet
     #  capture that ID and assign it to an environmental variable
-    export GOOGLE_PROJECT=$(gcloud projects list --filter=name=$GOOGLE_PROJECT_NAME --format="value(projectId)" )
-    [ -z "$GOOGLE_PROJECT" ] && echo "Could not create GOOGLE_PROJECT" && exit 1
+    export FHIR_PROJECT=$(gcloud projects list --filter=name=$FHIR_PROJECT_NAME --format="value(projectId)" )
+    [ -z "$FHIR_PROJECT" ] && echo "Could not create FHIR_PROJECT" && exit 1
     # attach a billing to the project
-    gcloud beta billing projects link $GOOGLE_PROJECT --billing-account=$GOOGLE_BILLING_ACCOUNT
+    gcloud beta billing projects link $FHIR_PROJECT --billing-account=$GOOGLE_BILLING_ACCOUNT
     # point as this project by default.
-    gcloud config set project $GOOGLE_PROJECT
+    gcloud config set project $FHIR_PROJECT
     #  ‘Cloud Healthcare API’ click ‘Enable’ to add the API to the current project.
     gcloud services enable healthcare.googleapis.com
 fi
 
 # point as this project by default.
-gcloud config set project $GOOGLE_PROJECT
+gcloud config set project $FHIR_PROJECT
 
 # get service account
-export GOOGLE_SERVICE_ACCOUNT=$(gcloud projects get-iam-policy $GOOGLE_PROJECT --format="value(bindings.members)" --flatten="bindings[]" | grep serviceAccount | sed s/serviceAccount:// | head -1)
+export GOOGLE_SERVICE_ACCOUNT=$(gcloud projects get-iam-policy $FHIR_PROJECT --format="value(bindings.members)" --flatten="bindings[]" | grep serviceAccount | sed s/serviceAccount:// | head -1)
 [ -z "$GOOGLE_SERVICE_ACCOUNT" ] &&  echo "Unable to set GOOGLE_SERVICE_ACCOUNT ??" && exit 1
 # assign bucket reader permissions so that it can be used to read the bucket.
-gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objectViewer
+gcloud projects add-iam-policy-binding $FHIR_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objectViewer
 [ $? -ne 0 ] && echo "Unable to set roles/storage.objectViewer" && exit 1
 echo Granted roles/storage.objectViewer to $GOOGLE_SERVICE_ACCOUNT on $GOOGLE_BUCKET
-gcloud projects add-iam-policy-binding $GOOGLE_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objects.list
+gcloud projects add-iam-policy-binding $FHIR_PROJECT --member=serviceAccount:$GOOGLE_SERVICE_ACCOUNT --role=roles/storage.objects.list
 [ $? -ne 0 ] && echo "Unable to set roles/storage.objects.list" && exit 1
 echo Granted roles/storage.objects.list to $GOOGLE_SERVICE_ACCOUNT on $GOOGLE_BUCKET
 

@@ -304,6 +304,7 @@ class DispatchingFHIRClient(client.FHIRClient):
                     if 'FHIRPermissionDeniedException' in exc.__class__.__name__:
                         # requests.response embedded in exception
                         logger.error(f"{str(exc)} {exc.args[0].url}")
+                    logger.error(f"{str(exc)} {exc.args[0].url}")
                     raise exc
         return results
 
