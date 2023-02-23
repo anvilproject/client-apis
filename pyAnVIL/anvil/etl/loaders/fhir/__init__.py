@@ -2,7 +2,7 @@ import json
 import os
 from collections import defaultdict
 from anvil.etl.utilities.shell_helper import run_cmd
-
+import logging
 
 def _extract_workspace_mapping(output_path):
     """Read ResearchStudy identifiers to retrieve the consortium, data_store and id."""
@@ -19,6 +19,9 @@ def _extract_workspace_mapping(output_path):
             consortium = next(iter([identifier['value'] for identifier in identifiers if identifier['system'] == "https://anvil.terra.bio/#consortium"]), None)
             workspace = next(iter([identifier['value'] for identifier in identifiers if identifier['system'] == "https://anvil.terra.bio/#workspaces/anvil-datastorage/"]), None)
             data_store = next(iter([identifier['value'] for identifier in identifiers if identifier['system'] == "https://anvil.terra.bio/#FHIR/data-store"]), None)
+            if not consortium:
+                logging.getLogger('_extract_workspace_mapping').warning(f"No consortium for {research_study}")
+                continue
             _id = research_study['id']
             obj = {'name': workspace, 'id': _id, 'consortium': consortium, 'data_store': data_store}
             mapping['consortium'][consortium].append(obj)

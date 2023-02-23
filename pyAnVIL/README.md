@@ -396,11 +396,15 @@ Commands:
 
 
 ```commandline
+# render FHIR
+anvil_etl transform fhir
 # create the IG, FHIR's "schema"
 anvil_etl load fhir IG create
 # create the data set and data store containers
 anvil_etl load fhir data-set create
 anvil_etl load fhir data-store create
+# upload to buckets
+anvil_etl load fhir data-store upload
 # load the data to respective stores
 anvil_etl load fhir data-store load
 # load all public resources into the public store

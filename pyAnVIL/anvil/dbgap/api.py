@@ -5,7 +5,7 @@ import requests
 import xmltodict
 import json
 import os
-from anvil.util.cache import memoize
+# from anvil.util.cache import memoize
 
 logger = logging.getLogger('anvil.dbgap.api')
 
@@ -15,7 +15,7 @@ url_base = 'https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id
 DEFAULT_OUTPUT_PATH = f"{os.path.dirname(__file__)}/../data/data_ingestion_tracker.json"
 
 
-@memoize
+# @memoize
 def get_study(accession):
     """Return tuple (qualified_accession, schema)."""
     qualified_accession = None
@@ -33,7 +33,7 @@ def get_study(accession):
         return None
 
 
-@memoize
+# @memoize
 def get_projects():
     """Open embedded extract from google spreadsheet, indexed by workspace."""
     with open(DEFAULT_OUTPUT_PATH, 'r') as ins:

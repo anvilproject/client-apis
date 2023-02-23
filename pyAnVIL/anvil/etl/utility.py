@@ -5,6 +5,10 @@ import logging
 
 import numpy as np
 import pandas as pd
+
+from pandas import DataFrame
+import seaborn as sns
+
 import yaml
 import json
 
@@ -65,12 +69,16 @@ def errors(ctx, workspace):
 def qa(ctx, consortium, workspace, details):
     """Report on analysis."""
     summaries = []
+    output_path=ctx.obj['output_path']
+    
+
     with open(f"{ctx.obj['output_path']}/analysis.ndjson") as input_stream:
         for line in input_stream.readlines():
             summary = json.loads(line)
             o = {
                 'consortium': summary['consortium'],
                 'workspace': summary['workspace'],
+                'indication':  summary['indication'],
             }
             for k in ['patients', 'specimens', 'tasks', 'documents']:
                 o[k] = summary['nodes'][k]
@@ -92,6 +100,52 @@ def qa(ctx, consortium, workspace, details):
             summaries.append(o)
     df = pd.DataFrame(summaries).replace({np.nan: None})
     print(tabulate(df, headers='keys', tablefmt='github'))
+    df.to_csv(f"{ctx.obj['output_path']}/qa.tsv", sep="\t")
+
+    # groupby = df.groupby(['consortium',  'indication'])
+    # specimens = groupby.specimens.sum()
+
+    # import pdb; pdb.set_trace()
+    
+
+    sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+    specimens = pd.pivot_table(df, index=["consortium"], columns=["indication"], values=["specimens"], aggfunc=np.sum)
+    plot = sns.heatmap(specimens)
+    plot.figure.tight_layout()
+    fig = plot.get_figure()
+    fig.savefig(f"{ctx.obj['output_path']}/specimens.png")
+    fig.clf()
+
+    crams = pd.pivot_table(df, index=["consortium"], columns=["indication"], values=["cram"], aggfunc=np.sum)
+    plot = sns.heatmap(crams)
+    plot.figure.tight_layout()
+    fig = plot.get_figure()
+    fig.savefig(f"{ctx.obj['output_path']}/cram.png")
+    fig.clf()
+
+    qa_grades = pd.pivot_table(df, index=["consortium"], columns=["indication"], values=["qa_grade"], aggfunc=np.mean)
+    plot = sns.heatmap(qa_grades)
+    plot.figure.tight_layout()
+    fig = plot.get_figure()
+    fig.savefig(f"{ctx.obj['output_path']}/qa_grades.png")
+    fig.clf()
+
+    qa_grades = pd.pivot_table(df[df.qa_grade <  99], index=["consortium"], columns=["workspace"], values=["qa_grade"], aggfunc=np.mean)
+    plot = sns.heatmap(qa_grades)
+    plot.figure.tight_layout()
+    fig = plot.get_figure()
+    fig.savefig(f"{ctx.obj['output_path']}/POOR-qa_grades.png")
+    fig.clf()
+
+
+    drs_grades = pd.pivot_table(df, index=["consortium"], columns=["indication"], values=["drs_grade"], aggfunc=np.mean)
+    plot = sns.heatmap(drs_grades)
+    plot.figure.tight_layout()
+    fig = plot.get_figure()
+    fig.savefig(f"{ctx.obj['output_path']}/drs_grades.png")
+    fig.clf()
+
 
 
 @utility.command(name='backup')

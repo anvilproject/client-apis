@@ -93,7 +93,9 @@ def ensure_data_store_name(workspace):
         if not data_store_name or not data_store_name.startswith('phs'):
             data_store_name = 'pending'
         else:
-            if "library:dataUseRestriction" in workspace['tracker'] and 'tbd' != workspace['tracker']['library:dataUseRestriction'].lower():
+            if "library:dataUseRestriction" in workspace['tracker'] and \
+            workspace['tracker']['library:dataUseRestriction'] and \
+            'tbd' != workspace['tracker']['library:dataUseRestriction'].lower():
                 data_store_name = f"{data_store_name}-{workspace['tracker']['library:dataUseRestriction']}"
     return data_store_name.replace(' ', '_')
 

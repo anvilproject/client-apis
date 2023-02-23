@@ -73,8 +73,8 @@ def create_data_stores(ctx, token=None):
 @data_store_cli.command(name='upload')
 @click.option('--consortium', default=None, help='Filter, only this consortium.', show_default=True)
 @click.option('--workspace', default=None, help='Filter, only this workspace', show_default=True)
-@click.option('--drop', default=False, help='Delete FHIR daa in bucket first', show_default=True, is_flag=True)
-@click.option('--check', default=False, help='Delete FHIR daa in bucket first', show_default=True, is_flag=True)
+@click.option('--drop', default=False, help='Delete FHIR data in bucket first', show_default=True, is_flag=True)
+@click.option('--check', default=False, help='Check FHIR data exists in bucket after', show_default=True, is_flag=True)
 @click.option('--go_fast', default=True, help='Copy entire fhir/ sdir in one go.', show_default=True, is_flag=True)
 @click.pass_context
 def upload(ctx, consortium, workspace, drop, check, go_fast):
@@ -103,10 +103,10 @@ def upload(ctx, consortium, workspace, drop, check, go_fast):
             run_cmd(f"gsutil rm -r gs://$GOOGLE_BUCKET/{dir_name}")
 
     if go_fast:
-        run_cmd(f"gsutil -m cp -J -r {output_path}/fhir/ gs://$GOOGLE_BUCKET")
+        run_cmd(f"gsutil -o 'GSUtil:parallel_process_count=1' -o 'GSUtil:parallel_thread_count=16' -m cp -J -r {output_path}/fhir/ gs://$GOOGLE_BUCKET")
     else:
         for group in chunker(uploaded_workspaces, 20):
-            cmds = [f"gsutil -m cp -J -r {output_path}/{dir_name}/ gs://$GOOGLE_BUCKET" for dir_name in group]
+            cmds = [f"gsutil -n -m cp -J -r {output_path}/{dir_name}/ gs://$GOOGLE_BUCKET" for dir_name in group]
             run_cmd('\n'.join(cmds))
 
     if check:

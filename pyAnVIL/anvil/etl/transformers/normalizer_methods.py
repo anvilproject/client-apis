@@ -70,6 +70,10 @@ def _extract_bucket_fields(output_path=None, entities=None, workspace_name=None)
             # TODO - move this exception to config or other ?
             if entity_name == 'sequencing' and 'AnVIL_CMG_Broad' in workspace.workspace.name:
                 bucket_keys = 'crai_or_bai_path,crai_path,cram_or_bam_path,cram_path,md5_path'.split(',')
+            if entity_name == 'sequencing' and 'AnVIL_CCDG_WashU_CVD_EOCAD_METSIM_WGS' in workspace.workspace.name:
+                bucket_keys = ['seq_filename', 'cram']
+            if entity_name == 'sequencing' and 'AnVIL_CMG_Yale_HMB-GSO' in workspace.workspace.name:
+                bucket_keys = ['seq_filename']
             yield {
                 'consortium_name': workspace.consortium_name,
                 'workspace_name': workspace.workspace.name,
@@ -330,6 +334,24 @@ def extract_specimen_reference_sample_id(context, consortium_name, workspace, co
             'entityType': 'sample',
             'fhir_entity': context.inverted_config['sample']
         }
+    # else:
+    #     logger.error(('extract_specimen_reference_sample_id', entity))
+
+
+def extract_specimen_reference_sequencing_id(context, consortium_name, workspace, config):
+    """Extract a specimen key from arbitrary entity, reads from ctx.entity_with_specimen_reference, sets specimen_reference aka the key."""
+    assert 'entity_with_specimen_reference' in context
+    entity = context['entity_with_specimen_reference']
+    if 'name' in entity:
+        context['specimen_reference'] = {
+            'name': entity['name'].split('.')[0],
+            'entityType': 'sample',
+            'fhir_entity': context.inverted_config['sample']
+        }
+    # else:
+    #     logger.error(('extract_specimen_reference_sequencing_id', entity))
+
+
 
 
 def extract_specimen_reference_collaborator_sample_id(context, consortium_name, workspace, config):
@@ -386,13 +408,15 @@ def ensure_tasks_linked_to_documents(context, consortium_name, workspace, config
                             }
                         )
                         for field in bf['bucket_fields']:
-                            if workspace.workspace.name not in ['AnVIL_CMG_BaylorHopkins_HMB-NPU_WES']:
+                            # if workspace.workspace.name not in ['AnVIL_CMG_BaylorHopkins_HMB-NPU_WES']:
                                 # TODO - remove if not needed
-                                if 'AnVIL_CMG_Broad' not in workspace.workspace.name:
-                                    assert field in child['attributes'], (field, child, bf)
+                                # if 'AnVIL_CMG_Broad' not in workspace.workspace.name:
+                                #     assert field in child['attributes'], (field, child, bf)
                             if field in child['attributes']:
                                 _task_children[bf['entity_name']][field] = child['attributes'][field]
                                 document_count += 1
+                            else:
+                                logger.warning(('field not found', field, child, bf))
                 # # a task might have it's own bucket fields
                 # for field in bf['bucket_fields']:
                 #     logger.error(('?', field))
@@ -851,7 +875,11 @@ C['CMG/AnVIL_CMG_Broad_Kidney_Hildebrandt_WES/ensure_bucket_fields'] = lambda co
 C['CMG/AnVIL_CMG_Broad_Muscle_KNC_WES/ensure_bucket_fields'] = lambda context, consortium_name, workspace, config: ensure_bucket_fieldsAnVIL_CMG_Broad_crai_or_bai(context, consortium_name, workspace, config)
 C['//blob_attributes'] = lambda context, consortium_name, workspace, config: blob_attributes(context, consortium_name, workspace, config)
 
+C['CCDG/AnVIL_CCDG_WashU_CVD_MultiEthnic_WGS/extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference_sequencing_id(context, consortium_name, workspace, config)
 C['CCDG//extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference_sample_id(context, consortium_name, workspace, config)
+C['CMG/ANVIL_CMG_Yale_GRU/extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference_sample_id(context, consortium_name, workspace, config)
+C['CMG/AnVIL_CMG_Yale_HMB-GSO/extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference_sample_id(context, consortium_name, workspace, config)
+
 C['CMG//extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference_CMG(context, consortium_name, workspace, config)
 C['NIMH//extract_specimen_reference'] = lambda context, consortium_name, workspace, config: extract_specimen_reference_sample_id(context, consortium_name, workspace, config)
 

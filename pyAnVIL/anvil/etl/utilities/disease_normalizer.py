@@ -698,6 +698,7 @@ text_ontology['epigenetic variation'] = 'UNKNOWN:UNKNOWN'
 text_ontology['heart and blood vessel disease'] = 'MONDO:0004995'
 text_ontology['hemorrhagic stroke'] = 'MONDO:0005098'
 text_ontology['population'] = 'UNKNOWN:UNKNOWN'
+text_ontology['IBD'] = 'MONDO:0005265'
 
 
 # useful links:
