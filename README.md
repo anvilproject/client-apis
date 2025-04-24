@@ -1,11 +1,8 @@
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-# client-apis
+# DEPRECATED client-apis
+This repo was deprecated:
+* gen3 no longer part of the anvil stack
+* the Broad TDR project addresses data harmonization
+* the Broad FHIR initiative addresses hosting FHIR data
 
 ## About
 
