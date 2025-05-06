@@ -7,7 +7,7 @@ attrdict==2.0.1
 google-cloud-storage==2.3.0
 fastavro==1.4.10
 tabulate==0.8.9
-requests==2.27.1
+requests==2.31.0
 PyYAML~=5.1
 setuptools~=60.2.0
 importlib_metadata~=4.11.3
